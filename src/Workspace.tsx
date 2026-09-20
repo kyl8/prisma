@@ -1017,6 +1017,7 @@ function RequestsCard() {
     "Especifique o tipo de aço utilizado.",
   );
   const [backendCompanies, setBackendCompanies] = useState<BackendCompany[]>([]);
+  const [selectedRequestCompanyId, setSelectedRequestCompanyId] = useState("");
   const [backendRequests, setBackendRequests] = useState<any[]>([]);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [copiedRequestId, setCopiedRequestId] = useState<string | null>(null);
@@ -1026,11 +1027,12 @@ function RequestsCard() {
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [reviewRequest, setReviewRequest] = useState<any | null>(null);
   const [rejectNote, setRejectNote] = useState("");
-  const activeCompany = backendCompanies[0];
+  const activeCompany = backendCompanies.find((company) => company.id === selectedRequestCompanyId) ?? backendCompanies[0];
   useEffect(() => {
     listCatalogCompanies().then((companies) => {
       setBackendCompanies(companies);
       if (companies[0]) {
+        setSelectedRequestCompanyId(companies[0].id);
         setRecipientName(companies[0].contactName ?? "");
         setRecipientEmail(companies[0].contactEmail ?? "");
         const firstProduct = companies[0].products[0];
@@ -1307,6 +1309,7 @@ function RequestsCard() {
             </div>}
             <label className="ws-field">
               <span>Empresa</span>
+              {backendCompanies.length > 1 && <select aria-label="Selecionar empresa" value={activeCompany?.id ?? ""} onChange={(event) => { const company = backendCompanies.find((item) => item.id === event.target.value); if (!company) return; setSelectedRequestCompanyId(company.id); setRecipientName(company.contactName ?? ""); setRecipientEmail(company.contactEmail ?? ""); setSelectedIds(company.products.slice(0, 2).map((product) => product.id)); setCorrectionProductId(company.products[0]?.id ?? ""); setCorrectionFieldKey(company.products[0]?.attributes[0]?.key ?? ""); }}>{backendCompanies.map((company) => <option key={company.id} value={company.id}>{company.name} · {company.cnpj}</option>)}</select>}
               <input value={activeCompany ? `${activeCompany.name} · ${activeCompany.cnpj}` : "Carregando empresa..."} readOnly />
             </label>
             <label className="ws-field">
