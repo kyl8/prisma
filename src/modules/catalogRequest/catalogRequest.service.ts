@@ -312,6 +312,29 @@ export async function cancelCatalogRequest(requestId: string, userId: string) {
   return { id: updated.id, status: updated.status };
 }
 
+export async function approveCatalogRequest(requestId: string, userId: string) {
+  const owned = await ownedRequest(requestId, userId);
+  if (owned.status !== "submitted") throw new CatalogRequestError("REQUEST_NOT_READY", "A solicitação ainda não foi enviada para revisão.", 409);
+  const current = await prisma.catalogRequest.findUniqueOrThrow({ where: { id: requestId }, include: { responses: true, products: { include: { product: { include: { fields: true } } } } } });
+  await prisma.$transaction(async (tx) => {
+    const grouped = new Map<string, typeof current.responses>();
+    for (const response of current.responses) {
+      const list = grouped.get(response.productId) ?? [];
+      list.push(response);
+      grouped.set(response.productId, list);
+    }
+    for (const [productId, responses] of grouped) {
+      const record = await tx.record.create({ data: { productId, userId, fieldResp: { create: responses.map((response) => ({ fieldId: response.fieldKey, response: response.value })) } } });
+      await tx.catalogRequestResponse.updateMany({ where: { id: { in: responses.map((response) => response.id) } }, data: { status: "approved", resolvedAt: new Date() } });
+      void record;
+    }
+    await tx.catalogRequest.update({ where: { id: requestId }, data: { status: "completed", completedAt: new Date() } });
+    await recordActivity(tx, { companyId: owned.companyId, actorUserId: userId, type: "PRODUCT_APPROVED", visibility: "SHARED", entityType: "catalog_request", entityId: requestId, requestId });
+    await createNotification(tx, { userId: owned.createdById, action: "Solicitação aprovada", description: "As informações foram aprovadas e aplicadas ao catálogo.", entityType: "catalog_request", entityId: requestId });
+  });
+  return { id: requestId, status: "completed" };
+}
+
 /** Removes the request, its responses and product links, and invalidates its bearer link. */
 export async function deleteCatalogRequest(requestId: string, userId: string) {
   const request = await ownedRequest(requestId, userId);

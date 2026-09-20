@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { authenticatedUserId, jsonError } from "@/modules/catalogRequest/catalogRequest.http";
-import { cancelCatalogRequest, deleteCatalogRequest, updateCatalogRequest } from "@/modules/catalogRequest/catalogRequest.service";
+import { approveCatalogRequest, cancelCatalogRequest, deleteCatalogRequest, updateCatalogRequest } from "@/modules/catalogRequest/catalogRequest.service";
 import { updateCatalogRequestSchema } from "@/modules/catalogRequest/catalogRequest.schemas";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ requestId: string }> }) {
@@ -20,5 +20,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ r
     const requestId = (await params).requestId;
     const permanent = new URL(request.url).searchParams.get("permanent") === "true";
     return Response.json(permanent ? await deleteCatalogRequest(requestId, userId) : await cancelCatalogRequest(requestId, userId));
+  } catch (error) { return jsonError(error); }
+}
+
+export async function POST(request: Request, { params }: { params: Promise<{ requestId: string }> }) {
+  try {
+    const userId = await authenticatedUserId(request, await auth());
+    if (!userId) return Response.json({ code: "UNAUTHORIZED", message: "Autenticação necessária." }, { status: 401 });
+    return Response.json(await approveCatalogRequest((await params).requestId, userId));
   } catch (error) { return jsonError(error); }
 }
