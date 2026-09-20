@@ -92,3 +92,11 @@ export async function createBackendCatalogRequest(input: Record<string, unknown>
 export async function reissueCatalogRequest(requestId: string) {
   return request<any>(`/api/catalog-requests/${encodeURIComponent(requestId)}/reissue`, { method: "POST" });
 }
+
+export async function updateBackendCatalogRequest(requestId: string, input: Record<string, unknown>) {
+  return request<any>(`/api/catalog-requests/${encodeURIComponent(requestId)}`, { method: "PATCH", body: JSON.stringify(input) });
+}
+
+export async function cancelBackendCatalogRequest(requestId: string) {
+  return request<{ id: string; status: "cancelled" }>(`/api/catalog-requests/${encodeURIComponent(requestId)}`, { method: "DELETE" });
+}

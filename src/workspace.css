@@ -2781,6 +2781,32 @@
   font-size: 10px;
   color: #8a8a84;
 }
+.ws-request-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.ws-danger {
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid #e1d7d3;
+  border-radius: 8px;
+  background: transparent;
+  color: #9c2f23;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, color .18s ease;
+}
+.ws-danger:hover:not(:disabled) {
+  border-color: #b42318;
+  background: #fff6f5;
+  color: #7c1d16;
+}
+.ws-danger:disabled { opacity: .45; cursor: not-allowed; }
 .ws-request-created {
   text-align: center;
   display: grid;
@@ -2942,6 +2968,15 @@
 [data-theme="dark"] .ws-request-meta {
   border-color: #33332e;
 }
+[data-theme="dark"] .ws-danger {
+  border-color: #74403b;
+  color: #f2aaa1;
+}
+[data-theme="dark"] .ws-danger:hover:not(:disabled) {
+  border-color: #bd5b50;
+  background: #321c1a;
+  color: #ffd0c9;
+}
 [data-theme="dark"] .ws-request-meta span {
   color: #999990;
 }
@@ -3074,6 +3109,11 @@
   }
   .ws-request > button {
     grid-column: 1 / -1;
+  }
+  .ws-request-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: flex-start;
   }
   .ws-request-meta {
     grid-template-columns: 1fr 1fr;

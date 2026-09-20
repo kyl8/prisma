@@ -425,6 +425,8 @@ export function requestStatusLabel(status: CatalogRequest["status"]): string {
       return "Concluído";
     case "expired":
       return "Expirado";
+    case "cancelled":
+      return "Cancelado";
   }
 }
 

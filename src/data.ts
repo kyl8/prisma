@@ -104,7 +104,7 @@ export type CatalogRequest = {
   recipientName: string;
   recipientEmail: string;
   productIds: string[];
-  status: "waiting" | "in_progress" | "submitted" | "completed" | "expired";
+  status: "waiting" | "in_progress" | "submitted" | "completed" | "expired" | "cancelled";
   createdAt: string;
   expiresAt: string;
   message?: string;

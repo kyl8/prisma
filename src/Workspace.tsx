@@ -19,12 +19,14 @@ import {
   requestCorrection,
   requestStatusLabel,
   showToast,
+  useCurrentUser,
   useStoreState,
 } from "./store";
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
-import { createBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, reissueCatalogRequest, type BackendCompany } from "./features/catalog-request/api/catalogRequestApi";
+import { cancelBackendCatalogRequest, createBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany } from "./features/catalog-request/api/catalogRequestApi";
+import { ActivityPage } from "./features/activity/ActivityPage";
 import "./workspace.css";
 
 type View =
@@ -872,6 +874,8 @@ function RequestsCard() {
   const [backendRequests, setBackendRequests] = useState<any[]>([]);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [copiedRequestId, setCopiedRequestId] = useState<string | null>(null);
+  const [editingRequest, setEditingRequest] = useState<any | null>(null);
+  const [actionRequestId, setActionRequestId] = useState<string | null>(null);
   const activeCompany = backendCompanies[0];
   useEffect(() => {
     listCatalogCompanies().then((companies) => {
@@ -887,7 +891,7 @@ function RequestsCard() {
   useEffect(() => {
     if (activeCompany) {
       listCompanyCatalogRequests(activeCompany.id)
-        .then((items) => setBackendRequests(items.map((item) => ({ ...item, productIds: Array.from({ length: item.productCount ?? 0 }, (_, index) => String(index)) }))))
+        .then((items) => setBackendRequests(items))
         .catch((error) => setBackendError(error.message));
     }
   }, [activeCompany]);
@@ -901,7 +905,7 @@ function RequestsCard() {
 
   const RequestStatus = ({ status }: { status: CatalogRequest["status"] }) => (
     <span
-      className={`ws-status ${status === "completed" ? "is-done" : status === "expired" ? "is-warn" : ""}`}
+      className={`ws-status ${status === "completed" ? "is-done" : ["expired", "cancelled"].includes(status) ? "is-warn" : ""}`}
     >
       {requestStatusLabel(status)}
     </span>
@@ -910,6 +914,26 @@ function RequestsCard() {
   const close = () => {
     setOpen(false);
     setCreated(null);
+    setEditingRequest(null);
+  };
+
+  const openNewRequest = () => {
+    setEditingRequest(null);
+    setCreated(null);
+    setOpen(true);
+  };
+
+  const openEditRequest = (request: any) => {
+    setEditingRequest(request);
+    setCreated(null);
+    setRecipientName(request.recipientName);
+    setRecipientEmail(request.recipientEmail);
+    setDeadline(request.expiresAt.slice(0, 10));
+    setMessage(request.message ?? "");
+    setKind(request.kind);
+    setSelectedIds(request.productIds ?? []);
+    setAllIncomplete(false);
+    setOpen(true);
   };
 
   const generate = async () => {
@@ -924,6 +948,20 @@ function RequestsCard() {
           : selectedIds;
     if (!activeCompany) { setBackendError("Nenhuma empresa disponível no backend."); return; }
     try {
+    if (editingRequest) {
+      const updated = await updateBackendCatalogRequest(editingRequest.id, {
+        recipientName,
+        recipientEmail,
+        expiresAt: new Date(`${deadline}T23:59:59`).toISOString(),
+        message: message || null,
+        ...(editingRequest.kind === "fill" && editingRequest.status === "waiting" ? { productIds } : {}),
+      });
+      setBackendRequests((items) => items.map((item) => item.id === editingRequest.id ? { ...item, ...updated, productIds: productIds } : item));
+      showToast("Solicitação atualizada");
+      playUISound("save");
+      close();
+      return;
+    }
     const request = await createBackendCatalogRequest({
       companyId: activeCompany.id,
       recipientName,
@@ -942,13 +980,46 @@ function RequestsCard() {
     } catch (error) { setBackendError(error instanceof Error ? error.message : "Não foi possível criar a solicitação."); }
   };
 
+  const sendLink = async (request: any) => {
+    setActionRequestId(request.id);
+    try {
+      const fresh = await reissueCatalogRequest(request.id);
+      const link = `${window.location.origin}/r/${fresh.token}/catalogo`;
+      await navigator.clipboard?.writeText(link);
+      setBackendRequests((items) => items.map((item) => item.id === request.id ? { ...item, token: fresh.token, url: link } : item));
+      setCopiedRequestId(request.id);
+      showToast("Link copiado — pronto para enviar ao importador.");
+      playUISound("success");
+      window.setTimeout(() => setCopiedRequestId((current) => current === request.id ? null : current), 2400);
+    } catch (error) {
+      setBackendError(error instanceof Error ? error.message : "Não foi possível gerar o link.");
+    } finally {
+      setActionRequestId(null);
+    }
+  };
+
+  const cancelRequest = async (request: any) => {
+    if (!window.confirm(`Cancelar a solicitação para ${request.recipientName}? O link deixará de aceitar preenchimentos.`)) return;
+    setActionRequestId(request.id);
+    try {
+      const cancelled = await cancelBackendCatalogRequest(request.id);
+      setBackendRequests((items) => items.map((item) => item.id === request.id ? { ...item, status: cancelled.status } : item));
+      showToast("Solicitação cancelada. O link não está mais ativo.");
+      playUISound("warning");
+    } catch (error) {
+      setBackendError(error instanceof Error ? error.message : "Não foi possível cancelar a solicitação.");
+    } finally {
+      setActionRequestId(null);
+    }
+  };
+
   return (
     <>
       <Card
         title="Solicitações de preenchimento"
         className="ws-card--wide"
         action={
-          <button className="ws-quiet" onClick={() => setOpen(true)}>
+          <button className="ws-quiet" onClick={openNewRequest}>
             <Glyph name="plus" /> Solicitar informações
           </button>
         }
@@ -975,45 +1046,45 @@ function RequestsCard() {
               <p>{request.recipientEmail}</p>
             </div>
             <RequestStatus status={request.status} />
-            {request.token ? (
-              <button className="ws-quiet" onClick={() => navigate(`/r/${request.token}/catalogo`)}>
-                Abrir link
+            <div className="ws-request-actions">
+              <button
+                className="ws-quiet"
+                onClick={() => openEditRequest(request)}
+                disabled={actionRequestId === request.id || ["submitted", "completed", "expired", "cancelled"].includes(request.status)}
+              >
+                Editar
               </button>
-            ) : (
               <button
                 className={copiedRequestId === request.id ? "ws-primary" : "ws-quiet"}
-                onClick={async () => {
-                  try {
-                    const fresh = await reissueCatalogRequest(request.id);
-                    const link = `${window.location.origin}/r/${fresh.token}/catalogo`;
-                    await navigator.clipboard?.writeText(link);
-                    setBackendRequests((items) => items.map((item) => item.id === request.id ? { ...item, token: fresh.token, url: link } : item));
-                    setCopiedRequestId(request.id);
-                    showToast("Novo link copiado");
-                    window.setTimeout(() => setCopiedRequestId((current) => current === request.id ? null : current), 2400);
-                  } catch (error) {
-                    setBackendError(error instanceof Error ? error.message : "Não foi possível gerar o link.");
-                  }
-                }}
+                onClick={() => sendLink(request)}
+                disabled={actionRequestId === request.id || ["expired", "cancelled"].includes(request.status)}
               >
-                {copiedRequestId === request.id ? "Link copiado" : "Gerar e copiar link"}
+                {actionRequestId === request.id ? "Gerando..." : copiedRequestId === request.id ? "Link copiado" : "Enviar link"}
               </button>
-            )}
+              <button
+                className="ws-danger"
+                onClick={() => cancelRequest(request)}
+                disabled={actionRequestId === request.id || ["submitted", "completed", "expired", "cancelled"].includes(request.status)}
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         ))}
       </Card>
       <Modal
         open={open}
         onClose={close}
-        title={created ? "Solicitação criada" : "Solicitar informações"}
+        title={created ? "Solicitação criada" : editingRequest ? "Editar solicitação" : "Solicitar informações"}
       >
         {!created ? (
           <>
             <p className="ws-card-copy" style={{ marginBottom: 16 }}>
-              Gere um link único para o importador preencher somente os produtos
-              incluídos nesta solicitação.
+              {editingRequest
+                ? "Atualize o destinatário, o prazo ou os produtos antes de reenviar o link."
+                : "Gere um link único para o importador preencher somente os produtos incluídos nesta solicitação."}
             </p>
-            <div className="ws-segmented-row">
+            {!editingRequest && <div className="ws-segmented-row">
               <button
                 className={kind === "fill" ? "active" : ""}
                 onClick={() => setKind("fill")}
@@ -1026,10 +1097,10 @@ function RequestsCard() {
               >
                 Corrigir informação
               </button>
-            </div>
+            </div>}
             <label className="ws-field">
               <span>Empresa</span>
-              <input value="Atlas Importações · 12.345.678/0001-90" readOnly />
+              <input value={activeCompany ? `${activeCompany.name} · ${activeCompany.cnpj}` : "Carregando empresa..."} readOnly />
             </label>
             <label className="ws-field">
               <span>Responsável</span>
@@ -1055,6 +1126,7 @@ function RequestsCard() {
                       <input
                         type="checkbox"
                         checked={allIncomplete}
+                        disabled={Boolean(editingRequest && editingRequest.status !== "waiting")}
                         onChange={(e) => setAllIncomplete(e.target.checked)}
                       />
                       Todos os produtos incompletos
@@ -1063,7 +1135,7 @@ function RequestsCard() {
                       <label key={p.id}>
                         <input
                           type="checkbox"
-                          disabled={allIncomplete}
+                          disabled={allIncomplete || Boolean(editingRequest && editingRequest.status !== "waiting")}
                           checked={selectedIds.includes(p.id)}
                           onChange={(e) =>
                             setSelectedIds((ids) =>
@@ -1080,7 +1152,12 @@ function RequestsCard() {
                     ))}
                   </div>
                 </label>
+                {editingRequest?.status !== "waiting" && (
+                  <p className="ws-card-copy">Os produtos não podem ser alterados depois que o preenchimento começou.</p>
+                )}
               </>
+            ) : editingRequest ? (
+              <p className="ws-card-copy">O produto e a observação desta correção permanecem protegidos; você ainda pode atualizar o destinatário, a mensagem e o prazo.</p>
             ) : (
               <>
                 <label className="ws-field">
@@ -1151,7 +1228,7 @@ function RequestsCard() {
                     : !allIncomplete && selectedIds.length === 0
                 }
               >
-                Gerar solicitação
+                {editingRequest ? "Salvar alterações" : "Gerar solicitação"}
               </button>
             </div>
           </>
@@ -2818,6 +2895,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
     [search, setSearch] = useState(false),
     [notice, setNotice] = useState(false);
   const { notifications } = useStoreState();
+  const currentUser = useCurrentUser();
   const unread = notifications.filter((n) => !n.read).length;
   const go = (v: View) => {
     setView(v);
@@ -2847,7 +2925,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       case "import-result":
         return <Import go={go} result />;
       case "activity":
-        return <Activity go={go} />;
+        return currentUser ? <ActivityPage viewer={currentUser} onNavigate={(target) => go(target === "product" ? "product" : "requests")} /> : null;
       case "users":
         return <Users />;
       case "settings":
