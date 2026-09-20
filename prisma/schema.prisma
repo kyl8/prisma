@@ -34,6 +34,9 @@ model User {
   //relations
   notifications    Notification[]     @relation("RUserNotification")
   records    Record[]     @relation("RProdRecordUser")
+
+  importer Importer?   @relation("RUserImport")
+  custbrok customsbroker? @relation("RUserCustom")
 }
  
 model Account {
@@ -93,9 +96,19 @@ model Authenticator {
 
 model Importer {
   id   String          @id @default(cuid())
+  userId String @unique
   // status String dado obtido através de pesquisas
 
   products       Product[]     @relation("RProductImporter")
+  user   User @relation("RUserImport", fields: [userId], references: [id])
+}
+
+model customsbroker {
+  id String            @id @default(cuid())
+  userId String @unique
+
+  specialty String @default("Não informada")
+  user   User @relation("RUserCustom", fields: [userId], references: [id])
 }
 
 model Product {
