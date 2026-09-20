@@ -2975,7 +2975,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
     setNotice(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const Page = () => {
+  const page = (() => {
     switch (view) {
       case "clients":
         return <Clients go={go} />;
@@ -3012,7 +3012,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       default:
         return <Overview go={go} />;
     }
-  };
+  })();
   return (
     <div className="workspace">
       <AppTop
@@ -3032,7 +3032,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
             exit={{ opacity: 0, y: -7 }}
             transition={{ duration: 0.24 }}
           >
-            <Page />
+            {page}
           </motion.div>
         </AnimatePresence>
       </main>
