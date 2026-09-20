@@ -35,12 +35,13 @@ function hash(value) {
 const activeAction = (action) => ["OPEN", "IN_PROGRESS"].includes(action.status)
 
 export class OperationalCaseService {
-  constructor({ repository, idFactory = randomUUID, clock = () => new Date().toISOString(), ingestionService = null, documentStorage = null }) {
+  constructor({ repository, idFactory = randomUUID, clock = () => new Date().toISOString(), ingestionService = null, documentStorage = null, siscomexIntegration = null }) {
     this.repository = repository
     this.idFactory = idFactory
     this.clock = clock
     this.ingestionService = ingestionService ?? createDefaultIngestionService({ idFactory })
     this.documentStorage = documentStorage
+    this.siscomexIntegration = siscomexIntegration
   }
 
   createCase(input = {}) {
@@ -96,6 +97,137 @@ export class OperationalCaseService {
 
   exportCatalog(caseId, format) {
     return exportCatalog(this.getCatalog(caseId), format)
+  }
+
+  getSiscomexStatus() {
+    return this.#siscomex().status()
+  }
+
+  testSiscomexConnection() {
+    return this.#siscomex().testConnection()
+  }
+
+  async syncSiscomex(caseId, input = {}) {
+    const before = this.getCase(caseId)
+    this.#assertExpectedVersion(before, input.expectedVersion)
+    const sync = await this.#siscomex().syncProduct(before, input)
+    return this.repository.transaction(() => {
+      const operationalCase = this.getCase(caseId)
+      this.#assertExpectedVersion(operationalCase, input.expectedVersion)
+      const timestamp = this.clock()
+      const actor = normalizeActor(input.actor)
+      const previousReadiness = operationalCase.readiness?.status ?? null
+      const previousDecision = operationalCase.decision?.type ?? null
+      const evidenceKeys = new Set(
+        operationalCase.evidences.map((item) =>
+          `${item.source?.snapshotId}:${item.entityId}:${item.field}:${JSON.stringify(item.normalizedValue)}`
+        ),
+      )
+      const newEvidences = sync.evidences.filter((item) => {
+        const key = `${item.source?.snapshotId}:${item.entityId}:${item.field}:${JSON.stringify(item.normalizedValue)}`
+        if (evidenceKeys.has(key)) return false
+        evidenceKeys.add(key)
+        return true
+      })
+      operationalCase.evidences.push(...newEvidences)
+
+      const otherFindings = operationalCase.findings.filter(
+        (item) => item.source?.type !== "SISCOMEX" || item.entityId !== sync.productId,
+      )
+      const existingOfficial = operationalCase.findings.filter(
+        (item) => item.source?.type === "SISCOMEX" && item.entityId === sync.productId,
+      )
+      operationalCase.findings = [
+        ...otherFindings,
+        ...mergeFindings(existingOfficial, sync.findings, timestamp),
+      ]
+      operationalCase.siscomex = {
+        ...(operationalCase.siscomex ?? {}),
+        diffs: {
+          ...(operationalCase.siscomex?.diffs ?? {}),
+          [sync.productId]: sync.diff,
+        },
+        recommendations: {
+          ...(operationalCase.siscomex?.recommendations ?? {}),
+          [sync.productId]: sync.recommendations,
+        },
+        lastSyncAt: timestamp,
+      }
+      delete operationalCase.idempotencyKeys.analysisFingerprint
+      for (const item of newEvidences) {
+        this.#appendEvent(operationalCase, "EVIDENCE_CREATED", timestamp, {
+          evidenceId: item.id,
+          field: item.field,
+          status: item.status,
+          sourceType: "SISCOMEX",
+        }, actor)
+      }
+      this.#appendEvent(operationalCase, "SISCOMEX_SYNC_COMPLETED", timestamp, {
+        productId: sync.productId,
+        environment: sync.environment,
+        cacheStatus: sync.cacheStatus,
+        snapshotIds: sync.snapshots.map((item) => item.id),
+      }, actor)
+      this.#refreshRisks(operationalCase)
+      this.#updateReadinessAndDecision(
+        operationalCase,
+        timestamp,
+        previousReadiness,
+        previousDecision,
+        actor,
+      )
+      operationalCase.updatedAt = timestamp
+      const saved = this.#save(operationalCase, timestamp, actor)
+      return {
+        caseId,
+        version: saved.version,
+        productId: sync.productId,
+        environment: sync.environment,
+        cacheStatus: sync.cacheStatus,
+        fetchedAt: sync.fetchedAt,
+        officialProduct: sync.officialProduct,
+        officialOperator: sync.officialOperator,
+        requirements: sync.requirements,
+        diff: sync.diff,
+        findings: sync.findings,
+        recommendations: sync.recommendations,
+        snapshotIds: sync.snapshots.map((item) => item.id),
+        catalogRecord: consolidateCatalog(saved).records.find(
+          (item) => item.productId === sync.productId || item.sourceProductIds.includes(sync.productId),
+        ),
+      }
+    })
+  }
+
+  getSiscomexCatalog(caseId) {
+    const operationalCase = this.getCase(caseId)
+    return {
+      caseId,
+      environment: this.#siscomex().status().environment,
+      lastSyncAt: operationalCase.siscomex?.lastSyncAt ?? null,
+      snapshots: this.#siscomex().listCaseSnapshots(caseId),
+      catalog: consolidateCatalog(operationalCase),
+    }
+  }
+
+  getSiscomexDiff(caseId) {
+    const operationalCase = this.getCase(caseId)
+    return {
+      caseId,
+      generatedAt: operationalCase.siscomex?.lastSyncAt ?? null,
+      diffs: Object.values(operationalCase.siscomex?.diffs ?? {}),
+      recommendations: Object.values(
+        operationalCase.siscomex?.recommendations ?? {},
+      ).flat(),
+    }
+  }
+
+  getSiscomexAttributes(ncm, options) {
+    return this.#siscomex().getAttributes(ncm, options)
+  }
+
+  getSiscomexNcm(ncm, options) {
+    return this.#siscomex().getNcm(ncm, options)
   }
 
   listCases(options) {
@@ -307,6 +439,9 @@ export class OperationalCaseService {
           { idFactory: this.idFactory, timestamp },
         ),
         ...identity.findings,
+        ...operationalCase.findings.filter(
+          (item) => item.source?.type === "SISCOMEX" && item.status === "OPEN",
+        ),
       ]
       operationalCase.findings = mergeFindings(
         operationalCase.findings,
@@ -646,6 +781,7 @@ export class OperationalCaseService {
       risks: operationalCase.risks,
       catalogGovernance: operationalCase.catalogGovernance,
       productIdentities: operationalCase.productIdentities,
+      siscomex: operationalCase.siscomex,
       quantitativePrediction: operationalCase.quantitativePrediction,
       timeline: operationalCase.timeline,
     }
@@ -660,6 +796,13 @@ export class OperationalCaseService {
         operationalCase.version,
       )
     }
+  }
+
+  #siscomex() {
+    if (!this.siscomexIntegration) {
+      throw new ValidationError("Siscomex integration is not configured")
+    }
+    return this.siscomexIntegration
   }
 
   #appendEvent(operationalCase, type, timestamp, metadata = {}, actor = SYSTEM_ACTOR, caseVersion = operationalCase.version + 1) {

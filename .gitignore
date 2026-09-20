@@ -4,3 +4,7 @@ node_modules/
 coverage/
 next-env.d.ts
 .prisma-data/
+*.p12
+*.pfx
+*.pem
+*.key

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test test/policy.test.js test/ingestion.test.js test/findings-flow.test.js test/operational-flow.test.js test/server.test.js test/persistence-milestone.test.js test/product-identity.test.js test/upload-and-http-versioning.test.js test/catalog-consolidation.test.js test/catalog-http.test.js"
+    "test": "node --test test/policy.test.js test/ingestion.test.js test/findings-flow.test.js test/operational-flow.test.js test/server.test.js test/persistence-milestone.test.js test/product-identity.test.js test/upload-and-http-versioning.test.js test/catalog-consolidation.test.js test/catalog-http.test.js test/siscomex-client.test.js test/siscomex-mapping.test.js test/siscomex-integration.test.js test/siscomex-persistence.test.js test/siscomex-http.test.js"
   },
   "dependencies": {
     "better-sqlite3": "12.9.0",

@@ -1,5 +1,7 @@
 import { resolve } from "node:path"
 
+import { loadSiscomexConfig } from "./integrations/siscomex/config.js"
+
 function positiveInteger(value, fallback, name) {
   if (value === undefined || value === "") return fallback
   const parsed = Number(value)
@@ -23,5 +25,6 @@ export function loadConfig(environment = process.env, cwd = process.cwd()) {
       5_000_000,
       "MAX_UPLOAD_SIZE",
     ),
+    siscomex: loadSiscomexConfig(environment),
   }
 }

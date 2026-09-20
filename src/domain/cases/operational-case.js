@@ -56,6 +56,11 @@ export function createOperationalCase(
     decision: null,
     resolvedFields: {},
     productIdentities: [],
+    siscomex: {
+      diffs: {},
+      recommendations: {},
+      lastSyncAt: null,
+    },
     idempotencyKeys: {},
     quantitativePrediction: {
       status: "UNAVAILABLE",

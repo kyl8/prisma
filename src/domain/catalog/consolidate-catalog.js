@@ -74,6 +74,11 @@ function normalized(value) {
   return JSON.stringify(value)
 }
 
+function normalizedFieldValue(field, value) {
+  if (field === "reportedNcm") return String(value ?? "").replace(/\D/g, "")
+  return normalized(value)
+}
+
 function hasValue(value) {
   return value !== undefined && value !== null && value !== ""
 }
@@ -138,6 +143,17 @@ function publicSource(source) {
       row: source.row,
       column: source.column,
       cell: source.cell,
+      subsystem: source.subsystem,
+      environment: source.environment,
+      entity: source.entity,
+      snapshotId: source.snapshotId,
+      fetchedAt: source.fetchedAt,
+      payloadHash: source.payloadHash,
+      productCode: source.productCode,
+      version: source.version,
+      operatorCode: source.operatorCode,
+      attributeCode: source.attributeCode,
+      ncm: source.ncm,
     }).filter(([, value]) => value !== undefined && value !== null),
   )
 }
@@ -177,7 +193,7 @@ function consolidateField(field, candidates) {
   const uniqueCandidates = [
     ...new Map(
       candidates.map((candidate) => [
-        `${sourceKey(candidate.source)}:${normalized(candidate.value)}`,
+        `${sourceKey(candidate.source)}:${normalizedFieldValue(field, candidate.value)}`,
         candidate,
       ]),
     ).values(),
@@ -198,7 +214,7 @@ function consolidateField(field, candidates) {
       : uniqueCandidates
   const values = new Map()
   for (const candidate of effectiveCandidates) {
-    const key = normalized(candidate.value)
+    const key = normalizedFieldValue(field, candidate.value)
     if (!values.has(key)) values.set(key, candidate.value)
   }
   const evidenceIds = [...new Set(effectiveCandidates.flatMap((item) => item.evidenceIds))]
@@ -635,6 +651,34 @@ function collectGroupCandidates(operationalCase, group, attachCaseEvidence) {
           status: unknown.status,
         }))
       }
+    }
+  }
+  const productIds = new Set(
+    group
+      .filter((node) => node.kind === "catalog")
+      .map((node) => node.product.id),
+  )
+  for (const officialEvidence of operationalCase.evidences ?? []) {
+    const belongsToGroup =
+      officialEvidence.source?.type === "SISCOMEX" &&
+      officialEvidence.entityType === "product" &&
+      productIds.has(officialEvidence.entityId)
+    if (!belongsToGroup || officialEvidence.status === "missing") continue
+    const candidate = createCandidate({
+      value: officialEvidence.normalizedValue,
+      rawValue: officialEvidence.rawValue,
+      evidenceIds: [officialEvidence.id],
+      status: officialEvidence.status,
+      source: { ...officialEvidence.source },
+    })
+    if (officialEvidence.field.startsWith("attributes.")) {
+      addCandidate(
+        attributes,
+        officialEvidence.field.slice("attributes.".length),
+        candidate,
+      )
+    } else if (!officialEvidence.field.startsWith("attributeRequirement.")) {
+      addCandidate(fields, outputFieldForEvidence(officialEvidence), candidate)
     }
   }
   if (attachCaseEvidence) {

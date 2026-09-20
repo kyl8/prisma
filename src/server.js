@@ -7,6 +7,8 @@ import { createRequestHandler } from "./http/request-handler.js"
 import { InMemoryOperationalCaseRepository } from "./repositories/in-memory-operational-case-repository.js"
 import { SqliteOperationalCaseRepository } from "./repositories/sqlite-operational-case-repository.js"
 import { OperationalCaseService } from "./services/operational-case-service.js"
+import { createSiscomexIntegration } from "./integrations/siscomex/index.js"
+import { loadSiscomexConfig } from "./integrations/siscomex/config.js"
 
 export const DEFAULT_PORT = 3000
 
@@ -25,13 +27,18 @@ export function resolvePort(value = process.env.PORT) {
 
 export function createPrismaServer({ service, repository, config } = {}) {
   const runtimeConfig = config ?? loadConfig()
+  const runtimeRepository = repository ?? new InMemoryOperationalCaseRepository()
   const operationalCaseService =
     service ??
     new OperationalCaseService({
-      repository: repository ?? new InMemoryOperationalCaseRepository(),
+      repository: runtimeRepository,
       documentStorage: new BinaryDocumentStorage({
         directory: runtimeConfig.uploadDirectory,
         maxUploadSize: runtimeConfig.maxUploadSize,
+      }),
+      siscomexIntegration: createSiscomexIntegration({
+        config: runtimeConfig.siscomex ?? loadSiscomexConfig({}),
+        repository: runtimeRepository,
       }),
     })
 

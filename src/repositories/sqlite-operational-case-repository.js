@@ -35,6 +35,7 @@ function coreParameters(operationalCase) {
     resolvedFields: json(operationalCase.resolvedFields ?? {}),
     quantitativePrediction: json(operationalCase.quantitativePrediction),
     productIdentities: json(operationalCase.productIdentities ?? []),
+    siscomex: json(operationalCase.siscomex ?? {}),
     idempotencyKeys: json(operationalCase.idempotencyKeys ?? {}),
     createdAt: operationalCase.createdAt,
     updatedAt: operationalCase.updatedAt,
@@ -65,14 +66,14 @@ export class SqliteOperationalCaseRepository extends OperationalCaseRepository {
             decision_json, catalog_governance_json, divergences_json,
             missing_fields_json, risks_json, decisions_json,
             resolved_fields_json, quantitative_prediction_json,
-            product_identities_json, idempotency_keys_json, created_at,
+            product_identities_json, siscomex_state_json, idempotency_keys_json, created_at,
             updated_at, last_analyzed_at
           ) VALUES (
             @id, @status, @version, @metadata, @parties, @shipment,
             @products, @operationalMetrics, @readiness, @decision,
             @catalogGovernance, @divergences, @missingFields, @risks,
             @decisions, @resolvedFields, @quantitativePrediction,
-            @productIdentities, @idempotencyKeys, @createdAt, @updatedAt,
+            @productIdentities, @siscomex, @idempotencyKeys, @createdAt, @updatedAt,
             @lastAnalyzedAt
           )
         `)
@@ -112,7 +113,8 @@ export class SqliteOperationalCaseRepository extends OperationalCaseRepository {
             risks_json=@risks, decisions_json=@decisions,
             resolved_fields_json=@resolvedFields,
             quantitative_prediction_json=@quantitativePrediction,
-            product_identities_json=@productIdentities,
+             product_identities_json=@productIdentities,
+             siscomex_state_json=@siscomex,
             idempotency_keys_json=@idempotencyKeys, updated_at=@updatedAt,
             last_analyzed_at=@lastAnalyzedAt
           WHERE id=@id AND version=@expectedVersion
@@ -167,6 +169,7 @@ export class SqliteOperationalCaseRepository extends OperationalCaseRepository {
       decision: parse(row.decision_json),
       quantitativePrediction: parse(row.quantitative_prediction_json),
       productIdentities: parse(row.product_identities_json, []),
+      siscomex: parse(row.siscomex_state_json, {}),
       idempotencyKeys: parse(row.idempotency_keys_json, {}),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -185,6 +188,117 @@ export class SqliteOperationalCaseRepository extends OperationalCaseRepository {
     return this.#atomic(work)
   }
 
+  saveSiscomexSnapshot(snapshot) {
+    this.database.prepare(`
+      INSERT OR IGNORE INTO siscomex_snapshots (
+        id, case_id, product_id, subsystem, environment, resource_type,
+        resource_key, external_product_code, external_version,
+        foreign_operator_code, ncm, payload_json, payload_hash, fetched_at,
+        valid_from, valid_to, status, created_at
+      ) VALUES (
+        @id, @caseId, @productId, @subsystem, @environment, @resourceType,
+        @resourceKey, @externalProductCode, @externalVersion,
+        @foreignOperatorCode, @ncm, @payload, @payloadHash, @fetchedAt,
+        @validFrom, @validTo, @status, @createdAt
+      )
+    `).run({ ...snapshot, payload: json(snapshot.payload) })
+    const row = this.database.prepare(`
+      SELECT * FROM siscomex_snapshots
+      WHERE environment = @environment AND subsystem = @subsystem
+        AND resource_type = @resourceType AND resource_key = @resourceKey
+        AND payload_hash = @payloadHash
+        AND COALESCE(case_id, '') = COALESCE(@caseId, '')
+        AND COALESCE(product_id, '') = COALESCE(@productId, '')
+      ORDER BY fetched_at DESC LIMIT 1
+    `).get(snapshot)
+    this.database.prepare(`
+      INSERT INTO siscomex_cache_entries (scope_key, snapshot_id, checked_at)
+      VALUES (?, ?, ?)
+      ON CONFLICT(scope_key) DO UPDATE SET
+        snapshot_id=excluded.snapshot_id,
+        checked_at=excluded.checked_at
+    `).run(this.#siscomexScope(snapshot), row.id, snapshot.fetchedAt)
+    return { ...this.#siscomexSnapshot(row), cacheCheckedAt: snapshot.fetchedAt }
+  }
+
+  listSiscomexSnapshots(criteria = {}) {
+    const clauses = []
+    const parameters = {}
+    const columns = {
+      caseId: "case_id",
+      productId: "product_id",
+      subsystem: "subsystem",
+      environment: "environment",
+      resourceType: "resource_type",
+      resourceKey: "resource_key",
+    }
+    for (const [key, column] of Object.entries(columns)) {
+      if (criteria[key] === undefined) continue
+      clauses.push(`${column} IS @${key}`)
+      parameters[key] = criteria[key]
+    }
+    const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : ""
+    return this.database
+      .prepare(`
+        SELECT siscomex_snapshots.*, siscomex_cache_entries.checked_at AS cache_checked_at
+        FROM siscomex_snapshots
+        LEFT JOIN siscomex_cache_entries
+          ON siscomex_cache_entries.snapshot_id = siscomex_snapshots.id
+        ${where}
+        ORDER BY COALESCE(siscomex_cache_entries.checked_at, fetched_at) DESC,
+          siscomex_snapshots.rowid DESC
+      `)
+      .all(parameters)
+      .map((row) => this.#siscomexSnapshot(row))
+  }
+
+  findLatestSiscomexSnapshot(criteria = {}) {
+    return this.listSiscomexSnapshots(criteria)[0] ?? null
+  }
+
+  saveSiscomexSyncRun(run) {
+    this.database.prepare(`
+      INSERT INTO siscomex_sync_runs (
+        id, case_id, product_id, sync_type, environment, status,
+        resource_count, cache_status, error_code, error_tag, started_at,
+        finished_at
+      ) VALUES (
+        @id, @caseId, @productId, @syncType, @environment, @status,
+        @resourceCount, @cacheStatus, @errorCode, @errorTag, @startedAt,
+        @finishedAt
+      )
+    `).run(run)
+    return structuredClone(run)
+  }
+
+  listSiscomexSyncRuns(criteria = {}) {
+    const clauses = []
+    const parameters = {}
+    for (const [key, column] of Object.entries({ caseId: "case_id", productId: "product_id" })) {
+      if (criteria[key] === undefined) continue
+      clauses.push(`${column} IS @${key}`)
+      parameters[key] = criteria[key]
+    }
+    const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : ""
+    return this.database
+      .prepare(`SELECT * FROM siscomex_sync_runs ${where} ORDER BY started_at DESC, rowid DESC`)
+      .all(parameters)
+      .map((row) => ({
+        id: row.id,
+        caseId: row.case_id,
+        productId: row.product_id,
+        syncType: row.sync_type,
+        environment: row.environment,
+        status: row.status,
+        resourceCount: row.resource_count,
+        cacheStatus: row.cache_status,
+        errorCode: row.error_code,
+        errorTag: row.error_tag,
+        startedAt: row.started_at,
+        finishedAt: row.finished_at,
+      }))
+  }
+
   close() {
     this.database.close()
   }
@@ -199,6 +313,42 @@ export class SqliteOperationalCaseRepository extends OperationalCaseRepository {
       .prepare(`SELECT ${column} FROM ${table} WHERE case_id = ? ORDER BY rowid`)
       .all(caseId)
       .map((item) => parse(item[column]))
+  }
+
+  #siscomexSnapshot(row) {
+    if (!row) return null
+    return {
+      id: row.id,
+      caseId: row.case_id,
+      productId: row.product_id,
+      subsystem: row.subsystem,
+      environment: row.environment,
+      resourceType: row.resource_type,
+      resourceKey: row.resource_key,
+      externalProductCode: row.external_product_code,
+      externalVersion: row.external_version,
+      foreignOperatorCode: row.foreign_operator_code,
+      ncm: row.ncm,
+      payload: parse(row.payload_json),
+      payloadHash: row.payload_hash,
+      fetchedAt: row.fetched_at,
+      validFrom: row.valid_from,
+      validTo: row.valid_to,
+      status: row.status,
+      createdAt: row.created_at,
+      cacheCheckedAt: row.cache_checked_at ?? null,
+    }
+  }
+
+  #siscomexScope(snapshot) {
+    return JSON.stringify([
+      snapshot.caseId ?? null,
+      snapshot.productId ?? null,
+      snapshot.environment,
+      snapshot.subsystem,
+      snapshot.resourceType,
+      snapshot.resourceKey,
+    ])
   }
 
   #persistRelated(operationalCase) {

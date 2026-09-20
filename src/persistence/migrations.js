@@ -10,6 +10,7 @@ const migrationDirectory = resolve(
 const MIGRATIONS = Object.freeze([
   { version: 1, name: "initial", file: "001_initial.sql" },
   { version: 2, name: "immutable_ledger", file: "002_immutable_ledger.sql" },
+  { version: 3, name: "siscomex_snapshots", file: "003_siscomex_snapshots.sql" },
 ])
 
 export function runMigrations(database) {

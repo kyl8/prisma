@@ -70,7 +70,7 @@ test("migrations create a durable database that can be reopened", () => {
   assert.equal(created.version, 1)
   assert.deepEqual(
     first.database.prepare("SELECT version FROM schema_migrations ORDER BY version").all(),
-    [{ version: 1 }, { version: 2 }],
+    [{ version: 1 }, { version: 2 }, { version: 3 }],
   )
   first.close()
 

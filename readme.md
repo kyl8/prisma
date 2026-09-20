@@ -27,7 +27,7 @@ mas não são pré-requisitos para produzir o catálogo consolidado.
 ## Arquitetura do MVP
 
 ```text
-PDF/OCR | CSV | XLS/XLSX/XLSM | JSON | catálogo existente
+PDF/OCR | CSV | XLS/XLSX/XLSM | JSON | catálogo existente | Siscomex
                          ↓
                      Ingestion
                          ↓
@@ -71,6 +71,16 @@ DATABASE_PATH=.prisma-data/prisma.db
 UPLOAD_DIR=.prisma-data/uploads
 MAX_UPLOAD_SIZE=5000000
 PORT=3000
+SISCOMEX_ENABLED=false
+SISCOMEX_ENV=validation
+SISCOMEX_ALLOW_PRODUCTION=false
+SISCOMEX_ROLE_TYPE=IMPEXP
+SISCOMEX_CLIENT_ID=
+SISCOMEX_CLIENT_SECRET=
+SISCOMEX_RESPONSIBLE_ROOT_ID=
+SISCOMEX_CACHE_TTL_SECONDS=3600
+SISCOMEX_TIMEOUT_MS=15000
+SISCOMEX_MAX_SERVER_RETRIES=1
 ```
 
 O runtime aplica migrations SQLite automaticamente. O repository em memória
@@ -156,6 +166,130 @@ recomenda ou substitui classificação.
 - ausência → `MISSING`.
 
 O MVP nunca produz status `VALIDATED` para NCM.
+
+## Integração read-only com o Portal Único Siscomex
+
+O Siscomex é uma fonte oficial adicional. Ele não substitui silenciosamente
+Invoice, Packing List, Datasheet ou catálogo local. Respostas oficiais viram
+snapshots imutáveis e Evidence antes de participar da consolidação.
+
+```text
+CATP + Operador Estrangeiro + CADA + Classif
+                    ↓
+         Snapshot/cache SQLite
+                    ↓
+           Evidence oficial
+                    ↓
+        CatalogRecord + Findings
+                    ↓
+      Diff oficial + Recommendations
+```
+
+A integração é desabilitada por padrão. `validation` usa
+`https://val.portalunico.siscomex.gov.br`. Produção exige simultaneamente
+`SISCOMEX_ENABLED=true`, `SISCOMEX_ENV=production` e
+`SISCOMEX_ALLOW_PRODUCTION=true`.
+Até a consulta pública do Classif exige `SISCOMEX_ENABLED=true`, impedindo
+tráfego externo acidental quando a integração está desabilitada.
+
+### Contratos oficiais
+
+Os contratos foram conferidos na documentação e nos Swagger atuais:
+
+- [introdução, ambientes e protocolo de sessão](https://docs.portalunico.siscomex.gov.br/introducao-api-publica/);
+- [Swagger de autenticação](https://docs.portalunico.siscomex.gov.br/api/plat/plat-auth.json);
+- [Swagger do CATP](https://docs.portalunico.siscomex.gov.br/api/catp/catp.json);
+- [Swagger do CADA](https://docs.portalunico.siscomex.gov.br/api/cada/cadatributos.json);
+- [Swagger do Classif](https://docs.portalunico.siscomex.gov.br/api/clsf/classif.json);
+- [limites de acesso](https://docs.portalunico.siscomex.gov.br/pages/limites-acesso/).
+
+Autenticação por chave de acesso usa exclusivamente o contrato oficial:
+
+```text
+POST /portal/api/autenticar/chave-acesso
+Client-Id
+Client-Secret
+Role-Type
+
+response headers:
+Set-Token
+X-CSRF-Token
+X-CSRF-Expiration
+```
+
+JWT, CSRF e chaves permanecem apenas na camada de integração. A sessão renova
+os tokens devolvidos pelo servidor, respeita expiração, serializa o uso do CSRF
+rotativo e permite somente uma reautenticação depois de `401`.
+
+Chamadas externas utilizadas:
+
+```text
+GET /catp/api/ext/produto
+GET /catp/api/ext/produto/:cpfCnpjRaiz/:codigo/:versao
+GET /catp/api/ext/produto/exportar/:cpfCnpjRaiz/:exibirDesativados
+GET /catp/api/ext/operador-estrangeiro
+GET /catp/api/ext/operador-estrangeiro/:cpfCnpjRaiz/:pais/:codigo/:versao
+GET /cadatributos/api/ext/atributo-ncm/:ncm
+GET /classif/api/publico/nomenclatura/download/json
+```
+
+Nenhum `POST`, `PUT` ou `DELETE` de negócio do CATP é exposto. Versões de
+produto e operador são tratadas como strings, inclusive `1`, `1.0` e `1.1`.
+
+O Swagger atual do CADA descreve os DTOs de atributo, mas omite o schema da
+resposta `200` na consulta por NCM. O Swagger do Classif também não declara o
+schema do download JSON. A resposta pública atual do ambiente de validação usa
+`Nomenclaturas`, `Codigo`, `Descricao`, `Data_Inicio` e `Data_Fim`; somente
+esses dados observados são mapeados. Todos os mappers preservam `rawPayload`, e
+campos desconhecidos não são promovidos ao domínio.
+
+### Cache, snapshots e indisponibilidade
+
+`siscomex_snapshots` é append-only e guarda ambiente, subsistema, chave do
+recurso, produto/caso relacionado, payload, SHA-256, versão externa e datas.
+Um payload diferente cria novo histórico; payload idêntico reutiliza o snapshot.
+`siscomex_cache_entries` registra apenas a última verificação do recurso sem
+alterar o snapshot histórico. `siscomex_sync_runs` registra resultado e erro
+sanitizado de cada sincronização manual.
+
+Estados de cache: `FRESH`, `STALE` e `UNAVAILABLE`.
+
+Se a API estiver indisponível e houver snapshot anterior, o PRISMA usa a última
+resposta como `STALE`, preserva `fetchedAt` e continua a análise local. Erros
+`500/503` recebem apenas retry curto e limitado. `PUCX-ER1001`/rate limit não é
+repetido automaticamente.
+
+### API interna Siscomex
+
+```text
+GET  /api/prisma/integrations/siscomex/status
+POST /api/prisma/integrations/siscomex/test
+POST /api/prisma/cases/:id/siscomex/sync
+GET  /api/prisma/cases/:id/siscomex/catalog
+GET  /api/prisma/cases/:id/siscomex/diff
+GET  /api/prisma/siscomex/attributes/:ncm
+GET  /api/prisma/siscomex/ncm/:ncm
+```
+
+Exemplo de sincronização manual:
+
+```json
+{
+  "productId": "wine",
+  "responsibleRootId": "12345678",
+  "productCode": "0000000001",
+  "version": "1",
+  "foreignOperator": {
+    "country": "FR",
+    "code": "OPE_2",
+    "version": "1"
+  }
+}
+```
+
+A consulta de NCM verifica somente existência e dados oficiais da NCM informada.
+O campo `classificationAssigned` permanece `false`; o PRISMA não classifica a
+mercadoria automaticamente.
 
 ## Data Quality
 
@@ -285,6 +419,10 @@ O teste ponta a ponta cria o caso, analisa documentos, produz os dois
 - macros e fórmulas não são executadas;
 - respostas de exportação não incluem `storageKey` ou path local;
 - erros HTTP não expõem stack trace.
+- credenciais Siscomex existem somente em variáveis de ambiente;
+- JWT, CSRF, access keys, certificados e passphrases são redigidos;
+- TLS nunca é desabilitado e o cliente não aceita host arbitrário;
+- o frontend nunca recebe headers ou respostas de autenticação.
 
 ## Testes
 
@@ -294,16 +432,24 @@ npm test
 
 A suíte cobre ingestão, normalização, Evidence, reconciliation, Product
 Identity, Findings, persistência, migrations, rollback, concorrência, upload,
-CatalogRecord, qualidade, diff, recomendações, summary, exports e API.
+CatalogRecord, qualidade, diff, recomendações, summary, exports, auth Siscomex,
+JWT/CSRF, retries, rate limit, CATP, operador estrangeiro, CADA, snapshots,
+cache, Evidence oficial e API.
 
 ## Limitações deliberadas do MVP
 
-- autenticação e multi-tenancy não fazem parte deste milestone;
+- autenticação dos usuários do PRISMA e multi-tenancy não fazem parte deste milestone;
 - storage binário é filesystem local;
 - OCR continua externo;
 - identidade é exata, sem fuzzy matching;
 - não há ML, LLM, embeddings ou recomendação automática de NCM;
 - não há integrações ERP/TMS, notificações ou workflow BPM;
+- não há write-back no CATP, DUIMP ou LPCO;
+- não há scheduler, webhook ou sincronização incremental automática;
+- certificado A1/A3 não é carregado neste milestone; o runtime usa chaves de
+  acesso oficiais, cujo contrato atual foi confirmado;
+- esta branch não contém fonte frontend versionada; a demonstração Siscomex é
+  feita pela API interna;
 - não há deployment cloud, Kafka, Redis ou microservices;
 - valores ambíguos permanecem ambíguos para revisão humana.
 

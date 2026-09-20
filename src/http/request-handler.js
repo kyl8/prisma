@@ -6,6 +6,8 @@ import {
 } from "../domain/shared/errors.js"
 import { handleCaseRoute } from "./case-routes.js"
 import { readJson, sendJson } from "./json.js"
+import { handleSiscomexRoute } from "./siscomex-routes.js"
+import { SiscomexError } from "../integrations/siscomex/errors.js"
 
 export function createRequestHandler({ service, maxUploadSize = 5_000_000 }) {
   return async function requestHandler(request, response) {
@@ -30,6 +32,14 @@ export function createRequestHandler({ service, maxUploadSize = 5_000_000 }) {
         sendJson(response, 200, service.validateCatalog(await readJson(request)))
         return
       }
+
+      const siscomexHandled = await handleSiscomexRoute({
+        request,
+        response,
+        segments,
+        service,
+      })
+      if (siscomexHandled) return
 
       const handled = await handleCaseRoute({
         request,
@@ -59,6 +69,19 @@ export function createRequestHandler({ service, maxUploadSize = 5_000_000 }) {
           expectedVersion: error.expectedVersion,
           currentVersion: error.currentVersion,
         })
+        return
+      }
+      if (error instanceof SiscomexError) {
+        const status = error.rateLimited
+          ? 429
+          : error.code === "SISCOMEX_NOT_CONFIGURED"
+            ? 503
+            : error.httpStatus === 404
+              ? 404
+              : error.retryable
+                ? 503
+                : 502
+        sendJson(response, status, error.toPublic())
         return
       }
 
