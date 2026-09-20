@@ -24,6 +24,18 @@ Para cada produto, o PRISMA responde:
 Actions, Readiness e Decision permanecem disponíveis para fluxos operacionais,
 mas não são pré-requisitos para produzir o catálogo consolidado.
 
+## Comportamento do agente
+
+A política `1.1` usa resposta adaptativa e cooperativa. O agente responde primeiro
+ao pedido real, avança com dados parciais e limita apenas a conclusão afetada por
+uma lacuna. Fatos, inferências, hipóteses e ausências continuam separados.
+
+Perguntas simples recebem respostas diretas. O protocolo completo e a decisão
+estruturada são usados somente em análises documentais ou operacionais completas,
+ou quando solicitados. Quando permitido, o agente pode pesquisar fontes atuais,
+comparar alternativas e apresentar NCMs candidatas para revisão humana, sem
+classificá-las como definitivas nem alterar o cadastro silenciosamente.
+
 ## Arquitetura do MVP
 
 ```text

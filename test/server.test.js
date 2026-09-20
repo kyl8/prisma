@@ -27,7 +27,9 @@ test("serves the default PRISMA policy", async () => {
 
   assert.equal(response.status, 200)
   assert.equal(body.default, true)
-  assert.equal(body.decision.required, true)
+  assert.equal(body.version, "1.1.0")
+  assert.equal(body.interaction.responseMode, "adaptive")
+  assert.equal(body.decision.required, false)
 })
 
 test("returns health status", async () => {
