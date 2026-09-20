@@ -1,5 +1,5 @@
 import { ValidationError } from "../domain/shared/errors.js"
-import { readJson, sendJson } from "./json.js"
+import { readJson, sendContent, sendJson } from "./json.js"
 import { readMultipartUpload } from "./multipart.js"
 
 function expectedVersion(request) {
@@ -55,6 +55,56 @@ export async function handleCaseRoute({
 
   if (request.method === "GET" && segments.length === 4) {
     sendJson(response, 200, service.getCase(caseId))
+    return true
+  }
+
+  if (
+    request.method === "GET" &&
+    segments.length === 5 &&
+    segments[4] === "catalog"
+  ) {
+    sendJson(response, 200, service.getCatalog(caseId))
+    return true
+  }
+
+  if (
+    request.method === "GET" &&
+    segments.length === 6 &&
+    segments[4] === "catalog" &&
+    segments[5] === "diff"
+  ) {
+    sendJson(response, 200, service.getCatalogDiff(caseId))
+    return true
+  }
+
+  if (
+    request.method === "GET" &&
+    segments.length === 6 &&
+    segments[4] === "catalog" &&
+    segments[5] === "export"
+  ) {
+    const url = new URL(request.url ?? "/", "http://localhost")
+    const exported = service.exportCatalog(
+      caseId,
+      url.searchParams.get("format") ?? "json",
+    )
+    sendContent(response, 200, exported.body, {
+      "content-type": exported.contentType,
+      "content-disposition": `attachment; filename="${exported.fileName}"`,
+    })
+    return true
+  }
+
+  if (
+    request.method === "GET" &&
+    segments.length === 6 &&
+    segments[4] === "catalog"
+  ) {
+    sendJson(
+      response,
+      200,
+      service.getCatalogRecord(caseId, decodeURIComponent(segments[5])),
+    )
     return true
   }
 

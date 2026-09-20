@@ -2,6 +2,8 @@ import { createHash, randomUUID } from "node:crypto"
 
 import { createActionsFromFindings, mergeActions } from "../domain/actions/action-queue.js"
 import { evaluateCatalog } from "../domain/catalog/evaluate-catalog.js"
+import { consolidateCatalog } from "../domain/catalog/consolidate-catalog.js"
+import { exportCatalog } from "../domain/catalog/export-catalog.js"
 import { createOperationalCase } from "../domain/cases/operational-case.js"
 import { createDecision } from "../domain/decisions/create-decision.js"
 import { createEvidence } from "../domain/evidence/evidence.js"
@@ -10,7 +12,11 @@ import { createFindingsFromAnalysis, mergeFindings } from "../domain/findings/fi
 import { resolveProductIdentities } from "../domain/products/resolve-product-identities.js"
 import { evaluateReadiness } from "../domain/readiness/evaluate-readiness.js"
 import { reconcileDocuments } from "../domain/reconciliation/reconcile-documents.js"
-import { CaseVersionConflictError, ValidationError } from "../domain/shared/errors.js"
+import {
+  CaseVersionConflictError,
+  NotFoundError,
+  ValidationError,
+} from "../domain/shared/errors.js"
 import { createCanonicalDocument } from "../ingestion/canonical/canonical-document.js"
 import { createDefaultIngestionService } from "../ingestion/ingestion-service.js"
 
@@ -64,6 +70,32 @@ export class OperationalCaseService {
 
   getCase(id) {
     return this.repository.findById(id)
+  }
+
+  getCatalog(caseId) {
+    return consolidateCatalog(this.getCase(caseId))
+  }
+
+  getCatalogDiff(caseId) {
+    const catalog = this.getCatalog(caseId)
+    return {
+      caseId,
+      generatedAt: catalog.generatedAt,
+      diffs: catalog.records.map((record) => record.diff),
+    }
+  }
+
+  getCatalogRecord(caseId, productId) {
+    const record = this.getCatalog(caseId).records.find(
+      (item) =>
+        item.productId === productId || item.catalogRecordId === productId,
+    )
+    if (!record) throw new NotFoundError("CatalogRecord", productId)
+    return record
+  }
+
+  exportCatalog(caseId, format) {
+    return exportCatalog(this.getCatalog(caseId), format)
   }
 
   listCases(options) {

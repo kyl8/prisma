@@ -81,6 +81,7 @@ export function generateDocumentEvidences(
             method: field.extraction?.method ?? document.source?.method ?? null,
             confidence: field.extraction?.confidence ?? null,
           },
+          identifierType: field.identifierType ?? null,
         },
         { id: idFactory(), timestamp },
       ),

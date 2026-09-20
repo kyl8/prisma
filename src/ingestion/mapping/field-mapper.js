@@ -18,6 +18,7 @@ const FIELD_ALIASES = Object.freeze({
     "country_of_origin",
     "pais de origem",
     "origem",
+    "origin country",
   ],
   ncm: ["ncm", "ncm informada", "ncm_reported", "ncmreported"],
   unit: ["unit", "unidade", "uom"],
@@ -41,6 +42,8 @@ const FIELD_ALIASES = Object.freeze({
   ],
   issueDate: ["issuedate", "issue_date", "data", "data emissao"],
   currency: ["currency", "moeda"],
+  material: ["material", "material composition", "composicao", "composição"],
+  application: ["application", "aplicacao", "aplicação", "use", "usage"],
 })
 
 function normalizeAlias(value) {

@@ -9,6 +9,14 @@ export function sendJson(response, statusCode, body) {
   response.end(JSON.stringify(body))
 }
 
+export function sendContent(response, statusCode, body, headers = {}) {
+  response.writeHead(statusCode, {
+    "content-length": Buffer.byteLength(body),
+    ...headers,
+  })
+  response.end(body)
+}
+
 export async function readJson(request) {
   const chunks = []
   let size = 0

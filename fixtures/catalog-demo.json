@@ -1,0 +1,107 @@
+{
+  "case": {
+    "id": "case-catalog-demo",
+    "metadata": {
+      "catalogPolicy": {
+        "essentialFields": [
+          "description",
+          "manufacturer",
+          "model",
+          "partNumber",
+          "reportedNcm",
+          "originCountry"
+        ]
+      }
+    },
+    "products": [
+      {
+        "id": "catalog-xp400",
+        "sku": "XP400-SKU",
+        "description": "Pump",
+        "ncm": "8413.70"
+      },
+      {
+        "id": "catalog-v10",
+        "sku": "V10-SKU",
+        "description": "Industrial Valve V10",
+        "model": "V10",
+        "ncm": "8481.80",
+        "requiredFields": ["partNumber"]
+      }
+    ],
+    "documents": [
+      {
+        "id": "invoice-demo",
+        "type": "COMMERCIAL_INVOICE",
+        "items": [
+          {
+            "fields": {
+              "SKU": "XP400-SKU",
+              "Part Number": "XP400-A",
+              "Description": "Industrial Centrifugal Pump XP400",
+              "Manufacturer": "ABC Machinery Ltd.",
+              "Model": "XP400",
+              "Origin Country": "China",
+              "NCM": "8413.70"
+            }
+          },
+          {
+            "fields": {
+              "SKU": "V10-SKU",
+              "Description": "Industrial Valve V10",
+              "Manufacturer": "Atlas Valves",
+              "Model": "V10",
+              "Origin Country": "Brazil",
+              "NCM": "8481.80"
+            }
+          }
+        ]
+      },
+      {
+        "id": "packing-demo",
+        "type": "PACKING_LIST",
+        "items": [
+          {
+            "fields": {
+              "SKU": "XP400-SKU",
+              "Part Number": "XP400-A",
+              "Description": "Industrial Centrifugal Pump XP400",
+              "Model": "XP400",
+              "Quantity": "10 PCS"
+            }
+          },
+          {
+            "fields": {
+              "SKU": "V10-SKU",
+              "Description": "Industrial Valve V10",
+              "Manufacturer": "Apex Valves",
+              "Model": "V10",
+              "Quantity": "5 PCS"
+            }
+          }
+        ]
+      },
+      {
+        "id": "datasheet-demo",
+        "type": "TECHNICAL_DATASHEET",
+        "items": [
+          {
+            "fields": {
+              "SKU": "XP400-SKU",
+              "Part Number": "XP400-A",
+              "Description": "Industrial Centrifugal Pump XP400",
+              "Manufacturer": "ABC Machinery Ltd.",
+              "Model": "XP400",
+              "Application": "Industrial fluid transfer"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "records": 2,
+    "enrichedProductId": "catalog-xp400",
+    "conflictingProductId": "catalog-v10"
+  }
+}

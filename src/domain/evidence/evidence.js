@@ -41,6 +41,7 @@ export function createEvidence(input, { id, timestamp }) {
     source: { ...input.source },
     confidence: input.confidence,
     extraction: input.extraction ? { ...input.extraction } : null,
+    identifierType: input.identifierType ?? null,
     extractedAt: input.extractedAt ?? timestamp,
   }
 }
