@@ -8,6 +8,11 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test test/policy.test.js test/server.test.js"
+    "test": "node --test test/policy.test.js test/ingestion.test.js test/findings-flow.test.js test/operational-flow.test.js test/server.test.js test/persistence-milestone.test.js test/product-identity.test.js test/upload-and-http-versioning.test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.9.0",
+    "busboy": "1.6.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

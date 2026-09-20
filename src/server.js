@@ -1,7 +1,12 @@
 import { createServer } from "node:http"
 import { pathToFileURL } from "node:url"
 
-import { PRISMA_ANALYSIS_POLICY } from "./policy.js"
+import { loadConfig } from "./config.js"
+import { BinaryDocumentStorage } from "./documents/binary-document-storage.js"
+import { createRequestHandler } from "./http/request-handler.js"
+import { InMemoryOperationalCaseRepository } from "./repositories/in-memory-operational-case-repository.js"
+import { SqliteOperationalCaseRepository } from "./repositories/sqlite-operational-case-repository.js"
+import { OperationalCaseService } from "./services/operational-case-service.js"
 
 export const DEFAULT_PORT = 3000
 
@@ -18,36 +23,36 @@ export function resolvePort(value = process.env.PORT) {
   return port
 }
 
-function sendJson(response, statusCode, body) {
-  response.writeHead(statusCode, {
-    "content-type": "application/json; charset=utf-8",
-  })
-  response.end(JSON.stringify(body))
-}
-export function createPrismaServer() {
-  return createServer((request, response) => {
-    const url = new URL(request.url ?? "/", "http://localhost")
+export function createPrismaServer({ service, repository, config } = {}) {
+  const runtimeConfig = config ?? loadConfig()
+  const operationalCaseService =
+    service ??
+    new OperationalCaseService({
+      repository: repository ?? new InMemoryOperationalCaseRepository(),
+      documentStorage: new BinaryDocumentStorage({
+        directory: runtimeConfig.uploadDirectory,
+        maxUploadSize: runtimeConfig.maxUploadSize,
+      }),
+    })
 
-    if (request.method === "GET" && url.pathname === "/health") {
-      sendJson(response, 200, { status: "ok" })
-      return
-    }
-
-    if (request.method === "GET" && url.pathname === "/api/prisma/policy") {
-      sendJson(response, 200, PRISMA_ANALYSIS_POLICY)
-      return
-    }
-
-    sendJson(response, 404, { error: "not_found" })
-  })
+  return createServer(createRequestHandler({
+    service: operationalCaseService,
+    maxUploadSize: runtimeConfig.maxUploadSize,
+  }))
 }
 
 const isEntryPoint =
   process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
 
 if (isEntryPoint) {
+  const config = loadConfig()
   const port = resolvePort()
-  createPrismaServer().listen(port, () => {
+  const repository = new SqliteOperationalCaseRepository({
+    databasePath: config.databasePath,
+  })
+  const server = createPrismaServer({ repository, config })
+  server.on("close", () => repository.close())
+  server.listen(port, () => {
     console.log(`PRISMA backend listening on http://localhost:${port}`)
   })
 }
