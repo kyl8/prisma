@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { IntegrationError } from "../integration/integration.errors";
-import { executeLogcomexAgent, getLogcomexStatus, isLogcomexAgentConfigured } from "../integration/logcomex.client";
+import { answerFromCatalog, catalogScopeAnswer } from "./assistant.answer";
+import { executeLogcomexAssistant, getLogcomexStatus, isLogcomexAssistantConfigured } from "../integration/logcomex.client";
 
 const PRISMA_POLICY = [
   "Separe fatos, inferências e dados ausentes.",
@@ -86,12 +87,19 @@ export async function askAssistant(userId: string, input: AssistantInput) {
   if (!message) throw new IntegrationError("EMPTY_MESSAGE", "Digite uma pergunta para o assistente.", 422);
   const company = await fetchCompany(userId, input.companyId);
   const context = buildContext(company, input.productId);
+  const catalogAnswer = answerFromCatalog(message, context);
+  const logcomexConfigured = getLogcomexStatus().configured;
+  if (catalogAnswer) {
+    return { answer: catalogAnswer, provider: "catalog" as const, logcomex: { configured: logcomexConfigured, consulted: false }, context: { companyId: company.id, productCount: context.products.length } };
+  }
+
   let logcomex: unknown = null;
   let integrationWarning = "";
-  const logcomexConfigured = getLogcomexStatus().configured;
-  if (isLogcomexAgentConfigured()) {
+  let answer = await askRemoteAgent(input, context, null);
+  let provider: "agent" | "logcomex" | "catalog" = answer ? "agent" : "catalog";
+  if (!answer && isLogcomexAssistantConfigured()) {
     const agentInput = {
-      arquivo_documento: message,
+      arquivo_documento: JSON.stringify(context.selectedProduct ?? context.products),
       tipo_documento: "auto",
       etapa_operacao: "cadastro_catalogo",
       objetivo_analise: message,
@@ -102,11 +110,11 @@ export async function askAssistant(userId: string, input: AssistantInput) {
       async: true,
     };
     try {
-      logcomex = await executeLogcomexAgent(agentInput);
+      logcomex = await executeLogcomexAssistant(agentInput);
     } catch (error) {
       if (error instanceof IntegrationError && error.code === "LOGCOMEX_HTTP_422") {
         try {
-          logcomex = await executeLogcomexAgent({ ...agentInput, incluir_sugestoes_preditivas: "nao", nivel_detalhe: "resumido", objetivo_analise: `${message}. Responda com checklist objetivo e JSON valido.` });
+          logcomex = await executeLogcomexAssistant({ ...agentInput, incluir_sugestoes_preditivas: "nao", nivel_detalhe: "resumido", objetivo_analise: `${message}. Responda com checklist objetivo e JSON valido.` });
         } catch (retryError) {
           if (retryError instanceof IntegrationError) integrationWarning = retryError.message;
           else integrationWarning = "A Logcomex nÃ£o retornou a anÃ¡lise a tempo.";
@@ -117,8 +125,12 @@ export async function askAssistant(userId: string, input: AssistantInput) {
         integrationWarning = "A integraÃ§Ã£o externa estÃ¡ indisponÃ­vel no momento.";
       }
     }
+    if (logcomex) {
+      answer = formatLogcomexAnswer(logcomex);
+      provider = answer ? "logcomex" : "catalog";
+      if (!answer) integrationWarning = "O agente externo devolveu uma resposta incompatível e ela foi descartada.";
+    }
   }
-  const answer = logcomex ? formatLogcomexAnswer(logcomex) : await askRemoteAgent(input, context, logcomex);
-  if (!answer) throw new IntegrationError("ASSISTANT_UNAVAILABLE", integrationWarning || "A Logcomex nao retornou uma resposta. Tente novamente em instantes.", 502);
-  return { answer, provider: logcomex ? "logcomex" : "agent", warning: integrationWarning || undefined, logcomex: { configured: logcomexConfigured, consulted: Boolean(logcomex) }, context: { companyId: company.id, productCount: context.products.length } };
+  if (!answer) answer = catalogScopeAnswer(context);
+  return { answer, provider, warning: integrationWarning || undefined, logcomex: { configured: logcomexConfigured, consulted: Boolean(logcomex) }, context: { companyId: company.id, productCount: context.products.length } };
 }

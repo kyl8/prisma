@@ -7,7 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test src/modules/activity/activity.policy.test.ts src/modules/siscomex/siscomex.test.ts",
+    "test": "tsx --test src/modules/activity/activity.policy.test.ts src/modules/assistant/assistant.answer.test.ts src/modules/siscomex/siscomex.test.ts",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",

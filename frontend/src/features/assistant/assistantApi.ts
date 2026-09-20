@@ -26,7 +26,7 @@ async function request<T>(path: string, init?: RequestInit) {
 
 export type AssistantResponse = {
   answer: string;
-  provider: "logcomex" | "agent";
+  provider: "logcomex" | "agent" | "catalog";
   warning?: string;
   logcomex: { configured: boolean; consulted: boolean };
   context: { companyId: string; productCount: number };

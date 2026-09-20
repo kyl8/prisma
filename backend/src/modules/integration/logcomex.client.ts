@@ -72,6 +72,14 @@ export function isLogcomexAgentConfigured() {
   return Boolean(process.env.LOGCOMEX_API_KEY?.trim());
 }
 
+export function isLogcomexAssistantConfigured() {
+  return Boolean(
+    process.env.LOGCOMEX_API_KEY?.trim()
+      && process.env.LOGCOMEX_ASSISTANT_AGENT_ID?.trim()
+      && process.env.LOGCOMEX_ASSISTANT_PROMPT_ID?.trim(),
+  );
+}
+
 async function authorizedFetch(url: string, init: RequestInit, timeoutMs?: number) {
   const configuredTimeout = Number(process.env.LOGCOMEX_TIMEOUT_MS ?? 30000);
   const requestTimeout = Math.max(1000, Math.min(configuredTimeout, timeoutMs ?? configuredTimeout));
@@ -93,6 +101,10 @@ export async function executeLogcomexAgent(input: JsonRecord) {
   if (!isLogcomexAgentConfigured()) throw new IntegrationError("LOGCOMEX_NOT_CONFIGURED", "A integração com a Logcomex ainda não foi configurada.", 503);
   const agentId = process.env.LOGCOMEX_AGENT_ID?.trim() || DEFAULT_AGENT_ID;
   const promptId = process.env.LOGCOMEX_PROMPT_ID?.trim() || DEFAULT_PROMPT_ID;
+  return executePublishedAgent(agentId, promptId, input);
+}
+
+async function executePublishedAgent(agentId: string, promptId: string, input: JsonRecord) {
   const executeUrl = `${configuredBaseUrl()}/agent-api-execute/${agentId}/${promptId}`;
   const deadline = Date.now() + Number(process.env.LOGCOMEX_MAX_WAIT_MS ?? 120000);
   let { response, payload } = await authorizedFetch(executeUrl, { method: "POST", body: JSON.stringify(input) }, Math.max(1000, deadline - Date.now()));
@@ -111,4 +123,13 @@ export async function executeLogcomexAgent(input: JsonRecord) {
     return payload;
   }
   throw new IntegrationError("LOGCOMEX_TIMEOUT", "A análise da Logcomex ainda está em processamento. Tente novamente em instantes.", 504);
+}
+
+export async function executeLogcomexAssistant(input: JsonRecord) {
+  if (!isLogcomexAssistantConfigured()) {
+    throw new IntegrationError("LOGCOMEX_ASSISTANT_NOT_CONFIGURED", "O agente de assistente da Logcomex ainda não foi configurado.", 503);
+  }
+  const agentId = process.env.LOGCOMEX_ASSISTANT_AGENT_ID!.trim();
+  const promptId = process.env.LOGCOMEX_ASSISTANT_PROMPT_ID!.trim();
+  return executePublishedAgent(agentId, promptId, input);
 }

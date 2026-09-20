@@ -13,7 +13,7 @@ PRISMA_AI_AGENT_TOKEN=seu-token
 
 O backend envia `message`, `context`, `logcomex` e a política de segurança do PRISMA. O adaptador aceita respostas com `answer`, `message`, `response`, `output_text` ou texto simples.
 
-Sem `PRISMA_AI_AGENT_URL`, a resposta é produzida por regras locais baseadas no catálogo real; isso mantém a plataforma utilizável durante o desenvolvimento e não inventa dados.
+Sem `PRISMA_AI_AGENT_URL`, a resposta é produzida por regras locais baseadas no catálogo real; isso mantém a plataforma utilizável durante o desenvolvimento e não inventa dados. Para usar um prompt publicado da Logcomex especificamente no chat, configure `LOGCOMEX_ASSISTANT_AGENT_ID` e `LOGCOMEX_ASSISTANT_PROMPT_ID`. Os IDs de análise documental (`LOGCOMEX_AGENT_ID` e `LOGCOMEX_PROMPT_ID`) não são reutilizados pelo assistente.
 
 ## Logcomex
 
