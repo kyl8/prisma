@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CatalogRequest } from "./data";
 import { Glyph, GlyphName } from "./icons";
 import {
@@ -24,6 +24,7 @@ import {
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
+import { createBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, type BackendCompany } from "./features/catalog-request/api/catalogRequestApi";
 import "./workspace.css";
 
 type View =
@@ -848,9 +849,31 @@ function RequestsCard() {
   const [correctionNote, setCorrectionNote] = useState(
     "Especifique o tipo de aço utilizado.",
   );
+  const [backendCompanies, setBackendCompanies] = useState<BackendCompany[]>([]);
+  const [backendRequests, setBackendRequests] = useState<any[]>([]);
+  const [backendError, setBackendError] = useState<string | null>(null);
+  const activeCompany = backendCompanies[0];
+  useEffect(() => {
+    listCatalogCompanies().then((companies) => {
+      setBackendCompanies(companies);
+      if (companies[0]) {
+        setRecipientName(companies[0].contactName ?? "");
+        setRecipientEmail(companies[0].contactEmail ?? "");
+        setCorrectionProductId(companies[0].products[0]?.id ?? "");
+        setSelectedIds(companies[0].products.slice(0, 2).map((product) => product.id));
+      }
+    }).catch((error) => setBackendError(error.message));
+  }, []);
+  useEffect(() => {
+    if (activeCompany) {
+      listCompanyCatalogRequests(activeCompany.id)
+        .then((items) => setBackendRequests(items.map((item) => ({ ...item, productIds: Array.from({ length: item.productCount ?? 0 }, (_, index) => String(index)) }))))
+        .catch((error) => setBackendError(error.message));
+    }
+  }, [activeCompany]);
   const { requests, products } = useStoreState();
-  const atlasRequests = requests.filter((r) => r.companyId === "atlas");
-  const atlasProducts = productsForCompany("atlas");
+  const atlasRequests = backendCompanies.length ? backendRequests : [];
+  const atlasProducts = activeCompany?.products ?? [];
 
   const RequestStatus = ({ status }: { status: CatalogRequest["status"] }) => (
     <span
@@ -865,7 +888,7 @@ function RequestsCard() {
     setCreated(null);
   };
 
-  const generate = () => {
+  const generate = async () => {
     const incompleteIds = atlasProducts
       .filter((p) => productCompleteness(p) < 100)
       .map((p) => p.id);
@@ -875,18 +898,22 @@ function RequestsCard() {
         : allIncomplete
           ? incompleteIds
           : selectedIds;
-    const request = createCatalogRequest({
-      companyId: "atlas",
+    if (!activeCompany) { setBackendError("Nenhuma empresa disponível no backend."); return; }
+    try {
+    const request = await createBackendCatalogRequest({
+      companyId: activeCompany.id,
       recipientName,
       recipientEmail,
       productIds,
-      expiresAt: deadline,
+      expiresAt: new Date(`${deadline}T23:59:59`).toISOString(),
       message: message || undefined,
       kind,
       correctionFieldKey: kind === "correction" ? correctionFieldKey : undefined,
       correctionNote: kind === "correction" ? correctionNote : undefined,
     });
-    setCreated(request);
+    setCreated({ ...request, productIds });
+    setBackendRequests((items) => [{ ...request, productCount: productIds.length }, ...items]);
+    } catch (error) { setBackendError(error instanceof Error ? error.message : "Não foi possível criar a solicitação."); }
   };
 
   return (

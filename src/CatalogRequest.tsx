@@ -14,6 +14,13 @@ import {
   updateProductAttribute,
   useStoreState,
 } from "./store";
+import {
+  getPublicCatalogRequest,
+  saveCatalogProduct,
+  startCatalogRequest,
+  submitCatalogRequest,
+  type PublicCatalogRequest,
+} from "./features/catalog-request/api/catalogRequestApi";
 import { ThemeToggle } from "./theme";
 import { playUISound } from "./utils/uiSounds";
 import "./importer.css";
@@ -28,6 +35,58 @@ function fmtDate(iso: string): string {
   } catch {
     return iso;
   }
+}
+
+export function CatalogRequestFlow({ token }: { token: string }) {
+  const [request, setRequest] = useState<PublicCatalogRequest | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [index, setIndex] = useState(0);
+  const [sending, setSending] = useState(false);
+  const [correctionValue, setCorrectionValue] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    getPublicCatalogRequest(token)
+      .then((value) => mounted && setRequest(value))
+      .catch((value) => mounted && setError(value))
+      .finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
+  }, [token]);
+
+  if (loading) return <RequestShell><div className="req-card"><p className="req-eyebrow">SOLICITAÇÃO DE PREENCHIMENTO</p><h1>Carregando solicitação…</h1><p className="req-intro">Validando o link e preparando os produtos autorizados.</p></div></RequestShell>;
+  if (error || !request) return <RequestShell><div className="req-card"><p className="req-eyebrow">SOLICITAÇÃO DE PREENCHIMENTO</p><h1>{(error as any)?.code === "REQUEST_EXPIRED" ? "Este link expirou." : "Link indisponível"}</h1><p className="req-intro">{error?.message ?? "Esta solicitação não foi encontrada."}</p><a className="button button--dark" href="/">Voltar ao início</a></div></RequestShell>;
+
+  const products = request.products;
+  const start = () => {
+    setSending(true);
+    startCatalogRequest(token).then(setRequest).then(() => setIndex(0)).catch((e) => { setError(e); playUISound("error"); }).finally(() => setSending(false));
+  };
+  const save = (values: Record<string, string>) => {
+    const product = products[index];
+    setSending(true);
+    saveCatalogProduct(token, product.id, values).then((next) => { setRequest(next); showToast("Progresso salvo. Você pode continuar pelo mesmo link."); playUISound("save"); }).catch((e) => { showToast(e.message); playUISound("error"); }).finally(() => setSending(false));
+  };
+  const next = (values: Record<string, string>) => {
+    const product = products[index];
+    setSending(true);
+    saveCatalogProduct(token, product.id, values)
+      .then((nextRequest) => {
+        setRequest(nextRequest);
+        if (index < products.length - 1) { setIndex(index + 1); return; }
+        return submitCatalogRequest(token).then((submitted) => { setRequest(submitted); playUISound("submit"); });
+      })
+      .catch((e) => { showToast(e.message); playUISound("error"); })
+      .finally(() => setSending(false));
+  };
+  const done = request.status === "submitted" || request.status === "completed";
+  if (done) return <RequestShell><motion.div className="req-card req-done" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><motion.span className="req-check" initial={{ scale: 0 }} animate={{ scale: 1 }}><Glyph name="check" size={24} /></motion.span><h1>Tudo certo.</h1><p className="req-intro">Informações enviadas para revisão.</p><ul>{products.map((product) => <li key={product.id}><span>{product.name}</span><Glyph name="check" size={15} /></li>)}</ul><p className="req-note">O despachante foi avisado e poderá revisar as informações.</p></motion.div></RequestShell>;
+  if (request.status === "waiting") return <RequestShell><motion.div className="req-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><p className="req-eyebrow">SOLICITAÇÃO DE PREENCHIMENTO</p><h1>{request.company.name}</h1><p className="req-intro">{request.requestedBy.name ?? "Seu despachante"} solicitou algumas informações para completar seu catálogo de produtos.</p><div className="req-count">{products.length} produto{products.length > 1 ? "s" : ""} precisam da sua atenção.</div><div className="req-meta"><div><span>Solicitação</span><strong>#{request.id}</strong></div><div><span>Prazo</span><strong>{fmtDate(request.expiresAt)}</strong></div><div><span>Solicitado por</span><strong>{request.requestedBy.name}</strong></div></div><button className="button button--dark" disabled={sending} onClick={start}>Começar preenchimento <Glyph name="arrow" size={17} /></button><p className="req-note"><Glyph name="file" size={14} /> Este link permite acesso somente aos produtos incluídos.</p></motion.div></RequestShell>;
+  const product = products[index];
+  const correctionAttribute = product.attributes.find((attribute) => Boolean(attribute.note));
+  if (request.kind === "correction" && correctionAttribute) return <RequestShell><motion.div className="req-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><p className="req-eyebrow">CORREÇÃO SOLICITADA</p><h1>{product.name}</h1><p className="req-intro">{correctionAttribute.label}</p><div className="req-observer-note"><strong>Observação do despachante:</strong><p>{correctionAttribute.note}</p></div><label className="req-field"><span>Novo valor *</span><input value={correctionValue} onChange={(event) => setCorrectionValue(event.target.value)} /></label><div className="req-actions" style={{ justifyContent: "flex-end" }}><button className="button button--dark" disabled={sending || !correctionValue.trim()} onClick={() => next({ [correctionAttribute.key]: correctionValue })}>Salvar correção <Glyph name="arrow" size={16} /></button></div></motion.div></RequestShell>;
+  return <RequestShell><motion.div className="req-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><p className="req-eyebrow">PREENCHIMENTO · {index + 1} DE {products.length}</p><MissingFieldsForm product={product} isLast={index === products.length - 1} sending={sending} onNext={next} onSaveLater={save} /></motion.div></RequestShell>;
 }
 
 function RequestShell({ children }: { children: React.ReactNode }) {
@@ -220,7 +279,7 @@ function CorrectionForm({
   );
 }
 
-export function CatalogRequestFlow({ token }: { token: string }) {
+function LegacyCatalogRequestFlow({ token }: { token: string }) {
   const { requests, products } = useStoreState();
   const request = requests.find((r) => r.token === token);
   const [stage, setStage] = useState<"landing" | "form" | "done">(() =>
