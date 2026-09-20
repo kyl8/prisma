@@ -130,6 +130,8 @@ model Product {
   importer   Importer @relation("RProductImporter", fields: [importerId], references: [id])
 }
 
+//os fields, resp e records são utilizados para criar uma tabela personalizada para cada produto
+
 model ProductField {
   id        String  @id @default(cuid())
   productId String
@@ -161,6 +163,8 @@ model ProdFieldResp {
   productField   ProductField @relation("RProdFieldResp", fields: [fieldId], references: [id])
   record          Record @relation("RProdRespRecord", fields: [recordId], references: [id])
 }
+
+//o indentificador é uma ponte entre as APIs de indentificação e o nosso sistema
 
 model Identifier {
   id        String  @id @default(cuid())
