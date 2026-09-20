@@ -230,6 +230,13 @@ export async function cancelCatalogRequest(requestId: string, userId: string) {
   return { id: updated.id, status: updated.status };
 }
 
+/** Removes the request, its responses and product links, and invalidates its bearer link. */
+export async function deleteCatalogRequest(requestId: string, userId: string) {
+  const request = await ownedRequest(requestId, userId);
+  await prisma.catalogRequest.delete({ where: { id: request.id } });
+  return { id: request.id };
+}
+
 export async function startCatalogRequest(token: string) {
   const request = await findByToken(token);
   if (["submitted", "completed", "cancelled"].includes(request.status)) throw new CatalogRequestError("REQUEST_READ_ONLY", "Esta solicitação já foi encerrada.", 409);
