@@ -217,6 +217,17 @@ function Metric({ value, label }: { value: string | number; label: string }) {
     </div>
   );
 }
+
+function LiveDataPlaceholder({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="ws-empty-state">
+      <div className="ws-page-title"><div><h1>{title}</h1><p>{description}</p></div></div>
+      <Card title="Nenhum dado carregado">
+        <p className="ws-card-copy">Esta área exibe somente informações persistidas no backend. Assim que houver registros reais para este contexto, eles aparecerão aqui.</p>
+      </Card>
+    </div>
+  );
+}
 function Card({
   title,
   children,
@@ -3146,23 +3157,23 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       case "product":
         return <RealProduct product={selectedProduct} company={selectedCompany} go={go} />;
       case "review":
-        return <Product go={go} review />;
+        return <LiveDataPlaceholder title="Revisão de produto" description="A revisão será exibida quando houver produtos persistidos aguardando ação." />;
       case "pending":
-        return <Pending go={go} />;
+        return <LiveDataPlaceholder title="Pendências" description="Pendências reais do catálogo aparecerão aqui." />;
       case "pending-detail":
-        return <Pending go={go} detail />;
+        return <LiveDataPlaceholder title="Detalhe da pendência" description="Selecione uma pendência persistida para ver seus detalhes." />;
       case "import":
-        return <Import go={go} />;
+        return <LiveDataPlaceholder title="Importar catálogo" description="A importação será habilitada quando o fluxo de arquivos estiver conectado ao backend." />;
       case "import-result":
-        return <Import go={go} result />;
+        return <LiveDataPlaceholder title="Resultado da importação" description="Os resultados serão exibidos após uma importação persistida." />;
       case "activity":
         return currentUser ? <ActivityPage viewer={currentUser} onNavigate={(target) => go(target === "product" ? "product" : "requests")} /> : null;
       case "users":
-        return <Users />;
+        return <LiveDataPlaceholder title="Usuários e acessos" description="Usuários e permissões reais aparecerão quando forem vinculados ao backend." />;
       case "settings":
-        return <Settings />;
+        return <LiveDataPlaceholder title="Configurações" description="As configurações da conta serão carregadas do backend." />;
       case "assistant":
-        return <Assistant go={go} />;
+        return <LiveDataPlaceholder title="Assistente PRISMA" description="O assistente será habilitado quando houver uma fonte de dados e conversas persistidas." />;
       case "add-client":
         return <FormPage go={go} type="client" onClientCreated={(company) => { setSelectedCompanyId(company.id); setWorkspaceCompanies((current) => [...current, company].sort((a, b) => a.name.localeCompare(b.name))); }} />;
       case "create-product":
