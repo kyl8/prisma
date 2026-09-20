@@ -2833,6 +2833,7 @@ function FormPage({
   const [accessEmail, setAccessEmail] = useState("mariana@atlas.com.br");
   const [clientSaving, setClientSaving] = useState(false);
   const [clientError, setClientError] = useState("");
+  const [inviteLink, setInviteLink] = useState("");
   const isProduct = type === "product";
 
   if (success) {
@@ -2855,6 +2856,7 @@ function FormPage({
             >
               {isProduct ? "Abrir produto" : "Abrir cliente"}
             </button>
+            {!isProduct && inviteLink && <button className="ws-quiet" onClick={() => { void navigator.clipboard?.writeText(inviteLink); showToast("Link de convite copiado"); playUISound("success"); }}>Copiar link de convite</button>}
           </div>
         </Card>
         {!isProduct && false && (
@@ -2932,10 +2934,7 @@ function FormPage({
             }
           />
           <Card title="Acesso à plataforma">
-            <label className="ws-switch">
-              <input type="checkbox" defaultChecked /> Enviar convite ao
-              importador
-            </label>
+            <p className="ws-card-copy">O cliente será criado com acesso pendente. Depois da criação, copie o link de convite e envie-o diretamente ao importador.</p>
             <p className="ws-card-copy" style={{ marginTop: "8px" }}>
               O convite será enviado para o e-mail informado com permissões
               básicas de edição.
@@ -2961,6 +2960,7 @@ function FormPage({
                 try {
                   const company = await createWorkspaceCompany({ enterprise, cnpj, name, email });
                   onClientCreated?.(company);
+                  setInviteLink(`${window.location.origin}/login?invite=${encodeURIComponent(company.id)}`);
                   setAccessEmail(email);
                   setSuccess(true);
                   playUISound("success");
