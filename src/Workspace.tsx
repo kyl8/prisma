@@ -946,6 +946,11 @@ function RequestsCard() {
           </button>
         }
       >
+        {backendError && (
+          <p className="ws-card-copy" style={{ color: "#b42318" }}>
+            {backendError}. Verifique se o backend está rodando em localhost:3000.
+          </p>
+        )}
         {atlasRequests.length === 0 && (
           <p className="ws-card-copy">
             Nenhuma solicitação criada para esta empresa.
