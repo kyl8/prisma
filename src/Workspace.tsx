@@ -24,7 +24,7 @@ import {
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
-import { createBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, type BackendCompany } from "./features/catalog-request/api/catalogRequestApi";
+import { createBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, reissueCatalogRequest, type BackendCompany } from "./features/catalog-request/api/catalogRequestApi";
 import "./workspace.css";
 
 type View =
@@ -934,8 +934,10 @@ function RequestsCard() {
       correctionFieldKey: kind === "correction" ? correctionFieldKey : undefined,
       correctionNote: kind === "correction" ? correctionNote : undefined,
     });
-    setCreated({ ...request, productIds });
-    setBackendRequests((items) => [{ ...request, productCount: productIds.length }, ...items]);
+    const frontendUrl = `${window.location.origin}/r/${request.token}/catalogo`;
+    const requestWithUrl = { ...request, url: frontendUrl, productIds };
+    setCreated(requestWithUrl);
+    setBackendRequests((items) => [{ ...requestWithUrl, productCount: productIds.length }, ...items]);
     } catch (error) { setBackendError(error instanceof Error ? error.message : "Não foi possível criar a solicitação."); }
   };
 
@@ -977,7 +979,22 @@ function RequestsCard() {
                 Abrir link
               </button>
             ) : (
-              <span className="ws-status">Link já criado</span>
+              <button
+                className="ws-quiet"
+                onClick={async () => {
+                  try {
+                    const fresh = await reissueCatalogRequest(request.id);
+                    const link = `${window.location.origin}/r/${fresh.token}/catalogo`;
+                    await navigator.clipboard?.writeText(link);
+                    setBackendRequests((items) => items.map((item) => item.id === request.id ? { ...item, token: fresh.token, url: link } : item));
+                    showToast("Novo link copiado");
+                  } catch (error) {
+                    setBackendError(error instanceof Error ? error.message : "Não foi possível gerar o link.");
+                  }
+                }}
+              >
+                Gerar e copiar link
+              </button>
             )}
           </div>
         ))}

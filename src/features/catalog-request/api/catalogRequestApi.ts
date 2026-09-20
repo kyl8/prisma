@@ -87,3 +87,7 @@ export async function listCompanyCatalogRequests(companyId: string) {
 export async function createBackendCatalogRequest(input: Record<string, unknown>) {
   return request<any>("/api/catalog-requests", { method: "POST", body: JSON.stringify(input) });
 }
+
+export async function reissueCatalogRequest(requestId: string) {
+  return request<any>(`/api/catalog-requests/${encodeURIComponent(requestId)}/reissue`, { method: "POST" });
+}
