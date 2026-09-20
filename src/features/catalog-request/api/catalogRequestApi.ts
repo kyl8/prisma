@@ -121,3 +121,7 @@ export async function deleteBackendCatalogRequest(requestId: string) {
 export async function approveBackendCatalogRequest(requestId: string) {
   return request<{ id: string; status: "completed" }>(`/api/catalog-requests/${encodeURIComponent(requestId)}`, { method: "POST" });
 }
+
+export async function getCatalogRequestReview(requestId: string) {
+  return request<{ id: string; status: string; products: { id: string; name: string; sku: string; attributes: { key: string; label: string; value: string; status: string }[] }[] }>(`/api/catalog-requests/${encodeURIComponent(requestId)}`);
+}

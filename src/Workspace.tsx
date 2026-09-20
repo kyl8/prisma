@@ -25,7 +25,7 @@ import {
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
-import { approveBackendCatalogRequest, cancelBackendCatalogRequest, createBackendCatalogRequest, createWorkspaceCompany, deleteBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, listWorkspaceCompanies, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany, type WorkspaceCompany } from "./features/catalog-request/api/catalogRequestApi";
+import { approveBackendCatalogRequest, cancelBackendCatalogRequest, createBackendCatalogRequest, createWorkspaceCompany, deleteBackendCatalogRequest, getCatalogRequestReview, listCatalogCompanies, listCompanyCatalogRequests, listWorkspaceCompanies, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany, type WorkspaceCompany } from "./features/catalog-request/api/catalogRequestApi";
 import { ActivityPage } from "./features/activity/ActivityPage";
 import "./workspace.css";
 
@@ -1024,6 +1024,7 @@ function RequestsCard() {
   const [actionState, setActionState] = useState<{ id: string; kind: "link" | "cancel" | "delete" } | null>(null);
   const [cancelTarget, setCancelTarget] = useState<any | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [reviewRequest, setReviewRequest] = useState<any | null>(null);
   const activeCompany = backendCompanies[0];
   useEffect(() => {
     listCatalogCompanies().then((companies) => {
@@ -1191,6 +1192,10 @@ function RequestsCard() {
     } finally { setActionState(null); }
   };
 
+  const openReview = async (request: any) => {
+    try { setReviewRequest(await getCatalogRequestReview(request.id)); } catch (error) { setBackendError(error instanceof Error ? error.message : "Não foi possível carregar as respostas."); }
+  };
+
   return (
     <>
       <Card
@@ -1254,7 +1259,7 @@ function RequestsCard() {
               >
                 {actionState?.id === request.id && actionState?.kind === "delete" ? "Excluindo..." : "Excluir"}
               </button>
-              {request.status === "submitted" && <button className="ws-primary" onClick={() => void approveRequest(request)} disabled={Boolean(actionState)}>{actionState?.id === request.id ? "Aprovando..." : "Aprovar"}</button>}
+              {request.status === "submitted" && <><button className="ws-quiet" onClick={() => void openReview(request)} disabled={Boolean(actionState)}>Ver respostas</button><button className="ws-primary" onClick={() => void approveRequest(request)} disabled={Boolean(actionState)}>{actionState?.id === request.id ? "Aprovando..." : "Aprovar"}</button></>}
             </div>
           </div>
         ))}
@@ -1490,6 +1495,10 @@ function RequestsCard() {
             </button>
           </div>
         )}
+      </Modal>
+      <Modal open={Boolean(reviewRequest)} onClose={() => setReviewRequest(null)} title="Respostas do importador" wide>
+        <p className="ws-card-copy">Confira os valores enviados antes de aplicar ao catálogo oficial.</p>
+        {reviewRequest?.products?.map((product: any) => <Card key={product.id} title={product.name}><div className="ws-data-sections">{product.attributes.map((attribute: any) => <div className="ws-data-section" key={attribute.key}><h3>{attribute.label}</h3><div><strong>{attribute.value || "Não informado"}</strong><Status>{attribute.value ? "Respondido" : "Pendente"}</Status></div></div>)}</div></Card>)}
       </Modal>
       <Modal
         open={Boolean(cancelTarget)}
