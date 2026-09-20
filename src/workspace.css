@@ -2808,6 +2808,9 @@
 .ws-request-actions .ws-primary {
   margin-left: 8px;
 }
+.client-layout > .ws-card:nth-child(3) {
+  display: none;
+}
 .ws-field select + input[readonly] {
   display: none;
 }
