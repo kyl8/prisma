@@ -871,6 +871,7 @@ function RequestsCard() {
   const [backendCompanies, setBackendCompanies] = useState<BackendCompany[]>([]);
   const [backendRequests, setBackendRequests] = useState<any[]>([]);
   const [backendError, setBackendError] = useState<string | null>(null);
+  const [copiedRequestId, setCopiedRequestId] = useState<string | null>(null);
   const activeCompany = backendCompanies[0];
   useEffect(() => {
     listCatalogCompanies().then((companies) => {
@@ -980,20 +981,22 @@ function RequestsCard() {
               </button>
             ) : (
               <button
-                className="ws-quiet"
+                className={copiedRequestId === request.id ? "ws-primary" : "ws-quiet"}
                 onClick={async () => {
                   try {
                     const fresh = await reissueCatalogRequest(request.id);
                     const link = `${window.location.origin}/r/${fresh.token}/catalogo`;
                     await navigator.clipboard?.writeText(link);
                     setBackendRequests((items) => items.map((item) => item.id === request.id ? { ...item, token: fresh.token, url: link } : item));
+                    setCopiedRequestId(request.id);
                     showToast("Novo link copiado");
+                    window.setTimeout(() => setCopiedRequestId((current) => current === request.id ? null : current), 2400);
                   } catch (error) {
                     setBackendError(error instanceof Error ? error.message : "Não foi possível gerar o link.");
                   }
                 }}
               >
-                Gerar e copiar link
+                {copiedRequestId === request.id ? "Link copiado" : "Gerar e copiar link"}
               </button>
             )}
           </div>

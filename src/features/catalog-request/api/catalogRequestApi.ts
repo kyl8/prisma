@@ -20,6 +20,7 @@ function mapProduct(product: any): Product {
     name: product.name,
     sku: product.sku,
     ncm: product.ncm,
+    completeness: product.completeness,
     ncmDescription: "",
     status: product.status === "Aprovado" ? "approved" : "needs_you",
     updatedAt: new Date().toISOString(),

@@ -70,6 +70,8 @@ export type Product = {
   sku: string;
   ncm: string;
   ncmDescription: string;
+  /** Completude calculada pelo catálogo persistido, quando disponível. */
+  completeness?: string;
   attributes: ProductAttribute[];
   corrections: Correction[];
   status: ImporterProductStatus;

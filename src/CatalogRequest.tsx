@@ -81,12 +81,12 @@ export function CatalogRequestFlow({ token }: { token: string }) {
       .finally(() => setSending(false));
   };
   const done = request.status === "submitted" || request.status === "completed";
-  if (done) return <RequestShell><motion.div className="req-card req-done" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><motion.span className="req-check" initial={{ scale: 0 }} animate={{ scale: 1 }}><Glyph name="check" size={24} /></motion.span><h1>Tudo certo.</h1><p className="req-intro">Informações enviadas para revisão.</p><ul>{products.map((product) => <li key={product.id}><span>{product.name}</span><Glyph name="check" size={15} /></li>)}</ul><p className="req-note">O despachante foi avisado e poderá revisar as informações.</p></motion.div></RequestShell>;
+  if (done) return <RequestShell><motion.div className="req-card req-done" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><motion.span className="req-check" initial={{ scale: 0 }} animate={{ scale: 1 }}><Glyph name="check" size={24} /></motion.span><h1>Tudo certo.</h1><p className="req-intro">Informações enviadas para revisão.</p><ul>{products.map((product) => <li key={product.id}><span>{product.name}</span><Glyph name="check" size={15} /></li>)}</ul><p className="req-note">O despachante poderá revisar as informações agora.</p><div className="req-actions req-actions--center"><a className="button button--light" href="/">Voltar ao início</a></div></motion.div></RequestShell>;
   if (request.status === "waiting") return <RequestShell><motion.div className="req-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><p className="req-eyebrow">SOLICITAÇÃO DE PREENCHIMENTO</p><h1>{request.company.name}</h1><p className="req-intro">{request.requestedBy.name ?? "Seu despachante"} solicitou algumas informações para completar seu catálogo de produtos.</p><div className="req-count">{products.length} produto{products.length > 1 ? "s" : ""} precisam da sua atenção.</div><div className="req-meta"><div><span>Solicitação</span><strong>#{request.id}</strong></div><div><span>Prazo</span><strong>{fmtDate(request.expiresAt)}</strong></div><div><span>Solicitado por</span><strong>{request.requestedBy.name}</strong></div></div><button className="button button--dark" disabled={sending} onClick={start}>Começar preenchimento <Glyph name="arrow" size={17} /></button><p className="req-note"><Glyph name="file" size={14} /> Este link permite acesso somente aos produtos incluídos.</p></motion.div></RequestShell>;
   const product = products[index];
   const correctionAttribute = product.attributes.find((attribute) => Boolean(attribute.note));
   if (request.kind === "correction" && correctionAttribute) return <RequestShell><motion.div className="req-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><p className="req-eyebrow">CORREÇÃO SOLICITADA</p><h1>{product.name}</h1><p className="req-intro">{correctionAttribute.label}</p><div className="req-observer-note"><strong>Observação do despachante:</strong><p>{correctionAttribute.note}</p></div><label className="req-field"><span>Novo valor *</span><input value={correctionValue} onChange={(event) => setCorrectionValue(event.target.value)} /></label><div className="req-actions" style={{ justifyContent: "flex-end" }}><button className="button button--dark" disabled={sending || !correctionValue.trim()} onClick={() => next({ [correctionAttribute.key]: correctionValue })}>Salvar correção <Glyph name="arrow" size={16} /></button></div></motion.div></RequestShell>;
-  return <RequestShell><motion.div className="req-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><p className="req-eyebrow">PREENCHIMENTO · {index + 1} DE {products.length}</p><MissingFieldsForm product={product} isLast={index === products.length - 1} sending={sending} onNext={next} onSaveLater={save} /></motion.div></RequestShell>;
+  return <RequestShell><motion.div className="req-card req-card--catalog" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}><CatalogBatchForm products={products} sending={sending} onSave={async (draft) => { setSending(true); try { const updates = await Promise.all(Object.entries(draft).map(([productId, attributes]) => saveCatalogProduct(token, productId, attributes))); setRequest(updates.at(-1) ?? request); showToast("Progresso salvo. Você pode continuar pelo mesmo link."); playUISound("save"); } catch (e) { showToast(e instanceof Error ? e.message : "Não foi possível salvar."); playUISound("error"); } finally { setSending(false); } }} onSubmit={async (draft) => { setSending(true); try { const updates = await Promise.all(Object.entries(draft).map(([productId, attributes]) => saveCatalogProduct(token, productId, attributes))); const submitted = await submitCatalogRequest(token); setRequest(submitted ?? updates.at(-1) ?? request); playUISound("submit"); } catch (e) { showToast(e instanceof Error ? e.message : "Preencha os campos obrigatórios."); playUISound("warning"); } finally { setSending(false); } }} /></motion.div></RequestShell>;
 }
 
 function RequestShell({ children }: { children: React.ReactNode }) {
@@ -205,6 +205,56 @@ function ImpMiniStatus({ percent }: { percent: number }) {
       <strong>{percent}%</strong> completo
     </span>
   );
+}
+
+function CatalogBatchForm({
+  products,
+  sending,
+  onSave,
+  onSubmit,
+}: {
+  products: Product[];
+  sending: boolean;
+  onSave: (draft: Record<string, Record<string, string>>) => Promise<void>;
+  onSubmit: (draft: Record<string, Record<string, string>>) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(() =>
+    Object.fromEntries(products.map((product) => [product.id, Object.fromEntries(product.attributes.map((attribute) => [attribute.key, attribute.value]))])),
+  );
+  const [showErrors, setShowErrors] = useState(false);
+  const completenessOf = (product: Product) => {
+    const value = Number.parseInt(product.completeness ?? "", 10);
+    return Number.isFinite(value) ? value : productCompleteness(product);
+  };
+  const editableProducts = products;
+  const requiredMissing = editableProducts.flatMap((product) => product.attributes.filter((attribute) => attribute.required && !(draft[product.id]?.[attribute.key] ?? "").trim()).map((attribute) => `${product.id}:${attribute.key}`));
+  const update = (productId: string, key: string, value: string) => setDraft((current) => ({ ...current, [productId]: { ...current[productId], [key]: value } }));
+  const submit = () => {
+    if (requiredMissing.length) {
+      setShowErrors(true);
+      showToast("Preencha os campos obrigatórios antes de enviar para revisão.");
+      playUISound("warning");
+      return;
+    }
+    void onSubmit(draft);
+  };
+  return <div className="req-batch">
+    <div className="req-batch-head">
+      <div><h1>Complete o catálogo</h1><p>{products.length} produto{products.length > 1 ? "s" : ""} incluídos nesta solicitação.</p></div>
+      <span className="imp-mini"><strong>{editableProducts.length}</strong> no catálogo</span>
+    </div>
+    {products.map((product) => {
+      const fields = product.attributes;
+      return <section className="req-batch-product" key={product.id}>
+        <div className="req-form-product"><div><h2>{product.name}</h2><p>{product.sku} · NCM {product.ncm}</p></div><ImpMiniStatus percent={completenessOf(product)} /></div>
+        {fields.length === 0 ? <p className="req-product-complete"><Glyph name="check" size={15} /> Este produto já está completo. Nenhuma informação adicional é necessária.</p> : fields.map((attribute) => {
+          const hasError = showErrors && attribute.required && !(draft[product.id]?.[attribute.key] ?? "").trim();
+          return <label className={hasError ? "req-field is-error" : "req-field"} key={attribute.key}><span>{attribute.label}{attribute.required ? " *" : ""}</span>{attribute.note && <small>{attribute.note}</small>}<input value={draft[product.id]?.[attribute.key] ?? ""} onChange={(event) => update(product.id, attribute.key, event.target.value)} placeholder={`Adicionar ${attribute.label.toLowerCase()}`} /></label>;
+        })}
+      </section>;
+    })}
+    <div className="req-actions req-batch-actions"><button className="button button--light" disabled={sending} onClick={() => void onSave(draft)}>{sending ? "Salvando…" : "Salvar rascunho"}</button><button className="button button--dark" disabled={sending} onClick={submit}>{sending ? "Enviando…" : "Enviar para revisão"} <Glyph name="arrow" size={16} /></button></div>
+  </div>;
 }
 
 function CorrectionForm({
