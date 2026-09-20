@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-20T02:03:21.6446623Z",
+  "title": "Design System: PRISMA",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Graphite Ink",
+        "canonical": "#171715",
+        "tonalRamp": ["oklch(15% 0.006 105)", "oklch(25% 0.006 105)", "oklch(36% 0.006 105)", "oklch(48% 0.006 105)", "oklch(60% 0.006 105)", "oklch(72% 0.006 105)", "oklch(84% 0.006 105)", "oklch(95% 0.006 105)"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Operational Gray",
+        "canonical": "#666661",
+        "tonalRamp": ["oklch(15% 0.008 105)", "oklch(25% 0.008 105)", "oklch(36% 0.008 105)", "oklch(48% 0.008 105)", "oklch(60% 0.008 105)", "oklch(72% 0.008 105)", "oklch(84% 0.008 105)", "oklch(95% 0.008 105)"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "#f7f7f4",
+        "tonalRamp": ["oklch(15% 0.006 105)", "oklch(25% 0.006 105)", "oklch(36% 0.006 105)", "oklch(48% 0.006 105)", "oklch(60% 0.006 105)", "oklch(72% 0.006 105)", "oklch(84% 0.006 105)", "oklch(95% 0.006 105)"]
+      },
+      "workspace": {
+        "role": "neutral",
+        "displayName": "Workspace Paper",
+        "canonical": "#f6f6f3",
+        "tonalRamp": ["oklch(15% 0.006 105)", "oklch(25% 0.006 105)", "oklch(36% 0.006 105)", "oklch(48% 0.006 105)", "oklch(60% 0.006 105)", "oklch(72% 0.006 105)", "oklch(84% 0.006 105)", "oklch(95% 0.006 105)"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Fine Rule",
+        "canonical": "#deded8",
+        "tonalRamp": ["oklch(15% 0.009 105)", "oklch(25% 0.009 105)", "oklch(36% 0.009 105)", "oklch(48% 0.009 105)", "oklch(60% 0.009 105)", "oklch(72% 0.009 105)", "oklch(84% 0.009 105)", "oklch(95% 0.009 105)"]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Quiet Panel",
+        "canonical": "#efefeb",
+        "tonalRamp": ["oklch(15% 0.007 105)", "oklch(25% 0.007 105)", "oklch(36% 0.007 105)", "oklch(48% 0.007 105)", "oklch(60% 0.007 105)", "oklch(72% 0.007 105)", "oklch(84% 0.007 105)", "oklch(95% 0.007 105)"]
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "Soft Workspace",
+        "canonical": "#e9e9e4",
+        "tonalRamp": ["oklch(15% 0.008 105)", "oklch(25% 0.008 105)", "oklch(36% 0.008 105)", "oklch(48% 0.008 105)", "oklch(60% 0.008 105)", "oklch(72% 0.008 105)", "oklch(84% 0.008 105)", "oklch(95% 0.008 105)"]
+      },
+      "dark": {
+        "role": "primary",
+        "displayName": "Grounded Dark",
+        "canonical": "#141514",
+        "tonalRamp": ["oklch(15% 0.004 120)", "oklch(25% 0.004 120)", "oklch(36% 0.004 120)", "oklch(48% 0.004 120)", "oklch(60% 0.004 120)", "oklch(72% 0.004 120)", "oklch(84% 0.004 120)", "oklch(95% 0.004 120)"]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Clean White",
+        "canonical": "#fff",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(25% 0 0)", "oklch(36% 0 0)", "oklch(48% 0 0)", "oklch(60% 0 0)", "oklch(72% 0 0)", "oklch(84% 0 0)", "oklch(100% 0 0)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Editorial Display", "purpose": "Hero statements and only the largest persuasive moments." },
+      "headline": { "displayName": "Section Headline", "purpose": "Short feature and narrative headings." },
+      "title": { "displayName": "Product Title", "purpose": "Application-panel titles and readiness values." },
+      "body": { "displayName": "Explanatory Body", "purpose": "Marketing explanations and FAQ answers." },
+      "label": { "displayName": "Operational Label", "purpose": "Tabs, metadata, evidence notes, and compact controls." },
+      "application-heading": { "displayName": "Application Heading", "purpose": "Workspace page titles that retain editorial scale." },
+      "metric": { "displayName": "Operational Metric", "purpose": "Tabular readiness totals, percentages, and count summaries." },
+      "control-label": { "displayName": "Workspace Control Label", "purpose": "Compact 11px bold labels on workspace actions." }
+    },
+    "shadows": [
+      { "name": "application-window", "value": "0 34px 80px -52px rgba(0, 0, 0, 0.55)", "purpose": "Anchors the main dashboard demonstration." },
+      { "name": "assistant-shell", "value": "0 30px 70px -48px rgba(0, 0, 0, 0.5)", "purpose": "Separates the assistant from its soft gray section." },
+      { "name": "collaboration-card", "value": "0 24px 55px -38px #000", "purpose": "Lifts the collaboration thread inside its dark canvas." },
+      { "name": "workspace-card", "value": "0 25px 50px -48px rgba(0, 0, 0, 0.55)", "purpose": "Separates persistent task cards from the workspace canvas." },
+      { "name": "workspace-rail", "value": "0 20px 45px -33px #000", "purpose": "Identifies the floating desktop rail and mobile dock." },
+      { "name": "workspace-popover", "value": "0 24px 50px -30px #000", "purpose": "Places notifications and row utilities above task content." },
+      { "name": "workspace-modal", "value": "0 30px 70px -38px #000", "purpose": "Separates centered search from the scrim." },
+      { "name": "workspace-drawer", "value": "-30px 0 70px -52px #000", "purpose": "Separates contextual assistance from the active workspace." }
+    ],
+    "motion": [
+      { "name": "ease-settle", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entrances, clipped reveals, and major vertical settling." },
+      { "name": "state-crossfade", "value": "300ms ease", "purpose": "Tabs, panels, and local product state changes." },
+      { "name": "control-hover", "value": "250ms ease", "purpose": "Button lift and surface-color feedback." },
+      { "name": "reduced-motion", "value": "0.01ms", "purpose": "Effectively removes nonessential CSS animation when reduced motion is requested." },
+      { "name": "scroll-hero", "value": "translateY(-56px) scale(0.98), scrub 0.8", "purpose": "GSAP ScrollTrigger depth for the marketing hero product only." },
+      { "name": "scroll-statement", "value": "translateY(34px to -30px), scrub 0.7", "purpose": "GSAP ScrollTrigger traversal for the central marketing statement." },
+      { "name": "scroll-feature", "value": "translateY(24px to -18px), scrub 0.65", "purpose": "GSAP ScrollTrigger depth for marketing feature visuals." },
+      { "name": "workspace-page", "value": "240ms, opacity 0 to 1, translateY(10px to 0)", "purpose": "Short view transition inside persistent workspace chrome." },
+      { "name": "workspace-drawer", "value": "spring(stiffness 290, damping 28), translateX(440px to 0)", "purpose": "Contextual assistant entry and exit." }
+    ],
+    "breakpoints": [
+      { "name": "stack", "value": "900px" },
+      { "name": "mobile", "value": "620px" },
+      { "name": "workspace-stack", "value": "1000px" },
+      { "name": "workspace-mobile", "value": "700px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default action on paper and light gray surfaces.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">Explorar a plataforma <svg aria-hidden=\"true\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m14 7 5 5-5 5\"/></svg></a>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:46px; padding:0 18px; border-radius:9px; background:var(--dark, #141514); color:#fff; text-decoration:none; font:680 14px/1 'Manrope Variable', sans-serif; transition:transform .25s ease, background .25s ease; } .ds-btn-primary:hover { transform:translateY(-2px); background:#30302d; } .ds-btn-primary:focus-visible { outline:2px solid #181816; outline-offset:4px; }"
+    },
+    {
+      "name": "Light Button",
+      "kind": "button",
+      "refersTo": "button-light",
+      "description": "Inverse action for dark statement and closing sections.",
+      "html": "<a class=\"ds-btn-light\" href=\"#\">Conversar sobre o protótipo <svg aria-hidden=\"true\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m14 7 5 5-5 5\"/></svg></a>",
+      "css": ".ds-btn-light { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:46px; padding:0 18px; border-radius:9px; background:#fff; color:#171715; text-decoration:none; font:680 14px/1 'Manrope Variable', sans-serif; transition:transform .25s ease, background .25s ease; } .ds-btn-light:hover { transform:translateY(-2px); background:#e8e8e3; } .ds-btn-light:focus-visible { outline:2px solid #fff; outline-offset:4px; }"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "description": "Quiet text navigation with the current primary action visually separated.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Navegação principal\"><a href=\"#\">Plataforma</a><a href=\"#\">Como funciona</a><a href=\"#\">Assistente</a></nav>",
+      "css": ".ds-nav { display:flex; align-items:center; gap:30px; font:400 14px/1.4 'Manrope Variable', sans-serif; } .ds-nav a { color:#444440; text-decoration:none; transition:color .2s; } .ds-nav a:hover { color:#000; } .ds-nav a:focus-visible { outline:2px solid #181816; outline-offset:4px; border-radius:4px; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "description": "Monochrome status treatment for complete, warning, and review states.",
+      "html": "<div class=\"ds-badges\"><span class=\"ds-badge ds-badge--done\">Completo</span><span class=\"ds-badge ds-badge--warn\">Requer ação</span><span class=\"ds-badge\">Em revisão</span></div>",
+      "css": ".ds-badges { display:flex; gap:8px; align-items:center; font-family:'Manrope Variable', sans-serif; } .ds-badge { padding:4px 6px; border-radius:5px; background:#ecece8; color:#171715; font-size:11px; font-weight:650; } .ds-badge--done { background:#1e1e1c; color:#fff; } .ds-badge--warn { outline:1px solid #8c8c86; outline-offset:-1px; }"
+    },
+    {
+      "name": "Application Card",
+      "kind": "card",
+      "refersTo": "app-card",
+      "description": "Nested working surface for operational data inside a framed product demonstration.",
+      "html": "<section class=\"ds-app-card\"><header><div><h3>Catálogo de produtos</h3><p>Atlas Componentes Ltda.</p></div><button>+ Adicionar</button></header><div class=\"ds-app-row\"><strong>Válvula industrial VX-80</strong><span>Requer ação</span></div><div class=\"ds-app-row\"><strong>Sensor de pressão SP-12</strong><span>Em revisão</span></div></section>",
+      "css": ".ds-app-card { width:100%; max-width:560px; padding:24px; border-radius:13px; background:#fff; color:#171715; font-family:'Manrope Variable', sans-serif; } .ds-app-card header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; } .ds-app-card h3 { margin:0 0 3px; font-size:15px; } .ds-app-card p { margin:0; color:#565651; font-size:11px; } .ds-app-card button { border:0; border-radius:7px; padding:9px 11px; background:#171715; color:#fff; font-size:11px; } .ds-app-card button:hover { background:#30302d; } .ds-app-card button:focus-visible { outline:2px solid #181816; outline-offset:4px; } .ds-app-row { display:flex; justify-content:space-between; gap:16px; padding:12px; border:1px solid #deded8; border-bottom:0; font-size:11px; } .ds-app-row:last-child { border-bottom:1px solid #deded8; border-radius:0 0 9px 9px; } .ds-app-row:first-of-type { border-radius:9px 9px 0 0; } .ds-app-row span { color:#565651; }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "description": "Compact two-state filter used inside product simulations.",
+      "html": "<div class=\"ds-segmented\" role=\"group\" aria-label=\"Filtrar catálogo\"><button class=\"ds-active\">Todos</button><button>Requer ação</button></div>",
+      "css": ".ds-segmented { display:inline-flex; padding:3px; border-radius:7px; background:#eeeae6; font-family:'Manrope Variable', sans-serif; } .ds-segmented button { min-height:32px; padding:0 9px; border:0; border-radius:5px; background:transparent; color:#565651; font-size:11px; } .ds-segmented button:hover { color:#171715; } .ds-segmented button.ds-active { background:#fff; color:#171715; } .ds-segmented button:focus-visible { outline:2px solid #181816; outline-offset:2px; }"
+    },
+    {
+      "name": "Assistant Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Read-only assistant composer used to present a simulated conversational action.",
+      "html": "<div class=\"ds-field\"><span>Digite uma pergunta sobre a operação</span><button aria-label=\"Enviar\"><svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m14 7 5 5-5 5\"/></svg></button></div>",
+      "css": ".ds-field { height:42px; display:flex; align-items:center; padding-left:12px; border:1px solid #d6d6d0; border-radius:9px; background:#fff; font-family:'Manrope Variable', sans-serif; } .ds-field span { flex:1; color:#565651; font-size:11px; } .ds-field button { width:29px; height:29px; margin-right:6px; display:grid; place-items:center; border:0; border-radius:6px; background:#1b1b19; color:#fff; } .ds-field button:hover { background:#30302d; } .ds-field button:focus-visible { outline:2px solid #181816; outline-offset:3px; }"
+    },
+    {
+      "name": "Workspace Rail",
+      "kind": "nav",
+      "description": "Persistent icon navigation that becomes a bottom dock on mobile.",
+      "html": "<nav class=\"ds-rail\" aria-label=\"Navegação rápida\"><button class=\"ds-active\" aria-label=\"Visão geral\"><svg aria-hidden=\"true\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><path d=\"M4 13h6V4H4v9Zm10 7h6V11h-6v9ZM4 20h6v-3H4v3Zm10-13h6V4h-6v3Z\"/></svg></button><button aria-label=\"Clientes\"><svg aria-hidden=\"true\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3.5 20c.4-4 2.2-6 5.5-6s5.1 2 5.5 6M15 5.5a3 3 0 0 1 0 5M16 14c2.5.5 3.8 2.5 4 5\"/></svg></button><button aria-label=\"Catálogo\"><svg aria-hidden=\"true\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><path d=\"m12 3 7 4-7 4-7-4 7-4ZM5 12l7 4 7-4M5 17l7 4 7-4\"/></svg></button></nav>",
+      "css": ".ds-rail { display:grid; gap:3px; width:max-content; padding:7px; border:1px solid #dddeda; border-radius:14px; background:#fff; box-shadow:0 20px 45px -33px #000; } .ds-rail button { width:38px; height:38px; display:grid; place-items:center; border:0; border-radius:9px; background:transparent; color:#666660; } .ds-rail button:hover, .ds-rail button.ds-active { background:#191a18; color:#fff; } .ds-rail button:focus-visible { outline:2px solid #181816; outline-offset:3px; }"
+    },
+    {
+      "name": "Workspace Data Table",
+      "kind": "custom",
+      "description": "Border-led operational table with compact metadata and status.",
+      "html": "<div class=\"ds-table\" role=\"table\" aria-label=\"Produtos\"><div class=\"ds-tr ds-th\" role=\"row\"><span>Produto</span><span>NCM</span><span>Status</span></div><button class=\"ds-tr\" role=\"row\"><strong>Motor Elétrico XP-200</strong><span>8501.10.19</span><b>Completo</b></button><button class=\"ds-tr\" role=\"row\"><strong>Válvula industrial VX-80</strong><span>8481.80.99</span><b class=\"ds-warn\">Correção</b></button></div>",
+      "css": ".ds-table { width:100%; min-width:520px; overflow:hidden; color:#5f5f59; font-family:'Manrope Variable', sans-serif; } .ds-tr { width:100%; display:grid; grid-template-columns:1.4fr .75fr .7fr; align-items:center; gap:12px; padding:13px 10px; border:0; border-top:1px solid #e8e8e4; background:transparent; text-align:left; font-size:10px; } button.ds-tr { cursor:pointer; } button.ds-tr:hover { background:#f6f6f2; } .ds-tr strong { color:#21211e; font-size:11px; } .ds-th { border-top:0; background:#f4f4f0; color:#353530; font-size:9px; font-weight:700; } .ds-tr b { justify-self:start; padding:4px 6px; border-radius:5px; background:#1b1b19; color:#fff; font-size:9px; } .ds-tr b.ds-warn { border:1px solid #888880; background:#fff; color:#33332f; } button.ds-tr:focus-visible { outline:2px solid #181816; outline-offset:-2px; }"
+    },
+    {
+      "name": "FAQ Row",
+      "kind": "custom",
+      "description": "Border-led disclosure row for evidence-aware product questions.",
+      "html": "<button class=\"ds-faq\" aria-expanded=\"false\"><span>O PRISMA já integra com o Siscomex?</span><i aria-hidden=\"true\">+</i></button>",
+      "css": ".ds-faq { width:100%; min-height:72px; padding:25px 0; display:flex; justify-content:space-between; align-items:center; border:0; border-top:1px solid #cfcfc9; border-bottom:1px solid #cfcfc9; background:transparent; color:#171715; text-align:left; font:670 16px/1.4 'Manrope Variable', sans-serif; } .ds-faq i { font-style:normal; font-size:21px; font-weight:350; } .ds-faq:hover { color:#565651; } .ds-faq:focus-visible { outline:2px solid #181816; outline-offset:4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Operational Dossier",
+    "overview": "PRISMA feels like a calm, meticulously prepared operations file brought to life. Warm paper, graphite type, fine rules, and oversized plain-language headlines give marketing content editorial authority; compact product simulations then prove that the same visual world can carry dense customs and logistics information without becoming clinical.\n\nThe system is restrained rather than austere. Large fields of quiet space set the marketing pace, while precise line icons, small status marks, clipped application frames, and a dark grounded close supply contrast. The `/app` workspace turns the same visual language into a persistent operating environment: warm canvas, white bordered cards, compact tables and forms, a sticky utility bar, and a floating navigation rail. Product UI is visibly denser than the surrounding narrative, but both share one monochrome palette, one variable sans-serif family, and one rounded geometric language.",
+    "keyCharacteristics": [
+      "Warm monochrome surfaces with graphite text and no decorative accent color.",
+      "Oversized, tightly tracked editorial headlines paired with measured operational detail.",
+      "Spacious marketing sections alternating with credible, compact application demonstrations.",
+      "Thin neutral borders, restrained radii, and selective ambient depth.",
+      "Motion that settles, reveals, or crossfades without delaying comprehension.",
+      "A dense but calm application shell built from cards, metrics, tables, overlays, and contextual assistance."
+    ],
+    "rules": [
+      { "name": "The No Accent Rule", "body": "Do not introduce a chromatic brand color to manufacture emphasis; use contrast, weight, scale, and state instead.", "section": "colors" },
+      { "name": "The Warm Neutral Rule", "body": "Light grays should retain the slightly warm paper character of the existing palette, not drift toward blue-gray software chrome.", "section": "colors" },
+      { "name": "The Scale Before Color Rule", "body": "Establish hierarchy with size, weight, line length, and whitespace before changing foreground value.", "section": "typography" },
+      { "name": "The Product Density Rule", "body": "Marketing copy remains comfortably readable; only the framed product demonstrations descend to the compact 8–13px simulation scale.", "section": "typography" },
+      { "name": "The Narrative Alternation Rule", "body": "Repeated feature sections alternate copy and product evidence on desktop, then become one complete linear story on mobile.", "section": "layout" },
+      { "name": "The Shell Clearance Rule", "body": "Workspace content must reserve physical space for the floating rail on desktop and bottom dock on mobile; navigation may overlay the canvas, never the task controls.", "section": "layout" },
+      { "name": "The Flat-by-Default Rule", "body": "Use borders and neighboring surface values first; reserve shadows for large framed demonstrations and nested focal cards.", "section": "elevation" },
+      { "name": "The Nested Radius Rule", "body": "Inner controls use a visibly smaller radius than their containing card; do not stack equally rounded rectangles.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do use specific logistics terminology and realistic operational structures to make the monochrome world distinctive.",
+      "Do pair generous editorial whitespace with compact, credible product evidence.",
+      "Do preserve complete interactions and content when layouts collapse to one column.",
+      "Do label illustrative data and simulated limitations in visible, readable text.",
+      "Do use line icons with consistent rounded strokes and no filled decorative icon style.",
+      "Do preserve the top bar and rail while workspace task views change.",
+      "Do keep operational tables horizontally scrollable when their real column structure cannot collapse safely."
+    ],
+    "donts": [
+      "Don't add a chromatic accent, gradient, or decorative glow to create artificial energy.",
+      "Don't turn every content block into a floating card; section rhythm and tonal planes should carry the composition.",
+      "Don't use heavy shadows or uniformly large radii across nested elements.",
+      "Don't shrink marketing typography into application density, or enlarge operational labels until the simulations lose credibility.",
+      "Don't hide product demonstrations on mobile; remove only nonessential application chrome.",
+      "Don't present the `/app` entry as authenticated, integrated, or production-backed; the built route is a frontend workspace simulation.",
+      "Don't reuse scroll-scrub motion inside the workspace; task-state changes use short fades, popovers, modals, or the contextual drawer."
+    ]
+  }
+}
