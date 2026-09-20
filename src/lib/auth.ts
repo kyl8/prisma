@@ -1,13 +1,12 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import bcrypt from "bcryptjs";
 
 import NextAuth from "next-auth";
 import { encode as defaultEncode } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import GitHubProvider from "next-auth/providers/github";
 import { v4 as uuid } from "uuid";
-import { login, type UsuarioSemSenha } from "@/../types/user";
+import { login } from "@/../types/user";
 import prisma from "./prisma";
+import bcryptjs from "bcryptjs";
 
 //adicionando o adaptador para o Auth.js
 const adapter = PrismaAdapter(prisma as any);
@@ -26,7 +25,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const user = await prisma.user.findUnique({
           where: {
             email: verifiedCredentials.email,
-            foiDeletado: false,
           },
         });
 
@@ -38,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error("Senha do usuário não identificada");
         }
 
-        if (!bcrypt.compareSync(verifiedCredentials.password, user.password)) {
+        if (!bcryptjs.compareSync(verifiedCredentials.password, user.password)) {
           throw new Error("Senha inválida");
         }
 
