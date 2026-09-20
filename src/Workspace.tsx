@@ -642,10 +642,12 @@ const nav: [View, GlyphName, string][] = [
 function Rail({
   active,
   go,
+  goGlobal,
   openChat,
 }: {
   active: View;
   go: (v: View) => void;
+  goGlobal?: (v: View) => void;
   openChat: () => void;
 }) {
   return (
@@ -655,7 +657,7 @@ function Rail({
           <button
             title={label}
             className={active === id ? "active" : ""}
-            onClick={() => (id === "assistant" ? openChat() : go(id))}
+            onClick={() => (id === "assistant" ? openChat() : (id === "requests" && goGlobal ? goGlobal(id) : go(id)))}
             aria-label={label}
           >
             <Glyph name={icon} />
@@ -3166,6 +3168,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
   const [workspaceError, setWorkspaceError] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
+  const [requestScopeCompanyId, setRequestScopeCompanyId] = useState("");
   useEffect(() => {
     let active = true;
     setWorkspaceLoading(true);
@@ -3183,6 +3186,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
   const selectedProduct = selectedCompany?.products.find((product) => product.id === selectedProductId);
   const unread = notifications.filter((n) => !n.read).length;
   const go = (v: View) => {
+    if (v === "requests") setRequestScopeCompanyId(view === "client" ? selectedCompanyId : "");
     setView(v);
     setNotice(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -3196,7 +3200,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       case "catalog":
         return <RealCatalog company={selectedCompany} companies={workspaceCompanies} go={go} onSelectCompany={setSelectedCompanyId} onSelectProduct={setSelectedProductId} />;
       case "requests":
-        return selectedCompany ? <ClientRequestsInline company={selectedCompany} /> : <RequestsPage />;
+        return requestScopeCompanyId ? <ClientRequestsInline company={workspaceCompanies.find((company) => company.id === requestScopeCompanyId) ?? selectedCompany!} /> : <RequestsPage />;
       case "product":
         return <RealProduct product={selectedProduct} company={selectedCompany} go={go} />;
       case "review":
@@ -3234,7 +3238,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
         onLogout={onLogout}
         unread={unread}
       />
-      <Rail active={view} go={go} openChat={() => setChat(true)} />
+      <Rail active={view} go={go} goGlobal={(target) => { setRequestScopeCompanyId(""); setView(target); setNotice(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} openChat={() => setChat(true)} />
       <main className="ws-main">
         <AnimatePresence mode="wait">
           <motion.div
