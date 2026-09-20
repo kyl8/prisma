@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@10.29.2",
-  "engines": { "node": ">=24 <25" },
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "dev": "pnpm --parallel --filter @prisma/frontend --filter @prisma/backend dev",
     "build": "pnpm --filter @prisma/frontend build && pnpm --filter @prisma/backend build",
@@ -14,5 +16,11 @@
     "db:seed:demo": "pnpm --filter @prisma/backend db:seed:demo-accounts",
     "engine:dev": "pnpm --filter @prisma/catalog-engine start"
   },
-  "devDependencies": { "typescript": "^5.9.3" }
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@neon/config": "^1.7.2",
+    "@neon/env": "^1.4.3"
+  }
 }
