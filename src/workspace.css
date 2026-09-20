@@ -2808,14 +2808,7 @@
 .ws-request-actions .ws-primary {
   margin-left: 8px;
 }
-.client-layout > .ws-card:nth-child(3) {
-  display: none;
-}
-.client-header .ws-primary,
-.client-header + .ws-tabs button:nth-child(2) {
-  display: none;
-}
-.client-layout .ws-card:has(.ws-request-list) {
+.client-header .ws-primary {
   display: none;
 }
 .ws-field select + input[readonly] {
