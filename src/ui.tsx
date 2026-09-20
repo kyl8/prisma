@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { AppNotification } from "./data";
 import { Glyph } from "./icons";
-import { useStoreState } from "./store";
+import { dismissToast, useStoreState } from "./store";
 import { toggleSound, useSoundEnabled } from "./utils/uiSounds";
 
 /** Controle discreto de sons da interface, no padrão dos ícones do header. */
@@ -78,6 +78,11 @@ export function Modal({
 
 export function ToastHost() {
   const { toast } = useStoreState();
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => dismissToast(toast.id), 2500);
+    return () => window.clearTimeout(timer);
+  }, [toast?.id]);
   return (
     <div className="ws-toast-wrap" aria-live="polite">
       <AnimatePresence>
@@ -87,8 +92,8 @@ export function ToastHost() {
             className="ws-toast"
             initial={{ opacity: 0, y: 14, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.97 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, y: 10, scale: 0.97, filter: "blur(3px)" }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           >
             <Glyph name="check" size={15} />
             {toast.text}

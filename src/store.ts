@@ -181,8 +181,17 @@ export function showToast(text: string) {
   if (toastTimer !== null) window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => {
     state.toast = null;
+    toastTimer = null;
     emit();
-  }, 2800);
+  }, 2400);
+  emit();
+}
+
+export function dismissToast(id?: number) {
+  if (id !== undefined && state.toast?.id !== id) return;
+  if (toastTimer !== null) window.clearTimeout(toastTimer);
+  toastTimer = null;
+  state.toast = null;
   emit();
 }
 

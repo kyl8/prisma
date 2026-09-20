@@ -171,6 +171,23 @@
   background: #fff;
   color: #252522;
   border: 1px solid #d6d6d0;
+  cursor: pointer;
+  transition: transform .18s cubic-bezier(.16, 1, .3, 1), border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.ws-quiet:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #989890;
+  background: #f7f7f4;
+  box-shadow: 0 7px 15px -12px rgba(0, 0, 0, .42);
+}
+.ws-quiet:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+.ws-quiet:disabled,
+.ws-primary:disabled {
+  cursor: not-allowed;
+  opacity: .48;
 }
 .ws-icon {
   min-width: 40px;
@@ -2807,10 +2824,21 @@
   color: #7c1d16;
 }
 .ws-danger:disabled { opacity: .45; cursor: not-allowed; }
+.ws-danger--solid {
+  background: #9c2f23;
+  border-color: #9c2f23;
+  color: #fff;
+}
+.ws-danger--solid:hover:not(:disabled) {
+  background: #7c1d16;
+  border-color: #7c1d16;
+  color: #fff;
+}
 .ws-request-created {
   text-align: center;
   display: grid;
   justify-items: center;
+  min-width: 0;
 }
 .ws-request-check {
   display: grid;
@@ -2826,8 +2854,12 @@
   margin: 0 0 8px;
   font-size: 17px;
   letter-spacing: -0.02em;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .ws-request-link {
+  width: 100%;
+  min-width: 0;
   margin: 18px 0;
   padding: 10px 16px;
   border: 1px dashed #c9c9c3;
@@ -2836,6 +2868,9 @@
   font-size: 12px;
   color: #33332f;
   letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: left;
 }
 .ws-request-meta {
   display: grid;
@@ -2858,6 +2893,13 @@
 }
 .ws-request-meta strong {
   font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.ws-cancel-request p:first-child {
+  margin: 0 0 8px;
+  color: #252522;
+  font-size: 14px;
+  line-height: 1.55;
 }
 .ws-access {
   display: grid;
@@ -2976,6 +3018,16 @@
   border-color: #bd5b50;
   background: #321c1a;
   color: #ffd0c9;
+}
+[data-theme="dark"] .ws-danger--solid {
+  background: #c06a5f;
+  border-color: #c06a5f;
+  color: #171715;
+}
+[data-theme="dark"] .ws-danger--solid:hover:not(:disabled) {
+  background: #e39388;
+  border-color: #e39388;
+  color: #171715;
 }
 [data-theme="dark"] .ws-request-meta span {
   color: #999990;
@@ -3117,6 +3169,31 @@
   }
   .ws-request-meta {
     grid-template-columns: 1fr 1fr;
+  }
+  .ws-modal-backdrop {
+    align-items: end;
+    padding: 12px;
+  }
+  .ws-modal {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+    padding: 20px 17px;
+  }
+  .ws-request-link {
+    margin: 14px 0;
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+  .ws-request-created .ws-card-copy {
+    max-width: 34ch;
+  }
+  .ws-request-created .ws-modal-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .ws-request-created .ws-modal-actions > button {
+    width: 100%;
   }
   /* Mapeamento de importação empilha */
   .ws-map {

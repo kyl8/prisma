@@ -851,6 +851,20 @@ function RequestsPage() {
   );
 }
 
+function formatRequestDate(value?: string) {
+  if (!value) return "—";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "—"
+    : new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+}
+
+function requestInputDate(value?: string) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(date);
+}
+
 function RequestsCard() {
   const [open, setOpen] = useState(false);
   const [created, setCreated] = useState<(CatalogRequest & { url?: string }) | null>(null);
@@ -875,7 +889,8 @@ function RequestsCard() {
   const [backendError, setBackendError] = useState<string | null>(null);
   const [copiedRequestId, setCopiedRequestId] = useState<string | null>(null);
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
-  const [actionRequestId, setActionRequestId] = useState<string | null>(null);
+  const [actionState, setActionState] = useState<{ id: string; kind: "link" | "cancel" } | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<any | null>(null);
   const activeCompany = backendCompanies[0];
   useEffect(() => {
     listCatalogCompanies().then((companies) => {
@@ -928,7 +943,7 @@ function RequestsCard() {
     setCreated(null);
     setRecipientName(request.recipientName);
     setRecipientEmail(request.recipientEmail);
-    setDeadline(request.expiresAt.slice(0, 10));
+    setDeadline(requestInputDate(request.expiresAt));
     setMessage(request.message ?? "");
     setKind(request.kind);
     setSelectedIds(request.productIds ?? []);
@@ -981,7 +996,7 @@ function RequestsCard() {
   };
 
   const sendLink = async (request: any) => {
-    setActionRequestId(request.id);
+    setActionState({ id: request.id, kind: "link" });
     try {
       const fresh = await reissueCatalogRequest(request.id);
       const link = `${window.location.origin}/r/${fresh.token}/catalogo`;
@@ -994,22 +1009,22 @@ function RequestsCard() {
     } catch (error) {
       setBackendError(error instanceof Error ? error.message : "Não foi possível gerar o link.");
     } finally {
-      setActionRequestId(null);
+      setActionState(null);
     }
   };
 
   const cancelRequest = async (request: any) => {
-    if (!window.confirm(`Cancelar a solicitação para ${request.recipientName}? O link deixará de aceitar preenchimentos.`)) return;
-    setActionRequestId(request.id);
+    setActionState({ id: request.id, kind: "cancel" });
     try {
       const cancelled = await cancelBackendCatalogRequest(request.id);
       setBackendRequests((items) => items.map((item) => item.id === request.id ? { ...item, status: cancelled.status } : item));
+      setCancelTarget(null);
       showToast("Solicitação cancelada. O link não está mais ativo.");
       playUISound("warning");
     } catch (error) {
       setBackendError(error instanceof Error ? error.message : "Não foi possível cancelar a solicitação.");
     } finally {
-      setActionRequestId(null);
+      setActionState(null);
     }
   };
 
@@ -1041,7 +1056,7 @@ function RequestsCard() {
               <span>
                 {request.productIds.length} produto
                 {request.productIds.length > 1 ? "s" : ""} · {request.recipientName}{" "}
-                · vence {request.expiresAt.split("-").reverse().join("/")}
+                · vence {formatRequestDate(request.expiresAt)}
               </span>
               <p>{request.recipientEmail}</p>
             </div>
@@ -1050,23 +1065,23 @@ function RequestsCard() {
               <button
                 className="ws-quiet"
                 onClick={() => openEditRequest(request)}
-                disabled={actionRequestId === request.id || ["submitted", "completed", "expired", "cancelled"].includes(request.status)}
+                disabled={Boolean(actionState) || ["submitted", "completed", "expired", "cancelled"].includes(request.status)}
               >
                 Editar
               </button>
               <button
                 className={copiedRequestId === request.id ? "ws-primary" : "ws-quiet"}
                 onClick={() => sendLink(request)}
-                disabled={actionRequestId === request.id || ["expired", "cancelled"].includes(request.status)}
+                disabled={Boolean(actionState) || ["expired", "cancelled"].includes(request.status)}
               >
-                {actionRequestId === request.id ? "Gerando..." : copiedRequestId === request.id ? "Link copiado" : "Enviar link"}
+                {actionState?.id === request.id && actionState?.kind === "link" ? "Gerando..." : copiedRequestId === request.id ? "Link copiado" : "Enviar link"}
               </button>
               <button
                 className="ws-danger"
-                onClick={() => cancelRequest(request)}
-                disabled={actionRequestId === request.id || ["submitted", "completed", "expired", "cancelled"].includes(request.status)}
+                onClick={() => setCancelTarget(request)}
+                disabled={Boolean(actionState) || ["submitted", "completed", "expired", "cancelled"].includes(request.status)}
               >
-                Cancelar
+                {actionState?.id === request.id && actionState?.kind === "cancel" ? "Cancelando..." : "Cancelar"}
               </button>
             </div>
           </div>
@@ -1076,6 +1091,7 @@ function RequestsCard() {
         open={open}
         onClose={close}
         title={created ? "Solicitação criada" : editingRequest ? "Editar solicitação" : "Solicitar informações"}
+        wide={Boolean(created)}
       >
         {!created ? (
           <>
@@ -1252,7 +1268,7 @@ function RequestsCard() {
               </div>
               <div>
                 <span>Prazo</span>
-                <strong>{created.expiresAt.split("-").reverse().join("/")}</strong>
+                <strong>{formatRequestDate(created.expiresAt)}</strong>
               </div>
               <div>
                 <span>Produtos</span>
@@ -1306,6 +1322,22 @@ function RequestsCard() {
             </button>
           </div>
         )}
+      </Modal>
+      <Modal
+        open={Boolean(cancelTarget)}
+        onClose={() => !actionState && setCancelTarget(null)}
+        title="Cancelar solicitação"
+      >
+        <div className="ws-cancel-request">
+          <p>O link enviado para <strong>{cancelTarget?.recipientName}</strong> deixará de aceitar preenchimentos imediatamente.</p>
+          <p className="ws-card-copy">Essa ação não apaga os dados já salvos, mas encerra esta solicitação.</p>
+          <div className="ws-modal-actions">
+            <button className="ws-quiet" disabled={Boolean(actionState)} onClick={() => setCancelTarget(null)}>Voltar</button>
+            <button className="ws-danger ws-danger--solid" disabled={Boolean(actionState)} onClick={() => cancelTarget && void cancelRequest(cancelTarget)}>
+              {actionState?.kind === "cancel" ? "Cancelando..." : "Confirmar cancelamento"}
+            </button>
+          </div>
+        </div>
       </Modal>
     </>
   );

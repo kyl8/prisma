@@ -26,15 +26,14 @@ import { playUISound } from "./utils/uiSounds";
 import "./importer.css";
 
 function fmtDate(iso: string): string {
-  try {
-    return new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  } catch {
-    return iso;
-  }
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 export function CatalogRequestFlow({ token }: { token: string }) {
@@ -222,38 +221,49 @@ function CatalogBatchForm({
     Object.fromEntries(products.map((product) => [product.id, Object.fromEntries(product.attributes.map((attribute) => [attribute.key, attribute.value]))])),
   );
   const [showErrors, setShowErrors] = useState(false);
+  const [page, setPage] = useState(0);
   const completenessOf = (product: Product) => {
     const value = Number.parseInt(product.completeness ?? "", 10);
     return Number.isFinite(value) ? value : productCompleteness(product);
   };
-  const editableProducts = products;
-  const requiredMissing = editableProducts.flatMap((product) => product.attributes.filter((attribute) => attribute.required && !(draft[product.id]?.[attribute.key] ?? "").trim()).map((attribute) => `${product.id}:${attribute.key}`));
+  const product = products[page];
+  const requiredMissing = products.flatMap((item) => item.attributes.filter((attribute) => attribute.required && !(draft[item.id]?.[attribute.key] ?? "").trim()).map((attribute) => `${item.id}:${attribute.key}`));
   const update = (productId: string, key: string, value: string) => setDraft((current) => ({ ...current, [productId]: { ...current[productId], [key]: value } }));
   const submit = () => {
     if (requiredMissing.length) {
       setShowErrors(true);
+      const firstMissingProduct = requiredMissing[0].split(":")[0];
+      setPage(Math.max(0, products.findIndex((item) => item.id === firstMissingProduct)));
       showToast("Preencha os campos obrigatórios antes de enviar para revisão.");
       playUISound("warning");
       return;
     }
     void onSubmit(draft);
   };
+  if (!product) return null;
+  const fields = product.attributes;
   return <div className="req-batch">
     <div className="req-batch-head">
-      <div><h1>Complete o catálogo</h1><p>{products.length} produto{products.length > 1 ? "s" : ""} incluídos nesta solicitação.</p></div>
-      <span className="imp-mini"><strong>{editableProducts.length}</strong> no catálogo</span>
+      <div><h1>Complete o catálogo</h1><p>Preencha cada produto e avance quando estiver pronto.</p></div>
+      <span className="imp-mini"><strong>{page + 1} de {products.length}</strong> produtos</span>
     </div>
-    {products.map((product) => {
-      const fields = product.attributes;
-      return <section className="req-batch-product" key={product.id}>
+    <AnimatePresence mode="wait">
+      <motion.section className="req-batch-product" key={product.id} initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}>
         <div className="req-form-product"><div><h2>{product.name}</h2><p>{product.sku} · NCM {product.ncm}</p></div><ImpMiniStatus percent={completenessOf(product)} /></div>
-        {fields.length === 0 ? <p className="req-product-complete"><Glyph name="check" size={15} /> Este produto já está completo. Nenhuma informação adicional é necessária.</p> : fields.map((attribute) => {
+        {fields.length === 0 ? <p className="req-product-complete"><Glyph name="check" size={15} /> Este produto já está completo. Nenhuma informação adicional é necessária.</p> : <div className="req-fields-grid">{fields.map((attribute) => {
           const hasError = showErrors && attribute.required && !(draft[product.id]?.[attribute.key] ?? "").trim();
           return <label className={hasError ? "req-field is-error" : "req-field"} key={attribute.key}><span>{attribute.label}{attribute.required ? " *" : ""}</span>{attribute.note && <small>{attribute.note}</small>}<input value={draft[product.id]?.[attribute.key] ?? ""} onChange={(event) => update(product.id, attribute.key, event.target.value)} placeholder={`Adicionar ${attribute.label.toLowerCase()}`} /></label>;
-        })}
-      </section>;
-    })}
-    <div className="req-actions req-batch-actions"><button className="button button--light" disabled={sending} onClick={() => void onSave(draft)}>{sending ? "Salvando…" : "Salvar rascunho"}</button><button className="button button--dark" disabled={sending} onClick={submit}>{sending ? "Enviando…" : "Enviar para revisão"} <Glyph name="arrow" size={16} /></button></div>
+        })}</div>}
+      </motion.section>
+    </AnimatePresence>
+    <div className="req-batch-actions">
+      <div className="req-pagination" aria-label="Navegação entre produtos">
+        <button className="button button--light" disabled={sending || page === 0} onClick={() => setPage((current) => current - 1)}>Anterior</button>
+        <span>{page + 1} / {products.length}</span>
+        <button className="button button--light" disabled={sending || page === products.length - 1} onClick={() => setPage((current) => current + 1)}>Próximo produto</button>
+      </div>
+      <div className="req-actions"><button className="button button--light" disabled={sending} onClick={() => void onSave(draft)}>{sending ? "Salvando…" : "Salvar rascunho"}</button><button className="button button--dark" disabled={sending} onClick={submit}>{sending ? "Enviando…" : "Enviar para revisão"} <Glyph name="arrow" size={16} /></button></div>
+    </div>
   </div>;
 }
 
