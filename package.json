@@ -14,6 +14,7 @@
     "db:reset": "prisma migrate reset",
     "db:seed": "prisma db seed",
     "db:seed:test-company": "tsx scripts/seed-test-company.ts",
+    "db:seed:test-company-2": "tsx scripts/seed-second-company.ts",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate"
   },
