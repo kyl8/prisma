@@ -183,10 +183,11 @@ function RealCatalog({ company, go, onSelectProduct }: { company?: WorkspaceComp
   const [ncm, setNcm] = useState("Todas");
   const [completeness, setCompleteness] = useState("Todas");
   if (!company) return <div className="ws-empty">Nenhum cliente vinculado. Crie uma solicitação para associar uma empresa e acessar seu catálogo.</div>;
-  const complete = company.products.filter((product) => product.attributes.every((attribute) => attribute.value.trim())).length;
-  const submittedProducts = company.products.filter((product) => product.status === "sent_for_review").length;
-  const productFilter = company.products.filter((product) => product.name.toLowerCase().includes(search.toLowerCase()) || product.sku.toLowerCase().includes(search.toLowerCase()) || product.ncm.includes(search)).filter((product) => status === "Todos" || dispatcherStatusLabel(product) === status).filter((product) => ncm === "Todas" || product.ncm === ncm).filter((product) => completeness === "Todas" || (completeness === "100%" ? productCompleteness(product) === 100 : productCompleteness(product) !== 100));
-  const ncmOptions = ["Todas", ...new Set(company.products.map((product) => product.ncm))];
+  const products = (company.products ?? []).map((product) => ({ ...product, attributes: product.attributes ?? [] }));
+  const complete = products.filter((product) => product.attributes.every((attribute) => (attribute.value ?? "").trim())).length;
+  const submittedProducts = products.filter((product) => product.status === "sent_for_review").length;
+  const productFilter = products.filter((product) => (product.name ?? "").toLowerCase().includes(search.toLowerCase()) || (product.sku ?? "").toLowerCase().includes(search.toLowerCase()) || (product.ncm ?? "").includes(search)).filter((product) => status === "Todos" || dispatcherStatusLabel(product) === status).filter((product) => ncm === "Todas" || product.ncm === ncm).filter((product) => completeness === "Todas" || (completeness === "100%" ? productCompleteness(product) === 100 : productCompleteness(product) !== 100));
+  const ncmOptions = ["Todas", ...new Set(products.map((product) => product.ncm).filter(Boolean))];
   return <>
     <Breadcrumb>Clientes / {company.name} / {company.cnpj}</Breadcrumb>
     <div className="ws-page-title"><div><h1>{company.name}</h1><p>{company.cnpj} · Catálogo vinculado</p></div><div><button className="ws-primary" onClick={() => go("create-product")}><Glyph name="plus" /> Novo produto</button></div></div>
