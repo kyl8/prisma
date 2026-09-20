@@ -899,7 +899,9 @@ function RequestsCard() {
       if (companies[0]) {
         setRecipientName(companies[0].contactName ?? "");
         setRecipientEmail(companies[0].contactEmail ?? "");
-        setCorrectionProductId(companies[0].products[0]?.id ?? "");
+        const firstProduct = companies[0].products[0];
+        setCorrectionProductId(firstProduct?.id ?? "");
+        setCorrectionFieldKey(firstProduct?.attributes[0]?.key ?? "");
         setSelectedIds(companies[0].products.slice(0, 2).map((product) => product.id));
       }
     }).catch((error) => setBackendError(error.message));
@@ -1203,32 +1205,28 @@ function RequestsCard() {
               <>
                 <label className="ws-field">
                   <span>Produto</span>
-                  <select
+                  <Dropdown
+                    options={atlasProducts.map((product) => [product.name, product.id] as const)}
                     value={correctionProductId}
-                    onChange={(e) => setCorrectionProductId(e.target.value)}
-                  >
-                    {atlasProducts.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(productId) => {
+                      const selectedProduct = atlasProducts.find((product) => product.id === productId);
+                      setCorrectionProductId(productId);
+                      setCorrectionFieldKey(selectedProduct?.attributes[0]?.key ?? "");
+                    }}
+                    ariaLabel="Selecionar produto para correção"
+                  />
                 </label>
                 <label className="ws-field">
                   <span>Campo</span>
-                  <select
-                    value={correctionFieldKey}
-                    onChange={(e) => setCorrectionFieldKey(e.target.value)}
-                  >
-                    {(
-                      atlasProducts.find((p) => p.id === correctionProductId)
+                  <Dropdown
+                    options={(
+                      atlasProducts.find((product) => product.id === correctionProductId)
                         ?.attributes ?? []
-                    ).map((a) => (
-                      <option key={a.key} value={a.key}>
-                        {a.label}
-                      </option>
-                    ))}
-                  </select>
+                    ).map((attribute) => [attribute.label, attribute.key] as const)}
+                    value={correctionFieldKey}
+                    onChange={setCorrectionFieldKey}
+                    ariaLabel="Selecionar campo para correção"
+                  />
                 </label>
                 <label className="ws-field">
                   <span>Observação</span>
@@ -1639,16 +1637,12 @@ function Product({
         </p>
         <label className="ws-field">
           <span>Campo</span>
-          <select
+          <Dropdown
+            options={correctionFields.map((field) => [field.label, field.key] as const)}
             value={corrField}
-            onChange={(e) => setCorrField(e.target.value)}
-          >
-            {correctionFields.map((f) => (
-              <option key={f.key} value={f.key}>
-                {f.label}
-              </option>
-            ))}
-          </select>
+            onChange={setCorrField}
+            ariaLabel="Selecionar campo para correção"
+          />
         </label>
         <label className="ws-field">
           <span>Observação</span>
