@@ -177,7 +177,7 @@ function RealClientDetail({ company, go }: { company?: WorkspaceCompany; go: (v:
   </>;
 }
 
-function RealCatalog({ company, go, onSelectProduct }: { company?: WorkspaceCompany; go: (v: View) => void; onSelectProduct: (productId: string) => void }) {
+function RealCatalog({ company, companies, go, onSelectCompany, onSelectProduct }: { company?: WorkspaceCompany; companies: WorkspaceCompany[]; go: (v: View) => void; onSelectCompany: (companyId: string) => void; onSelectProduct: (productId: string) => void }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("Todos");
   const [ncm, setNcm] = useState("Todas");
@@ -190,6 +190,7 @@ function RealCatalog({ company, go, onSelectProduct }: { company?: WorkspaceComp
   const ncmOptions = ["Todas", ...new Set(products.map((product) => product.ncm).filter(Boolean))];
   return <>
     <Breadcrumb>Clientes / {company.name} / {company.cnpj}</Breadcrumb>
+    <label className="ws-field ws-catalog-company-picker"><span>Importador</span><select value={company.id} onChange={(event) => onSelectCompany(event.target.value)}>{companies.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.cnpj}</option>)}</select></label>
     <div className="ws-page-title"><div><h1>{company.name}</h1><p>{company.cnpj} · Catálogo vinculado</p></div><div><button className="ws-primary" onClick={() => go("create-product")}><Glyph name="plus" /> Novo produto</button></div></div>
     <div className="ws-metrics-grid five"><Metric value={company.totalProducts} label="Produtos" /><Metric value={complete} label="Completos" /><Metric value={company.pendingCount} label="Com pendências" /><Metric value={submittedProducts} label="Em revisão" /><Metric value={0} label="Com erro" /></div>
     <Card title="Catálogo de Produtos" className="ws-table-card"><div className="ws-tools"><label><Glyph name="search" /><input placeholder="Buscar produto, código ou NCM" value={search} onChange={(event) => setSearch(event.target.value)} /></label><Dropdown label="Status" options={["Todos", "Aguardando importador", "Aguardando despachante", "Correção solicitada", "Aprovado"]} value={status} onChange={setStatus} /><Dropdown label="NCM" options={ncmOptions} value={ncm} onChange={setNcm} /><Dropdown label="Completude" options={[["Todas", "Todas"], ["100% (Completo)", "100%"], ["< 100% (Incompleto)", "incomplete"]]} value={completeness} onChange={setCompleteness} />
@@ -3188,7 +3189,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       case "client":
         return <RealClientDetail company={selectedCompany} go={go} />;
       case "catalog":
-        return <RealCatalog company={selectedCompany} go={go} onSelectProduct={setSelectedProductId} />;
+        return <RealCatalog company={selectedCompany} companies={workspaceCompanies} go={go} onSelectCompany={setSelectedCompanyId} onSelectProduct={setSelectedProductId} />;
       case "requests":
         return <RequestsPage />;
       case "product":
