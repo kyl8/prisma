@@ -1,7 +1,11 @@
 import assert from "node:assert/strict"
 import { after, before, test } from "node:test"
 
-import { createPrismaServer } from "../src/server.js"
+import {
+  createPrismaServer,
+  DEFAULT_PORT,
+  resolvePort,
+} from "../src/server.js"
 
 const server = createPrismaServer()
 let baseUrl
@@ -29,4 +33,16 @@ test("serves the default PRISMA policy", async () => {
 test("returns health status", async () => {
   const response = await fetch(`${baseUrl}/health`)
   assert.deepEqual(await response.json(), { status: "ok" })
+})
+
+test("uses port 3000 by default and accepts a configured port", () => {
+  assert.equal(DEFAULT_PORT, 3000)
+  assert.equal(resolvePort(undefined), 3000)
+  assert.equal(resolvePort("8080"), 8080)
+})
+
+test("rejects invalid ports", () => {
+  assert.throws(() => resolvePort("0"), RangeError)
+  assert.throws(() => resolvePort("invalid"), RangeError)
+  assert.throws(() => resolvePort("65536"), RangeError)
 })

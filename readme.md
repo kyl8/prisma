@@ -13,7 +13,10 @@ branches `architecture` ou `frontend`.
 npm start
 ```
 
-O serviço usa a porta `3001` por padrão e expõe:
+O serviço usa a porta `3000` por padrão. Para escolher outra porta, defina a
+variável de ambiente `PORT` antes de iniciar, por exemplo `PORT=8080 npm start`.
+
+Endpoints:
 
 - `GET /health`
 - `GET /api/prisma/policy`
