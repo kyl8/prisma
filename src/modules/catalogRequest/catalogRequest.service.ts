@@ -341,6 +341,20 @@ export async function getCatalogRequestReview(requestId: string, userId: string)
   return { id: request.id, status: request.status, products: request.products.map(({ product }) => ({ id: product.id, name: product.name, sku: product.code, attributes: product.fields.map((field) => ({ key: field.id, label: field.label, value: request.responses.find((response) => response.productId === product.id && response.fieldKey === field.id)?.value ?? "", status: request.responses.find((response) => response.productId === product.id && response.fieldKey === field.id)?.status ?? "pending" })) })) };
 }
 
+export async function rejectCatalogRequest(requestId: string, note: string, userId: string) {
+  const owned = await ownedRequest(requestId, userId);
+  if (owned.status !== "submitted") throw new CatalogRequestError("REQUEST_NOT_READY", "A solicitação ainda não está aguardando revisão.", 409);
+  const reason = note.trim();
+  if (reason.length < 5) throw new CatalogRequestError("INVALID_NOTE", "Informe o motivo da recusa.", 422);
+  await prisma.$transaction(async (tx) => {
+    await tx.catalogRequestResponse.updateMany({ where: { requestId }, data: { status: "needs_correction", note: reason, resolvedAt: null } });
+    await tx.catalogRequest.update({ where: { id: requestId }, data: { status: "in_progress", submittedAt: null } });
+    await recordActivity(tx, { companyId: owned.companyId, actorUserId: userId, type: "CORRECTION_REQUESTED", visibility: "SHARED", entityType: "catalog_request", entityId: requestId, requestId, metadata: { note: reason } });
+    await createNotification(tx, { userId: owned.createdById, action: "Correção solicitada", description: reason, entityType: "catalog_request", entityId: requestId });
+  });
+  return { id: requestId, status: "in_progress", note: reason };
+}
+
 /** Removes the request, its responses and product links, and invalidates its bearer link. */
 export async function deleteCatalogRequest(requestId: string, userId: string) {
   const request = await ownedRequest(requestId, userId);
