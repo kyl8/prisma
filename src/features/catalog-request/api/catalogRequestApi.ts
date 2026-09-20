@@ -125,3 +125,7 @@ export async function approveBackendCatalogRequest(requestId: string) {
 export async function getCatalogRequestReview(requestId: string) {
   return request<{ id: string; status: string; products: { id: string; name: string; sku: string; attributes: { key: string; label: string; value: string; status: string }[] }[] }>(`/api/catalog-requests/${encodeURIComponent(requestId)}`);
 }
+
+export async function rejectBackendCatalogRequest(requestId: string, note: string) {
+  return request<{ id: string; status: "in_progress"; note: string }>(`/api/catalog-requests/${encodeURIComponent(requestId)}/reject`, { method: "POST", body: JSON.stringify({ note }) });
+}

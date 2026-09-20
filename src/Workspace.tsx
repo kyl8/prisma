@@ -25,7 +25,7 @@ import {
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
-import { approveBackendCatalogRequest, cancelBackendCatalogRequest, createBackendCatalogRequest, createWorkspaceCompany, deleteBackendCatalogRequest, getCatalogRequestReview, listCatalogCompanies, listCompanyCatalogRequests, listWorkspaceCompanies, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany, type WorkspaceCompany } from "./features/catalog-request/api/catalogRequestApi";
+import { approveBackendCatalogRequest, cancelBackendCatalogRequest, createBackendCatalogRequest, createWorkspaceCompany, deleteBackendCatalogRequest, getCatalogRequestReview, listCatalogCompanies, listCompanyCatalogRequests, listWorkspaceCompanies, rejectBackendCatalogRequest, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany, type WorkspaceCompany } from "./features/catalog-request/api/catalogRequestApi";
 import { ActivityPage } from "./features/activity/ActivityPage";
 import "./workspace.css";
 
@@ -1025,6 +1025,7 @@ function RequestsCard() {
   const [cancelTarget, setCancelTarget] = useState<any | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [reviewRequest, setReviewRequest] = useState<any | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
   const activeCompany = backendCompanies[0];
   useEffect(() => {
     listCatalogCompanies().then((companies) => {
@@ -1193,7 +1194,20 @@ function RequestsCard() {
   };
 
   const openReview = async (request: any) => {
-    try { setReviewRequest(await getCatalogRequestReview(request.id)); } catch (error) { setBackendError(error instanceof Error ? error.message : "Não foi possível carregar as respostas."); }
+    try { setRejectNote(""); setReviewRequest(await getCatalogRequestReview(request.id)); } catch (error) { setBackendError(error instanceof Error ? error.message : "Não foi possível carregar as respostas."); }
+  };
+
+  const rejectRequest = async () => {
+    if (!reviewRequest) return;
+    setActionState({ id: reviewRequest.id, kind: "cancel" });
+    try {
+      const rejected = await rejectBackendCatalogRequest(reviewRequest.id, rejectNote);
+      setBackendRequests((items) => items.map((item) => item.id === reviewRequest.id ? { ...item, status: rejected.status } : item));
+      setReviewRequest(null);
+      showToast("Correção solicitada ao importador.");
+      playUISound("warning");
+    } catch (error) { setBackendError(error instanceof Error ? error.message : "Não foi possível recusar a solicitação."); }
+    finally { setActionState(null); }
   };
 
   return (
@@ -1496,9 +1510,11 @@ function RequestsCard() {
           </div>
         )}
       </Modal>
-      <Modal open={Boolean(reviewRequest)} onClose={() => setReviewRequest(null)} title="Respostas do importador" wide>
+      <Modal open={Boolean(reviewRequest)} onClose={() => setReviewRequest(null)} title="Revisar respostas do importador" wide>
         <p className="ws-card-copy">Confira os valores enviados antes de aplicar ao catálogo oficial.</p>
         {reviewRequest?.products?.map((product: any) => <Card key={product.id} title={product.name}><div className="ws-data-sections">{product.attributes.map((attribute: any) => <div className="ws-data-section" key={attribute.key}><h3>{attribute.label}</h3><div><strong>{attribute.value || "Não informado"}</strong><Status>{attribute.value ? "Respondido" : "Pendente"}</Status></div></div>)}</div></Card>)}
+        <label className="ws-field"><span>Motivo da recusa (obrigatório apenas se recusar)</span><textarea value={rejectNote} onChange={(event) => setRejectNote(event.target.value)} placeholder="Explique o que precisa ser corrigido pelo importador." /></label>
+        <div className="ws-form-actions"><button className="ws-danger ws-danger--solid" disabled={!rejectNote.trim() || Boolean(actionState)} onClick={() => void rejectRequest()}>Recusar e solicitar correção</button><button className="ws-primary" disabled={Boolean(actionState)} onClick={() => { if (reviewRequest) void approveRequest(reviewRequest); setReviewRequest(null); }}>Aprovar e aplicar ao catálogo</button></div>
       </Modal>
       <Modal
         open={Boolean(cancelTarget)}
