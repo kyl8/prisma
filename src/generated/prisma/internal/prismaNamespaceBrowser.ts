@@ -63,7 +63,10 @@ export const ModelName = {
   Record: 'Record',
   ProdFieldResp: 'ProdFieldResp',
   Identifier: 'Identifier',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  CatalogRequest: 'CatalogRequest',
+  CatalogRequestProduct: 'CatalogRequestProduct',
+  CatalogRequestResponse: 'CatalogRequestResponse'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -232,6 +235,51 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const CatalogRequestScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  companyId: 'companyId',
+  createdById: 'createdById',
+  recipientName: 'recipientName',
+  recipientEmail: 'recipientEmail',
+  status: 'status',
+  kind: 'kind',
+  message: 'message',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  startedAt: 'startedAt',
+  submittedAt: 'submittedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type CatalogRequestScalarFieldEnum = (typeof CatalogRequestScalarFieldEnum)[keyof typeof CatalogRequestScalarFieldEnum]
+
+
+export const CatalogRequestProductScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  productId: 'productId'
+} as const
+
+export type CatalogRequestProductScalarFieldEnum = (typeof CatalogRequestProductScalarFieldEnum)[keyof typeof CatalogRequestProductScalarFieldEnum]
+
+
+export const CatalogRequestResponseScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  productId: 'productId',
+  fieldKey: 'fieldKey',
+  value: 'value',
+  status: 'status',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type CatalogRequestResponseScalarFieldEnum = (typeof CatalogRequestResponseScalarFieldEnum)[keyof typeof CatalogRequestResponseScalarFieldEnum]
 
 
 export const SortOrder = {
