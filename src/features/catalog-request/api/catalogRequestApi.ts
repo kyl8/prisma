@@ -76,9 +76,22 @@ export async function submitCatalogRequest(token: string) {
 }
 
 export type BackendCompany = { id: string; name: string; cnpj: string; contactName?: string; contactEmail?: string; products: Product[] };
+export type WorkspaceCompany = BackendCompany & {
+  totalProducts: number; completeProducts: number; completeness: number; pendingCount: number; awaitingImporter: number; inReview: number; pendingResponses: number;
+  requests: { id: string; status: string; kind: string; recipientName: string; recipientEmail: string; createdAt: string; productCount: number }[];
+  activity: { id: string; type: string; createdAt: string; actorName: string; productName: string | null; requestId: string | null }[];
+};
 
 export async function listCatalogCompanies() {
   return request<BackendCompany[]>("/api/companies");
+}
+
+export async function listWorkspaceCompanies() {
+  return request<WorkspaceCompany[]>("/api/workspace/companies");
+}
+
+export async function createWorkspaceCompany(input: { enterprise: string; cnpj: string; name: string; email: string }) {
+  return request<WorkspaceCompany>("/api/workspace/companies", { method: "POST", body: JSON.stringify(input) });
 }
 
 export async function listCompanyCatalogRequests(companyId: string) {

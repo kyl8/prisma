@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { CatalogRequest } from "./data";
+import { CatalogRequest, type Product } from "./data";
 import { Glyph, GlyphName } from "./icons";
 import {
   addCompany,
@@ -25,7 +25,7 @@ import {
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
-import { cancelBackendCatalogRequest, createBackendCatalogRequest, deleteBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany } from "./features/catalog-request/api/catalogRequestApi";
+import { cancelBackendCatalogRequest, createBackendCatalogRequest, createWorkspaceCompany, deleteBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, listWorkspaceCompanies, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany, type WorkspaceCompany } from "./features/catalog-request/api/catalogRequestApi";
 import { ActivityPage } from "./features/activity/ActivityPage";
 import "./workspace.css";
 
@@ -81,6 +81,30 @@ const clients = [
   ],
 ];
 
+type WorkspaceActivityItem = WorkspaceCompany["activity"][number];
+
+function activityTitle(type: string) {
+  const titles: Record<string, string> = {
+    REQUEST_CREATED: "Solicitação criada", REQUEST_STARTED: "Preenchimento iniciado", REQUEST_SUBMITTED: "Informações enviadas para revisão",
+    PRODUCT_UPDATED: "Produto atualizado", PRODUCT_SUBMITTED: "Produto enviado para revisão", PRODUCT_APPROVED: "Produto aprovado",
+    CORRECTION_REQUESTED: "Correção solicitada", CORRECTION_RESOLVED: "Correção respondida", REMINDER_SENT: "Lembrete enviado",
+    CATALOG_IMPORTED: "Catálogo importado", CATALOG_INCONSISTENCY_FOUND: "Inconsistências encontradas",
+  };
+  return titles[type] ?? "Atividade registrada";
+}
+
+function RealActivityList({ items, go }: { items: WorkspaceActivityItem[]; go: (v: View) => void }) {
+  return <div className="ws-timeline">
+    {items.map((item) => <button key={item.id} onClick={() => go(item.requestId ? "requests" : item.productName ? "catalog" : "activity")}>
+      <time>{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</time>
+      <span />
+      <p><strong>{item.actorName} · {activityTitle(item.type)}</strong>{item.productName ?? "Catálogo do cliente"}</p>
+      <Glyph name="arrow" />
+    </button>)}
+    {items.length === 0 && <p className="ws-empty">Ainda não há atividade registrada para este cliente.</p>}
+  </div>;
+}
+
 
 function Status({ children }: { children: string }) {
   return (
@@ -91,6 +115,100 @@ function Status({ children }: { children: string }) {
     </span>
   );
 }
+
+function RealOverview({ companies, loading, error, go }: { companies: WorkspaceCompany[]; loading: boolean; error: string; go: (v: View) => void }) {
+  const products = companies.flatMap((company) => company.products);
+  const pending = companies.reduce((count, company) => count + company.pendingCount, 0);
+  const review = companies.reduce((count, company) => count + company.inReview, 0);
+  const complete = companies.filter((company) => company.totalProducts > 0 && company.completeness === 100).length;
+  const activity = companies.flatMap((company) => company.activity.map((event) => ({ ...event, companyName: company.name }))).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
+  return <>
+    <div className="ws-page-title"><div><h1>Visão geral</h1><p>Resumo das empresas e do trabalho registrado no sistema.</p></div><button className="ws-primary" onClick={() => go("add-client")}><Glyph name="plus" /> Adicionar cliente</button></div>
+    {error && <p className="ws-empty" role="alert">{error}</p>}
+    <div className="ws-layout overview-layout">
+      <Card title="Prioridades de hoje" className="ws-card--large">
+        <div className="ws-priority"><span><Glyph name="alert" /></span><div><strong>{pending} produtos em solicitações abertas</strong><p>{loading ? "Atualizando informações…" : `${companies.length} clientes vinculados à sua conta.`}</p></div><button onClick={() => go("requests")}>Ver solicitações <Glyph name="arrow" /></button></div>
+        <div className="ws-priority"><span><Glyph name="file" /></span><div><strong>{review} solicitações enviadas para revisão</strong><p>Contagem calculada das solicitações persistidas.</p></div><button onClick={() => go("requests")}>Revisar agora <Glyph name="arrow" /></button></div>
+      </Card>
+      <div className="ws-metrics-panel"><Metric value={loading ? "—" : companies.length} label="Clientes ativos" /><Metric value={loading ? "—" : pending} label="Produtos em solicitações abertas" /><Metric value={loading ? "—" : complete} label="Catálogos completos" /></div>
+      <Card title="Atividade recente" className="ws-card--timeline"><div className="ws-timeline">{activity.map((event) => <button key={event.id} onClick={() => go(event.requestId ? "requests" : "activity")}><time>{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(event.createdAt))}</time><span /><p><strong>{event.actorName} · {activityTitle(event.type)}</strong>{event.productName ?? event.companyName}</p><Glyph name="arrow" /></button>)}{!loading && !activity.length && <p className="ws-empty">Ainda não há eventos registrados.</p>}</div></Card>
+      <RequestsCard />
+    </div>
+    <span hidden>{products.length}</span>
+  </>;
+}
+
+function RealClients({ companies, loading, error, go, onSelect }: { companies: WorkspaceCompany[]; loading: boolean; error: string; go: (v: View) => void; onSelect: (companyId: string) => void }) {
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("Todos");
+  const filtered = companies.filter((company) => {
+    const matchText = `${company.name} ${company.cnpj}`.toLowerCase().includes(search.toLowerCase());
+    const label = company.pendingCount ? "Em andamento" : company.inReview ? "Aguardando revisão" : "Sem pendências";
+    return matchText && (status === "Todos" || status === label);
+  });
+  const pendingCompanies = companies.filter((company) => company.pendingCount > 0).length;
+  const waitingImporter = companies.reduce((sum, company) => sum + company.awaitingImporter, 0);
+  const completed = companies.filter((company) => company.totalProducts > 0 && company.completeness === 100).length;
+  return <>
+    <div className="ws-page-title"><div><h1>Clientes</h1><p>Empresas vinculadas ao seu acesso e seus catálogos.</p></div><button className="ws-primary" onClick={() => go("add-client")}><Glyph name="plus" /> Adicionar cliente</button></div>
+    {error && <p className="ws-empty" role="alert">{error}</p>}
+    <div className="ws-metrics-grid"><Metric value={loading ? "—" : companies.length} label="Clientes ativos" /><Metric value={loading ? "—" : pendingCompanies} label="Clientes com pendências" /><Metric value={loading ? "—" : waitingImporter} label="Solicitações aguardando importador" /><Metric value={loading ? "—" : completed} label="Catálogos completos" /></div>
+    <Card title="Clientes" className="ws-table-card"><div className="ws-tools"><label><Glyph name="search" /><input placeholder="Buscar empresa ou CNPJ" value={search} onChange={(event) => setSearch(event.target.value)} /></label><Dropdown label="Status" options={["Todos", "Em andamento", "Aguardando revisão", "Sem pendências"]} value={status} onChange={setStatus} /></div>
+      <div className="ws-table"><div className="ws-tr ws-th client-cols"><span>Empresa</span><span>CNPJ principal</span><span>Produtos</span><span>Completude</span><span>Pendências</span><span>Próxima ação</span><span>Atualização</span><span>Status</span><span /></div>
+        {filtered.map((company) => { const label = company.pendingCount ? "Em andamento" : company.inReview ? "Aguardando revisão" : "Sem pendências"; const last = company.activity[0]?.createdAt; return <button className="ws-tr client-cols" key={company.id} onClick={() => { onSelect(company.id); go("client"); }}><strong>{company.name}</strong><span>{company.cnpj}</span><span>{company.totalProducts} produtos</span><span>{company.completeness}%</span><span>{company.pendingCount}</span><span>{company.pendingCount ? "Importador" : company.inReview ? "Despachante" : "—"}</span><span>{last ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(last)) : "—"}</span><span><Status>{label}</Status></span><Glyph name="arrow" /></button>; })}
+        {!loading && filtered.length === 0 && <p className="ws-empty">{companies.length ? "Nenhum cliente corresponde aos filtros." : "Nenhum cliente está vinculado à sua conta. Crie uma solicitação para associar uma empresa."}</p>}
+        {loading && <p className="ws-empty">Carregando clientes do banco…</p>}
+      </div>
+    </Card>
+  </>;
+}
+
+function RealClientDetail({ company, go }: { company?: WorkspaceCompany; go: (v: View) => void }) {
+  if (!company) return <div className="ws-empty">Selecione um cliente para ver os detalhes.</div>;
+  return <>
+    <Breadcrumb>Clientes / {company.name}</Breadcrumb>
+    <div className="ws-page-title client-header"><div><h1>{company.name}</h1><p>{company.cnpj} · Contato: {company.contactName ?? "—"}</p></div><div><button className="ws-primary" onClick={() => go("requests")}>Solicitações</button></div></div>
+    <div className="ws-tabs"><button className="active">Visão geral</button><button onClick={() => go("catalog")}>Catálogo</button><button onClick={() => go("requests")}>Solicitações</button><button onClick={() => go("activity")}>Atividade</button></div>
+    <div className="ws-layout client-layout"><Card title="Visão geral do cliente" className="ws-card--large"><div className="ws-stat-rows"><Metric value={company.totalProducts} label="Total de produtos" /><Metric value={`${company.completeness}%`} label="Completude geral" /><Metric value={company.pendingCount} label="Produtos em solicitações abertas" /><Metric value={company.inReview} label="Solicitações em revisão" /></div></Card>
+      <Card title="Quem precisa agir"><div className="ws-who"><span>IM</span><p><strong>Importador</strong><small>{company.awaitingImporter} solicitações abertas</small></p><button onClick={() => go("requests")}>Ver</button></div><div className="ws-who"><span>DE</span><p><strong>Despachante</strong><small>{company.inReview} aguardando revisão</small></p><button onClick={() => go("requests")}>Ver</button></div></Card>
+      <Card title="Catálogo" className="ws-card--wide"><button className="ws-quiet" onClick={() => go("catalog")}>Abrir catálogo · {company.totalProducts} produtos <Glyph name="arrow" /></button></Card>
+      <Card title="Atividade recente" className="ws-card--wide"><RealActivityList items={company.activity} go={go} /></Card>
+    </div>
+  </>;
+}
+
+function RealCatalog({ company, go, onSelectProduct }: { company?: WorkspaceCompany; go: (v: View) => void; onSelectProduct: (productId: string) => void }) {
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("Todos");
+  const [ncm, setNcm] = useState("Todas");
+  const [completeness, setCompleteness] = useState("Todas");
+  if (!company) return <div className="ws-empty">Nenhum cliente vinculado. Crie uma solicitação para associar uma empresa e acessar seu catálogo.</div>;
+  const complete = company.products.filter((product) => product.attributes.every((attribute) => attribute.value.trim())).length;
+  const submittedProducts = company.products.filter((product) => product.status === "sent_for_review").length;
+  const productFilter = company.products.filter((product) => product.name.toLowerCase().includes(search.toLowerCase()) || product.sku.toLowerCase().includes(search.toLowerCase()) || product.ncm.includes(search)).filter((product) => status === "Todos" || dispatcherStatusLabel(product) === status).filter((product) => ncm === "Todas" || product.ncm === ncm).filter((product) => completeness === "Todas" || (completeness === "100%" ? productCompleteness(product) === 100 : productCompleteness(product) !== 100));
+  const ncmOptions = ["Todas", ...new Set(company.products.map((product) => product.ncm))];
+  return <>
+    <Breadcrumb>Clientes / {company.name} / {company.cnpj}</Breadcrumb>
+    <div className="ws-page-title"><div><h1>{company.name}</h1><p>{company.cnpj} · Catálogo vinculado</p></div><div><button className="ws-primary" onClick={() => go("create-product")}><Glyph name="plus" /> Novo produto</button></div></div>
+    <div className="ws-metrics-grid five"><Metric value={company.totalProducts} label="Produtos" /><Metric value={complete} label="Completos" /><Metric value={company.pendingCount} label="Com pendências" /><Metric value={submittedProducts} label="Em revisão" /><Metric value={0} label="Com erro" /></div>
+    <Card title="Catálogo de Produtos" className="ws-table-card"><div className="ws-tools"><label><Glyph name="search" /><input placeholder="Buscar produto, código ou NCM" value={search} onChange={(event) => setSearch(event.target.value)} /></label><Dropdown label="Status" options={["Todos", "Aguardando importador", "Aguardando despachante", "Correção solicitada", "Aprovado"]} value={status} onChange={setStatus} /><Dropdown label="NCM" options={ncmOptions} value={ncm} onChange={setNcm} /><Dropdown label="Completude" options={[["Todas", "Todas"], ["100% (Completo)", "100%"], ["< 100% (Incompleto)", "incomplete"]]} value={completeness} onChange={setCompleteness} />
+      </div><Table onProduct={(product) => { if (!product) return; onSelectProduct(product.id); go("product"); }} search="" backendProducts={productFilter} /></Card>
+  </>;
+}
+
+function RealProduct({ product, company, go }: { product?: Product; company?: WorkspaceCompany; go: (v: View) => void }) {
+  if (!product || !company) return <div className="ws-empty">Selecione um produto do catálogo para ver seus dados.</div>;
+  const filled = product.attributes.filter((attribute) => attribute.value.trim()).length;
+  const completeness = product.attributes.length ? Math.round(filled / product.attributes.length * 100) : 0;
+  return <>
+    <Breadcrumb>Clientes / {company.name} / Catálogo / {product.name}</Breadcrumb>
+    <div className="ws-page-title"><div><h1>{product.name}</h1><p>{product.sku} · NCM {product.ncm}</p></div><div><Status>{dispatcherStatusLabel(product)}</Status></div></div>
+    <div className="ws-layout"><Card title="Dados do produto" className="ws-card--large"><p className="ws-card-copy">Informações persistidas no catálogo de {company.name}.</p>
+      <div className="ws-data-sections">{product.attributes.map((attribute) => <div className="ws-data-section" key={attribute.key}><h3>{attribute.label}</h3><div><span>Valor</span><strong>{attribute.value || "Não informado"}</strong><Status>{attribute.value ? "Preenchido" : "Pendente"}</Status></div></div>)}</div>
+    </Card><div><Card title="Completude"><div className="ws-big-number">{completeness}<span>% completo</span></div><p className="ws-card-copy">{filled} de {product.attributes.length} campos preenchidos.</p></Card><Card title="Cliente"><strong>{company.name}</strong><p className="ws-card-copy">{company.cnpj}</p><button className="ws-quiet" onClick={() => go("catalog")}>Voltar ao catálogo</button></Card></div></div>
+  </>;
+}
+
 function Metric({ value, label }: { value: string | number; label: string }) {
   return (
     <div className="ws-metric">
@@ -122,7 +240,7 @@ function Card({
     </section>
   );
 }
-function Breadcrumb({ children }: { children: string }) {
+function Breadcrumb({ children }: { children: React.ReactNode }) {
   return <div className="ws-breadcrumb">{children}</div>;
 }
 
@@ -219,6 +337,7 @@ const timelineEvents = [
 function Table({
   onProduct,
   onClient,
+  backendProducts,
   pending = false,
   search = "",
   statusFilter = "Todos",
@@ -227,8 +346,9 @@ function Table({
   pendingFilters,
   companyId,
 }: {
-  onProduct?: () => void;
+  onProduct?: (product?: Product) => void;
   onClient?: () => void;
+  backendProducts?: Product[];
   pending?: boolean;
   search?: string;
   statusFilter?: string;
@@ -243,8 +363,8 @@ function Table({
   const { products: storeProducts } = useStoreState();
 
   const productList = useMemo(
-    () => (companyId ? productsForCompany(companyId) : storeProducts),
-    [storeProducts, companyId],
+    () => backendProducts ?? (companyId ? productsForCompany(companyId) : storeProducts),
+    [backendProducts, storeProducts, companyId],
   );
 
   const filteredProducts = useMemo(() => {
@@ -304,7 +424,7 @@ function Table({
         {rows.map((row) => (
           <button
             className="ws-tr pending-cols"
-            onClick={onProduct}
+            onClick={() => onProduct?.()}
             key={row.pendencia}
           >
             <span>{row.pendencia}</span>
@@ -345,7 +465,7 @@ function Table({
           <div className="ws-row-wrap" key={row.id}>
             <div
               className="ws-tr product-cols"
-              onClick={onProduct}
+              onClick={() => onProduct?.(row)}
               role="button"
               tabIndex={0}
             >
@@ -2652,14 +2772,18 @@ function Assistant({ go }: { go: (v: View) => void }) {
 function FormPage({
   go,
   type,
+  onClientCreated,
 }: {
   go: (v: View) => void;
   type: "client" | "product";
+  onClientCreated?: (company: WorkspaceCompany) => void;
 }) {
   const [success, setSuccess] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   const [accessEmail, setAccessEmail] = useState("mariana@atlas.com.br");
+  const [clientSaving, setClientSaving] = useState(false);
+  const [clientError, setClientError] = useState("");
   const isProduct = type === "product";
 
   if (success) {
@@ -2674,7 +2798,7 @@ function FormPage({
               ? "Produto salvo com sucesso."
               : "Cliente criado com sucesso."}
           </h2>
-          <p>O fluxo demonstrativo foi concluído.</p>
+          <p>{isProduct ? "As informações do produto foram salvas." : "Cliente criado no banco. O envio de convite ainda não está configurado."}</p>
           <div>
             <button
               className="ws-primary"
@@ -2684,7 +2808,7 @@ function FormPage({
             </button>
           </div>
         </Card>
-        {!isProduct && (
+        {!isProduct && false && (
           <Card title="Acesso do importador">
             <div className="ws-access">
               <div className="ws-access-row">
@@ -2768,13 +2892,33 @@ function FormPage({
               básicas de edição.
             </p>
           </Card>
+          {clientError && <p className="ws-empty" role="alert">{clientError}</p>}
           <div className="ws-form-actions">
             <button className="ws-quiet" onClick={() => go("clients")}>
               Cancelar
             </button>
             <button
               className="ws-primary"
-              onClick={() => {
+              disabled={clientSaving}
+              onClick={async () => {
+                const valueFor = (prefix: string) => Object.entries(form).find(([label]) => label.toLowerCase().startsWith(prefix))?.[1]?.trim() ?? "";
+                const enterprise = valueFor("raz");
+                const cnpj = valueFor("cnpj");
+                const name = Object.entries(form).find(([label]) => label.toLowerCase() === "nome")?.[1]?.trim() ?? "";
+                const email = valueFor("e-mail").toLowerCase();
+                if (!enterprise || !cnpj || !name || !email) { setClientError("Preencha razão social, CNPJ, nome e e-mail do responsável."); return; }
+                setClientError("");
+                setClientSaving(true);
+                try {
+                  const company = await createWorkspaceCompany({ enterprise, cnpj, name, email });
+                  onClientCreated?.(company);
+                  setAccessEmail(email);
+                  setSuccess(true);
+                  playUISound("success");
+                } catch (cause) {
+                  setClientError(cause instanceof Error ? cause.message : "Não foi possível criar o cliente.");
+                } finally { setClientSaving(false); }
+                return;
                 // Armazena a empresa no mock associando companyId, CNPJ e e-mail.
                 addCompany({
                   name: form["Razão social"] || "Nova Importadora Ltda.",
@@ -2787,7 +2931,7 @@ function FormPage({
                 playUISound("success");
               }}
             >
-              Criar cliente <Glyph name="arrow" />
+              {clientSaving ? "Criando..." : "Criar cliente"} <Glyph name="arrow" />
             </button>
           </div>
         </div>
@@ -2963,6 +3107,26 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
     [notice, setNotice] = useState(false);
   const { notifications } = useStoreState();
   const currentUser = useCurrentUser();
+  const [workspaceCompanies, setWorkspaceCompanies] = useState<WorkspaceCompany[]>([]);
+  const [workspaceLoading, setWorkspaceLoading] = useState(true);
+  const [workspaceError, setWorkspaceError] = useState("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState("");
+  useEffect(() => {
+    let active = true;
+    setWorkspaceLoading(true);
+    listWorkspaceCompanies().then((companies) => {
+      if (!active) return;
+      setWorkspaceCompanies(companies);
+      setSelectedCompanyId((current) => companies.some((company) => company.id === current) ? current : companies[0]?.id ?? "");
+      setWorkspaceError("");
+    }).catch((cause: Error) => {
+      if (active) setWorkspaceError(cause.message || "Não foi possível carregar os clientes do banco.");
+    }).finally(() => { if (active) setWorkspaceLoading(false); });
+    return () => { active = false; };
+  }, []);
+  const selectedCompany = workspaceCompanies.find((company) => company.id === selectedCompanyId);
+  const selectedProduct = selectedCompany?.products.find((product) => product.id === selectedProductId);
   const unread = notifications.filter((n) => !n.read).length;
   const go = (v: View) => {
     setView(v);
@@ -2972,15 +3136,15 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
   const page = (() => {
     switch (view) {
       case "clients":
-        return <Clients go={go} />;
+        return <RealClients companies={workspaceCompanies} loading={workspaceLoading} error={workspaceError} go={go} onSelect={setSelectedCompanyId} />;
       case "client":
-        return <ClientDetail go={go} />;
+        return <RealClientDetail company={selectedCompany} go={go} />;
       case "catalog":
-        return <Catalog go={go} />;
+        return <RealCatalog company={selectedCompany} go={go} onSelectProduct={setSelectedProductId} />;
       case "requests":
         return <RequestsPage />;
       case "product":
-        return <Product go={go} />;
+        return <RealProduct product={selectedProduct} company={selectedCompany} go={go} />;
       case "review":
         return <Product go={go} review />;
       case "pending":
@@ -3000,11 +3164,11 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       case "assistant":
         return <Assistant go={go} />;
       case "add-client":
-        return <FormPage go={go} type="client" />;
+        return <FormPage go={go} type="client" onClientCreated={(company) => { setSelectedCompanyId(company.id); setWorkspaceCompanies((current) => [...current, company].sort((a, b) => a.name.localeCompare(b.name))); }} />;
       case "create-product":
         return <FormPage go={go} type="product" />;
       default:
-        return <Overview go={go} />;
+        return <RealOverview companies={workspaceCompanies} loading={workspaceLoading} error={workspaceError} go={go} />;
     }
   })();
   return (
