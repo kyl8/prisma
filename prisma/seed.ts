@@ -12,6 +12,7 @@ const prisma = new PrismaClient({
 
 import fs from "fs";
 import path from "path";
+import bcrypt from "bcryptjs";
 
 async function readJson(filename: string) {
   const filePath = path.join(__dirname, "seed", filename);
@@ -23,8 +24,13 @@ async function main() {
   console.log("🌱 Iniciando o seed...");
 
   const users = await readJson("users.json");
-  for (const curso of users) {
-    await prisma.user.create({ data: curso });
+  for (const user of users) {
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    await prisma.user.create({ data: {
+      email: user.email,
+      name: user.name,
+      password: user.password
+    } });
   }
   console.log(`✅ ${users.length} users criados.`);
 }

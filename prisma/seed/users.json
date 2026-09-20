@@ -1,4 +1,17 @@
 [
-    {"email":"email@gmail.com", "name": "Paulo"},
-    {"email":"pedro@gmail.com", "name": "Pedro"}
+  {
+    "name": "João Silva",
+    "email": "joao.silva@example.com",
+    "password": "senha123"
+  },
+  {
+    "name": "Maria Souza",
+    "email": "maria.souza@example.com",
+    "password": "senha123"
+  },
+  {
+    "name": "Pedro Santos",
+    "email": "pedro.santos@example.com",
+    "password": "senha123"
+  }
 ]
