@@ -581,6 +581,7 @@ function Overview({ go }: { go: (v: View) => void }) {
         <Card title="Atividade recente" className="ws-card--timeline">
           <Timeline go={go} />
         </Card>
+        <RequestsCard />
       </div>
     </>
   );
