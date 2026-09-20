@@ -25,7 +25,7 @@ import {
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
-import { cancelBackendCatalogRequest, createBackendCatalogRequest, createWorkspaceCompany, deleteBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, listWorkspaceCompanies, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany, type WorkspaceCompany } from "./features/catalog-request/api/catalogRequestApi";
+import { approveBackendCatalogRequest, cancelBackendCatalogRequest, createBackendCatalogRequest, createWorkspaceCompany, deleteBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, listWorkspaceCompanies, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany, type WorkspaceCompany } from "./features/catalog-request/api/catalogRequestApi";
 import { ActivityPage } from "./features/activity/ActivityPage";
 import "./workspace.css";
 
@@ -1179,6 +1179,18 @@ function RequestsCard() {
     }
   };
 
+  const approveRequest = async (request: any) => {
+    setActionState({ id: request.id, kind: "link" });
+    try {
+      const approved = await approveBackendCatalogRequest(request.id);
+      setBackendRequests((items) => items.map((item) => item.id === request.id ? { ...item, status: approved.status } : item));
+      showToast("Informações aprovadas e aplicadas ao catálogo.");
+      playUISound("success");
+    } catch (error) {
+      setBackendError(error instanceof Error ? error.message : "Não foi possível aprovar a solicitação.");
+    } finally { setActionState(null); }
+  };
+
   return (
     <>
       <Card
@@ -1242,6 +1254,7 @@ function RequestsCard() {
               >
                 {actionState?.id === request.id && actionState?.kind === "delete" ? "Excluindo..." : "Excluir"}
               </button>
+              {request.status === "submitted" && <button className="ws-primary" onClick={() => void approveRequest(request)} disabled={Boolean(actionState)}>{actionState?.id === request.id ? "Aprovando..." : "Aprovar"}</button>}
             </div>
           </div>
         ))}

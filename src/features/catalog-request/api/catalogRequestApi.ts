@@ -117,3 +117,7 @@ export async function cancelBackendCatalogRequest(requestId: string) {
 export async function deleteBackendCatalogRequest(requestId: string) {
   return request<{ id: string }>(`/api/catalog-requests/${encodeURIComponent(requestId)}?permanent=true`, { method: "DELETE" });
 }
+
+export async function approveBackendCatalogRequest(requestId: string) {
+  return request<{ id: string; status: "completed" }>(`/api/catalog-requests/${encodeURIComponent(requestId)}`, { method: "POST" });
+}
