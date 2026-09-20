@@ -1,18 +1,14 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 
 import NextAuth from "next-auth";
-import { encode as defaultEncode } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import { v4 as uuid } from "uuid";
 import { login } from "@/../types/user";
 import prisma from "./prisma";
 import bcryptjs from "bcryptjs";
 
-//adicionando o adaptador para o Auth.js
-const adapter = PrismaAdapter(prisma as any);
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter,
+  adapter: PrismaAdapter(prisma as any),
+  session: { strategy: "jwt" },
   providers: [
     Credentials({
       credentials: {
@@ -20,40 +16,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        const verifiedCredentials = login.parse(credentials);
+        const parsedCredentials = login.safeParse(credentials);
+        if (!parsedCredentials.success) return null;
 
         const user = await prisma.user.findUnique({
           where: {
-            email: verifiedCredentials.email,
+            email: parsedCredentials.data.email,
           },
         });
 
-        if (!user) {
-          throw new Error("Usuário inválido");
-        }
-
-        if (!user.password) {
-          throw new Error("Senha do usuário não identificada");
-        }
-
-        if (!bcryptjs.compareSync(verifiedCredentials.password, user.password)) {
-          throw new Error("Senha inválida");
-        }
+        if (!user?.password) return null;
+        if (!(await bcryptjs.compare(parsedCredentials.data.password, user.password))) return null;
 
         return user;
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
-      if (account?.provider === "credentials") {
-        token.credentials = true;
-      }
+    async jwt({ token, user }) {
+      if (user?.id) token.sub = user.id;
       return token;
     },
-    async session({ session, user }) {
-      if (session.user && user) {
-        (session.user as typeof session.user & { id: string }).id = user.id;
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        (session.user as typeof session.user & { id: string }).id = token.sub;
       }
       return session;
     },
@@ -71,30 +57,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       if (url.startsWith(baseUrl)) return url;
       return baseUrl;
-    },
-  },
-  jwt: {
-    encode: async function (params) {
-      if (params.token?.credentials) {
-        const sessionToken = uuid();
-
-        if (!params.token.sub) {
-          throw new Error("No user ID found in token");
-        }
-
-        const createdSession = await adapter?.createSession?.({
-          sessionToken: sessionToken,
-          userId: params.token.sub,
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        });
-
-        if (!createdSession) {
-          throw new Error("Failed to create session");
-        }
-
-        return sessionToken;
-      }
-      return defaultEncode(params);
     },
   },
 });

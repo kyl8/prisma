@@ -29,7 +29,8 @@ export async function signInWithCredentials(email: string, password: string) {
   const { csrfToken } = await csrfResponse.json();
   const body = new URLSearchParams({ csrfToken, email, password, callbackUrl: `${window.location.origin}/app`, redirect: "false" });
   const response = await fetch(`${API_BASE}/api/auth/callback/credentials`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
-  if (!response.ok) throw new Error("E-mail ou senha inválidos.");
+  const authError = response.url ? new URL(response.url).searchParams.get("error") : null;
+  if (!response.ok || authError) throw new Error("E-mail ou senha inválidos.");
   return request<{ id: string; name: string | null; email: string; role: "importer" | "dispatcher" }>("/api/me");
 }
 
