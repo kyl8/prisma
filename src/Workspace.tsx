@@ -25,7 +25,7 @@ import {
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
-import { cancelBackendCatalogRequest, createBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany } from "./features/catalog-request/api/catalogRequestApi";
+import { cancelBackendCatalogRequest, createBackendCatalogRequest, deleteBackendCatalogRequest, listCatalogCompanies, listCompanyCatalogRequests, reissueCatalogRequest, updateBackendCatalogRequest, type BackendCompany } from "./features/catalog-request/api/catalogRequestApi";
 import { ActivityPage } from "./features/activity/ActivityPage";
 import "./workspace.css";
 
@@ -889,8 +889,9 @@ function RequestsCard() {
   const [backendError, setBackendError] = useState<string | null>(null);
   const [copiedRequestId, setCopiedRequestId] = useState<string | null>(null);
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
-  const [actionState, setActionState] = useState<{ id: string; kind: "link" | "cancel" } | null>(null);
+  const [actionState, setActionState] = useState<{ id: string; kind: "link" | "cancel" | "delete" } | null>(null);
   const [cancelTarget, setCancelTarget] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const activeCompany = backendCompanies[0];
   useEffect(() => {
     listCatalogCompanies().then((companies) => {
@@ -1028,6 +1029,22 @@ function RequestsCard() {
     }
   };
 
+  const deleteRequest = async (request: any) => {
+    setActionState({ id: request.id, kind: "delete" });
+    try {
+      await deleteBackendCatalogRequest(request.id);
+      setBackendRequests((items) => items.filter((item) => item.id !== request.id));
+      setDeleteTarget(null);
+      showToast("Solicitação excluída definitivamente.");
+      playUISound("warning");
+    } catch (error: any) {
+      showToast(error?.message ?? "Não foi possível excluir a solicitação.");
+      playUISound("error");
+    } finally {
+      setActionState(null);
+    }
+  };
+
   return (
     <>
       <Card
@@ -1082,6 +1099,14 @@ function RequestsCard() {
                 disabled={Boolean(actionState) || ["submitted", "completed", "expired", "cancelled"].includes(request.status)}
               >
                 {actionState?.id === request.id && actionState?.kind === "cancel" ? "Cancelando..." : "Cancelar"}
+              </button>
+              <button
+                className="ws-danger ws-danger--quiet"
+                title="Excluir definitivamente"
+                onClick={() => setDeleteTarget(request)}
+                disabled={Boolean(actionState)}
+              >
+                {actionState?.id === request.id && actionState?.kind === "delete" ? "Excluindo..." : "Excluir"}
               </button>
             </div>
           </div>
@@ -1335,6 +1360,22 @@ function RequestsCard() {
             <button className="ws-quiet" disabled={Boolean(actionState)} onClick={() => setCancelTarget(null)}>Voltar</button>
             <button className="ws-danger ws-danger--solid" disabled={Boolean(actionState)} onClick={() => cancelTarget && void cancelRequest(cancelTarget)}>
               {actionState?.kind === "cancel" ? "Cancelando..." : "Confirmar cancelamento"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        open={Boolean(deleteTarget)}
+        onClose={() => !actionState && setDeleteTarget(null)}
+        title="Excluir solicitação"
+      >
+        <div className="ws-cancel-request">
+          <p>Excluir a solicitação enviada para <strong>{deleteTarget?.recipientName}</strong>?</p>
+          <p className="ws-card-copy">Esta ação remove a solicitação, os dados respondidos e o link de acesso. Ela não pode ser desfeita.</p>
+          <div className="ws-modal-actions">
+            <button className="ws-quiet" disabled={Boolean(actionState)} onClick={() => setDeleteTarget(null)}>Voltar</button>
+            <button className="ws-danger ws-danger--solid" disabled={Boolean(actionState)} onClick={() => deleteTarget && void deleteRequest(deleteTarget)}>
+              {actionState?.kind === "delete" ? "Excluindo..." : "Excluir definitivamente"}
             </button>
           </div>
         </div>

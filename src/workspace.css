@@ -2823,7 +2823,18 @@
   background: #fff6f5;
   color: #7c1d16;
 }
+.ws-danger:focus-visible {
+  outline: 2px solid #171715;
+  outline-offset: 2px;
+}
 .ws-danger:disabled { opacity: .45; cursor: not-allowed; }
+.ws-danger--quiet {
+  border-color: transparent;
+  color: #8b3027;
+}
+.ws-danger--quiet:hover:not(:disabled) {
+  border-color: #e1d7d3;
+}
 .ws-danger--solid {
   background: #9c2f23;
   border-color: #9c2f23;
@@ -3018,6 +3029,13 @@
   border-color: #bd5b50;
   background: #321c1a;
   color: #ffd0c9;
+}
+[data-theme="dark"] .ws-danger:focus-visible {
+  outline-color: #f4f4f0;
+}
+[data-theme="dark"] .ws-danger--quiet {
+  border-color: transparent;
+  color: #efaaa0;
 }
 [data-theme="dark"] .ws-danger--solid {
   background: #c06a5f;
