@@ -184,6 +184,12 @@ export async function listCompanies(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: { include: { companyAccesses: { select: { companyId: true } } } } } });
   if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem consultar empresas.", 403);
   const companyIds = user.custbrok.companyAccesses.map((access) => access.companyId);
+  const legacyCompanyIds = await prisma.catalogRequest.findMany({ where: { createdById: userId }, distinct: ["companyId"], select: { companyId: true } });
+  const missingAccess = legacyCompanyIds.map((request) => request.companyId).filter((companyId) => !companyIds.includes(companyId));
+  if (missingAccess.length) {
+    await prisma.customsBrokerCompanyAccess.createMany({ data: missingAccess.map((companyId) => ({ customsBrokerId: user.custbrok!.id, companyId })), skipDuplicates: true });
+    companyIds.push(...missingAccess);
+  }
   const companies = await prisma.importer.findMany({ where: { id: { in: companyIds } }, include: { user: true, products: { include: { fields: true, records: { orderBy: { createdAt: "desc" }, include: { fieldResp: true } } } } }, orderBy: { user: { enterprise: "asc" } } });
   return companies.map((company) => ({
     id: company.id,
@@ -193,6 +199,56 @@ export async function listCompanies(userId: string) {
     contactEmail: company.user.email,
     products: company.products.map((product) => mapProduct(product)),
   }));
+}
+
+export async function listWorkspaceCompanies(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: true } });
+  if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem consultar clientes.", 403);
+  const requestCompanies = await prisma.catalogRequest.findMany({ where: { createdById: userId }, distinct: ["companyId"], select: { companyId: true } });
+  if (requestCompanies.length) await prisma.customsBrokerCompanyAccess.createMany({ data: requestCompanies.map(({ companyId }) => ({ customsBrokerId: user.custbrok!.id, companyId })), skipDuplicates: true });
+  const companies = await prisma.importer.findMany({
+    where: { brokerAccesses: { some: { customsBrokerId: user.custbrok.id } } },
+    include: {
+      user: { select: { enterprise: true, cnpj: true, name: true, email: true } },
+      products: { include: { fields: true, records: { orderBy: { createdAt: "desc" }, include: { fieldResp: true } }, catalogRequestResponses: true } },
+      catalogRequests: { include: { _count: { select: { products: true } } }, orderBy: { createdAt: "desc" } },
+      activityEvents: { where: { visibility: { in: ["SHARED", "DISPATCHER_ONLY", "IMPORTER_ONLY"] } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 5, include: { actor: { select: { name: true } }, product: { select: { name: true } } } },
+    },
+    orderBy: { user: { enterprise: "asc" } },
+  });
+  return companies.map((company) => {
+    const products = company.products.map((product) => mapProduct(product));
+    const totalProducts = products.length;
+    const complete = products.filter((product) => product.attributes.every((attribute: { value: string }) => attribute.value.trim())).length;
+    const pendingRequests = company.catalogRequests.filter((request) => ["waiting", "in_progress"].includes(request.status));
+    const submittedRequests = company.catalogRequests.filter((request) => request.status === "submitted");
+    const pendingResponses = company.products.reduce((count, product) => count + product.catalogRequestResponses.filter((response) => response.status === "pending" && response.value.trim()).length, 0);
+    return {
+      id: company.id, name: company.user.enterprise, cnpj: company.user.cnpj, contactName: company.user.name, contactEmail: company.user.email,
+      products, totalProducts, completeProducts: complete, completeness: totalProducts ? Math.round(complete / totalProducts * 100) : 0,
+      pendingCount: pendingRequests.reduce((count, request) => count + request._count.products, 0), awaitingImporter: pendingRequests.length,
+      inReview: submittedRequests.length, pendingResponses,
+      requests: company.catalogRequests.map((request) => ({ id: request.id, status: request.status, kind: request.kind, recipientName: request.recipientName, recipientEmail: request.recipientEmail, createdAt: request.createdAt.toISOString(), productCount: request._count.products })),
+      activity: company.activityEvents.map((event) => ({ id: event.id, type: event.type, createdAt: event.createdAt.toISOString(), actorName: event.actor?.name ?? "Importador", productName: event.product?.name ?? null, requestId: event.requestId })),
+    };
+  });
+}
+
+export async function createWorkspaceCompany(input: { enterprise: string; cnpj: string; name: string; email: string }, userId: string) {
+  const broker = await prisma.customsbroker.findUnique({ where: { userId } });
+  if (!broker) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem adicionar clientes.", 403);
+  const existing = await prisma.user.findUnique({ where: { email: input.email } });
+  if (existing) throw new CatalogRequestError("EMAIL_IN_USE", "Este e-mail já pertence a uma conta.", 409);
+  const digits = input.cnpj.replace(/\D/g, "");
+  if (digits.length !== 14) throw new CatalogRequestError("INVALID_CNPJ", "Informe um CNPJ com 14 dígitos.", 422);
+  const existingCnpj = await prisma.user.findFirst({ where: { cnpj: input.cnpj } });
+  if (existingCnpj) throw new CatalogRequestError("CNPJ_IN_USE", "Já existe uma empresa cadastrada com este CNPJ.", 409);
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({ data: { email: input.email, name: input.name, enterprise: input.enterprise, cnpj: input.cnpj } });
+    const company = await tx.importer.create({ data: { userId: user.id } });
+    await tx.customsBrokerCompanyAccess.create({ data: { customsBrokerId: broker.id, companyId: company.id } });
+    return { id: company.id, name: user.enterprise, cnpj: user.cnpj, contactName: user.name, contactEmail: user.email, products: [], totalProducts: 0, completeProducts: 0, completeness: 0, pendingCount: 0, awaitingImporter: 0, inReview: 0, pendingResponses: 0, requests: [], activity: [] };
+  });
 }
 
 export async function reissueCatalogRequest(requestId: string, userId: string) {
