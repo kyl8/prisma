@@ -53,6 +53,11 @@ export type Importer = Prisma.ImporterModel
  */
 export type customsbroker = Prisma.customsbrokerModel
 /**
+ * Model CustomsBrokerCompanyAccess
+ * 
+ */
+export type CustomsBrokerCompanyAccess = Prisma.CustomsBrokerCompanyAccessModel
+/**
  * Model Product
  * 
  */
@@ -87,6 +92,11 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type CatalogRequest = Prisma.CatalogRequestModel
+/**
+ * Model ActivityEvent
+ * 
+ */
+export type ActivityEvent = Prisma.ActivityEventModel
 /**
  * Model CatalogRequestProduct
  * 

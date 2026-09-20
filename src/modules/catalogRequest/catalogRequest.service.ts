@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import prisma from "@/lib/prisma";
 import type { CreateCatalogRequestInput, SaveProductInput, UpdateCatalogRequestInput } from "./catalogRequest.schemas";
+import { recordActivity } from "@/modules/activity/activity.service";
+import { createNotification } from "@/modules/notification/notification.service";
 
 export const REQUEST_STATUSES = ["waiting", "in_progress", "submitted", "completed", "expired", "cancelled"] as const;
 export type RequestStatus = (typeof REQUEST_STATUSES)[number];
@@ -141,6 +143,22 @@ export async function createCatalogRequest(input: CreateCatalogRequestInput, use
       const correctionField = correctionProduct?.fields.find((field) => field.id === input.correctionFieldKey || field.title === input.correctionFieldKey);
       if (correctionField) await tx.catalogRequestResponse.create({ data: { requestId: created.id, productId: input.correctionProductId, fieldKey: correctionField.id, value: "", note: input.correctionNote } });
     }
+    await recordActivity(tx, {
+      companyId: company.id, actorUserId: userId, type: "REQUEST_CREATED", visibility: "SHARED",
+      entityType: "catalog_request", entityId: created.id, requestId: created.id,
+      metadata: { kind: input.kind, productCount: uniqueProductIds.length },
+    });
+    if (input.kind === "correction" && input.correctionProductId) {
+      await recordActivity(tx, {
+        companyId: company.id, actorUserId: userId, type: "CORRECTION_REQUESTED", visibility: "SHARED",
+        entityType: "catalog_request", entityId: created.id, requestId: created.id, productId: input.correctionProductId,
+        metadata: { fieldKey: input.correctionFieldKey ?? null },
+      });
+    }
+    await createNotification(tx, {
+      userId: company.userId, action: "Nova solicitação de preenchimento",
+      description: `Você tem ${uniqueProductIds.length} produto(s) para preencher.`, entityType: "catalog_request", entityId: created.id,
+    });
     return created;
   });
   return { id: request.id, status: request.status, token, url: publicUrl(token), company: { id: company.id, name: company.user.enterprise, cnpj: company.user.cnpj }, recipientName: request.recipientName, recipientEmail: request.recipientEmail, expiresAt: request.expiresAt.toISOString(), productCount: uniqueProductIds.length, createdAt: request.createdAt.toISOString() };
@@ -240,7 +258,17 @@ export async function deleteCatalogRequest(requestId: string, userId: string) {
 export async function startCatalogRequest(token: string) {
   const request = await findByToken(token);
   if (["submitted", "completed", "cancelled"].includes(request.status)) throw new CatalogRequestError("REQUEST_READ_ONLY", "Esta solicitação já foi encerrada.", 409);
-  if (request.status === "waiting") await prisma.catalogRequest.updateMany({ where: { id: request.id, status: "waiting" }, data: { status: "in_progress", startedAt: new Date() } });
+  if (request.status === "waiting") await prisma.$transaction(async (tx) => {
+    const updated = await tx.catalogRequest.updateMany({ where: { id: request.id, status: "waiting" }, data: { status: "in_progress", startedAt: new Date() } });
+    if (!updated.count) return;
+    await recordActivity(tx, {
+      companyId: request.companyId, type: "REQUEST_STARTED", visibility: "SHARED", entityType: "catalog_request", entityId: request.id, requestId: request.id,
+      metadata: { externalActorType: "IMPORTER_RECIPIENT" },
+    });
+    await createNotification(tx, {
+      userId: request.createdById, action: "Solicitação iniciada", description: `${request.recipientName} começou o preenchimento.`, entityType: "catalog_request", entityId: request.id,
+    });
+  });
   return getPublicCatalogRequest(token);
 }
 
@@ -260,7 +288,18 @@ export async function saveCatalogProduct(token: string, productId: string, input
     for (const item of normalized) {
       await tx.catalogRequestResponse.upsert({ where: { requestId_productId_fieldKey: { requestId: request.id, productId, fieldKey: item.fieldKey } }, create: { requestId: request.id, productId, fieldKey: item.fieldKey, value: item.value, status: "pending" }, update: { value: item.value, status: "pending", resolvedAt: null } });
     }
-    if (request.status === "waiting") await tx.catalogRequest.updateMany({ where: { id: request.id, status: "waiting" }, data: { status: "in_progress", startedAt: new Date() } });
+    if (request.status === "waiting") {
+      const started = await tx.catalogRequest.updateMany({ where: { id: request.id, status: "waiting" }, data: { status: "in_progress", startedAt: new Date() } });
+      if (started.count) {
+        await recordActivity(tx, {
+          companyId: request.companyId, type: "REQUEST_STARTED", visibility: "SHARED", entityType: "catalog_request", entityId: request.id, requestId: request.id,
+          metadata: { externalActorType: "IMPORTER_RECIPIENT" },
+        });
+        await createNotification(tx, {
+          userId: request.createdById, action: "Solicitação iniciada", description: `${request.recipientName} começou o preenchimento.`, entityType: "catalog_request", entityId: request.id,
+        });
+      }
+    }
   });
   return getPublicCatalogRequest(token);
 }
@@ -277,7 +316,24 @@ export async function submitCatalogRequest(token: string) {
     for (const attribute of mapped.attributes) if (attribute.required && !attribute.value.trim()) missing.push({ productId: entry.product.id, fieldKey: attribute.key });
   }
   if (missing.length) throw new CatalogRequestError("VALIDATION_ERROR", "Existem campos obrigatórios pendentes.", 422, missing);
-  const updated = await prisma.catalogRequest.updateMany({ where: { id: current.id, status: { in: ["in_progress", "waiting"] } }, data: { status: "submitted", submittedAt: new Date() } });
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.catalogRequest.updateMany({ where: { id: current.id, status: { in: ["in_progress", "waiting"] } }, data: { status: "submitted", submittedAt: new Date() } });
+    if (!result.count) return result;
+    await recordActivity(tx, {
+      companyId: current.companyId, type: "REQUEST_SUBMITTED", visibility: "SHARED", entityType: "catalog_request", entityId: current.id, requestId: current.id,
+      metadata: { externalActorType: "IMPORTER_RECIPIENT", kind: current.kind },
+    });
+    if (current.kind === "correction") {
+      await recordActivity(tx, {
+        companyId: current.companyId, type: "CORRECTION_RESOLVED", visibility: "SHARED", entityType: "catalog_request", entityId: current.id, requestId: current.id,
+      });
+    }
+    await createNotification(tx, {
+      userId: current.createdById, action: current.kind === "correction" ? "Correção respondida" : "Solicitação enviada para revisão",
+      description: `${current.recipientName} enviou informações para sua revisão.`, entityType: "catalog_request", entityId: current.id,
+    });
+    return result;
+  });
   if (!updated.count) return dto(await findByToken(token));
   return dto(await findByToken(token));
 }

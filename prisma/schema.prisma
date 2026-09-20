@@ -38,6 +38,7 @@ model User {
   importer               Importer?        @relation("RUserImport")
   custbrok               customsbroker?   @relation("RUserCustom")
   catalogRequestsCreated CatalogRequest[] @relation("CatalogRequestCreatedBy")
+  activityEvents         ActivityEvent[]  @relation("ActivityActor")
 }
 
 model Account {
@@ -103,6 +104,8 @@ model Importer {
   products        Product[]        @relation("RProductImporter")
   user            User             @relation("RUserImport", fields: [userId], references: [id])
   catalogRequests CatalogRequest[] @relation("CatalogRequestCompany")
+  activityEvents  ActivityEvent[]
+  brokerAccesses  CustomsBrokerCompanyAccess[]
 }
 
 model customsbroker {
@@ -111,6 +114,20 @@ model customsbroker {
 
   specialty String @default("Não informada")
   user      User   @relation("RUserCustom", fields: [userId], references: [id])
+  companyAccesses CustomsBrokerCompanyAccess[]
+}
+
+model CustomsBrokerCompanyAccess {
+  id              String @id @default(cuid())
+  customsBrokerId String
+  companyId       String
+  createdAt       DateTime @default(now())
+
+  customsBroker customsbroker @relation(fields: [customsBrokerId], references: [id], onDelete: Cascade)
+  company       Importer       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([customsBrokerId, companyId])
+  @@index([companyId])
 }
 
 model Product {
@@ -132,6 +149,7 @@ model Product {
   importer                Importer                 @relation("RProductImporter", fields: [importerId], references: [id])
   catalogRequestProducts  CatalogRequestProduct[]
   catalogRequestResponses CatalogRequestResponse[]
+  activityEvents          ActivityEvent[]
 }
 
 //os fields, resp e records são utilizados para criar uma tabela personalizada para cada produto
@@ -179,12 +197,18 @@ model Identifier {
 }
 
 model Notification {
-  id          String @id @default(cuid())
-  userId      String @unique
-  action      String
-  description String
+    id          String @id @default(cuid())
+    userId      String
+    action      String
+    description String
+    entityType  String?
+    entityId    String?
+    readAt      DateTime?
+    createdAt   DateTime @default(now())
 
-  user User @relation("RUserNotification", fields: [userId], references: [id])
+    user User @relation("RUserNotification", fields: [userId], references: [id])
+
+    @@index([userId, createdAt])
 }
 
 model CatalogRequest {
@@ -207,9 +231,55 @@ model CatalogRequest {
   createdBy User                     @relation("CatalogRequestCreatedBy", fields: [createdById], references: [id])
   products  CatalogRequestProduct[]
   responses CatalogRequestResponse[]
+  activityEvents ActivityEvent[]
 
   @@index([companyId, status])
   @@index([expiresAt])
+}
+
+enum ActivityVisibility {
+  SHARED
+  DISPATCHER_ONLY
+  IMPORTER_ONLY
+  SYSTEM_INTERNAL
+}
+
+enum ActivityType {
+  REQUEST_CREATED
+  REQUEST_STARTED
+  REQUEST_SUBMITTED
+  PRODUCT_UPDATED
+  PRODUCT_SUBMITTED
+  PRODUCT_APPROVED
+  CORRECTION_REQUESTED
+  CORRECTION_RESOLVED
+  REMINDER_SENT
+  CATALOG_IMPORTED
+  CATALOG_INCONSISTENCY_FOUND
+}
+
+model ActivityEvent {
+  id          String             @id @default(cuid())
+  companyId   String
+  actorUserId String?
+  type        ActivityType
+  visibility  ActivityVisibility
+  entityType  String?
+  entityId    String?
+  productId   String?
+  requestId   String?
+  metadata    Json?
+  createdAt   DateTime           @default(now())
+
+  company Importer        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  actor   User?           @relation("ActivityActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  product Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  request CatalogRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([actorUserId])
+  @@index([productId])
+  @@index([requestId])
 }
 
 model CatalogRequestProduct {

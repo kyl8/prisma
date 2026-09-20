@@ -58,6 +58,7 @@ export const ModelName = {
   Authenticator: 'Authenticator',
   Importer: 'Importer',
   customsbroker: 'customsbroker',
+  CustomsBrokerCompanyAccess: 'CustomsBrokerCompanyAccess',
   Product: 'Product',
   ProductField: 'ProductField',
   Record: 'Record',
@@ -65,6 +66,7 @@ export const ModelName = {
   Identifier: 'Identifier',
   Notification: 'Notification',
   CatalogRequest: 'CatalogRequest',
+  ActivityEvent: 'ActivityEvent',
   CatalogRequestProduct: 'CatalogRequestProduct',
   CatalogRequestResponse: 'CatalogRequestResponse'
 } as const
@@ -171,6 +173,16 @@ export const CustomsbrokerScalarFieldEnum = {
 export type CustomsbrokerScalarFieldEnum = (typeof CustomsbrokerScalarFieldEnum)[keyof typeof CustomsbrokerScalarFieldEnum]
 
 
+export const CustomsBrokerCompanyAccessScalarFieldEnum = {
+  id: 'id',
+  customsBrokerId: 'customsBrokerId',
+  companyId: 'companyId',
+  createdAt: 'createdAt'
+} as const
+
+export type CustomsBrokerCompanyAccessScalarFieldEnum = (typeof CustomsBrokerCompanyAccessScalarFieldEnum)[keyof typeof CustomsBrokerCompanyAccessScalarFieldEnum]
+
+
 export const ProductScalarFieldEnum = {
   id: 'id',
   importerId: 'importerId',
@@ -231,7 +243,11 @@ export const NotificationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   action: 'action',
-  description: 'description'
+  description: 'description',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
@@ -255,6 +271,23 @@ export const CatalogRequestScalarFieldEnum = {
 } as const
 
 export type CatalogRequestScalarFieldEnum = (typeof CatalogRequestScalarFieldEnum)[keyof typeof CatalogRequestScalarFieldEnum]
+
+
+export const ActivityEventScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  actorUserId: 'actorUserId',
+  type: 'type',
+  visibility: 'visibility',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  productId: 'productId',
+  requestId: 'requestId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type ActivityEventScalarFieldEnum = (typeof ActivityEventScalarFieldEnum)[keyof typeof ActivityEventScalarFieldEnum]
 
 
 export const CatalogRequestProductScalarFieldEnum = {
@@ -290,6 +323,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -304,4 +345,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

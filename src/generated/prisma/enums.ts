@@ -9,7 +9,28 @@
 * 🟢 You can import this file directly.
 */
 
+export const ActivityVisibility = {
+  SHARED: 'SHARED',
+  DISPATCHER_ONLY: 'DISPATCHER_ONLY',
+  IMPORTER_ONLY: 'IMPORTER_ONLY',
+  SYSTEM_INTERNAL: 'SYSTEM_INTERNAL'
+} as const
+
+export type ActivityVisibility = (typeof ActivityVisibility)[keyof typeof ActivityVisibility]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const ActivityType = {
+  REQUEST_CREATED: 'REQUEST_CREATED',
+  REQUEST_STARTED: 'REQUEST_STARTED',
+  REQUEST_SUBMITTED: 'REQUEST_SUBMITTED',
+  PRODUCT_UPDATED: 'PRODUCT_UPDATED',
+  PRODUCT_SUBMITTED: 'PRODUCT_SUBMITTED',
+  PRODUCT_APPROVED: 'PRODUCT_APPROVED',
+  CORRECTION_REQUESTED: 'CORRECTION_REQUESTED',
+  CORRECTION_RESOLVED: 'CORRECTION_RESOLVED',
+  REMINDER_SENT: 'REMINDER_SENT',
+  CATALOG_IMPORTED: 'CATALOG_IMPORTED',
+  CATALOG_INCONSISTENCY_FOUND: 'CATALOG_INCONSISTENCY_FOUND'
+} as const
+
+export type ActivityType = (typeof ActivityType)[keyof typeof ActivityType]
