@@ -1,0 +1,52 @@
+.siscomex-panel, .siscomex-settings { --sc-ink: #171715; --sc-muted: #666661; --sc-line: #deded8; --sc-paper: #f7f7f4; --sc-white: #fff; color: var(--sc-ink); font-size: 13px; line-height: 1.6; min-width: 0; }
+.siscomex-entry { margin: 0 0 20px; }
+.siscomex-entry > .ws-quiet { margin-bottom: 12px; }
+.siscomex-panel { padding: 24px; border: 1px solid var(--sc-line); border-radius: 14px; background: var(--sc-white); }
+.siscomex-settings { border-top: 1px solid var(--sc-line); padding-top: 20px; }
+.siscomex-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.siscomex-heading > div { min-width: 0; flex: 1 1 260px; }
+.siscomex-heading h2, .siscomex-heading h3, .siscomex-result h3 { margin: 0; font-size: 16px; font-weight: 650; }
+.siscomex-panel p, .siscomex-settings p { margin: 6px 0 12px; overflow-wrap: anywhere; }
+.siscomex-heading p, .siscomex-meta { color: var(--sc-muted); font-size: 12px; }
+.siscomex-tag { border: 1px solid var(--sc-line); border-radius: 6px; padding: 5px 9px; font-size: 11px; }
+.siscomex-subheading, .siscomex-result { border-top: 1px solid var(--sc-line); padding-top: 20px; margin-top: 24px; }
+.siscomex-form { padding: 0; margin: 24px 0 0; border: 0; min-width: 0; }
+.siscomex-form legend { margin-bottom: 14px; font-size: 15px; font-weight: 650; }
+.siscomex-fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; }
+.siscomex-field { display: grid; align-content: start; gap: 7px; margin-bottom: 16px; font-size: 12px; font-weight: 600; min-width: 0; }
+.siscomex-field input { width: 100%; box-sizing: border-box; min-height: 42px; padding: 10px 12px; border: 1px solid var(--sc-line); border-radius: 8px; background: var(--sc-white); color: var(--sc-ink); font: inherit; font-weight: 400; }
+.siscomex-field input::placeholder { color: var(--sc-muted); opacity: 1; }
+.siscomex-panel .ws-dropdown { min-width: 0; width: 100%; }
+.siscomex-panel .ws-dropdown-trigger { width: 100%; min-height: 42px; justify-content: space-between; text-align: left; }
+.siscomex-panel .ws-dropdown-trigger span { white-space: normal; overflow-wrap: anywhere; }
+.siscomex-panel .ws-menu { max-width: min(600px, 100%); max-height: 280px; overflow-y: auto; }
+.siscomex-panel .ws-menu button { white-space: normal; text-align: left; overflow-wrap: anywhere; }
+.siscomex-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 18px; }
+.siscomex-panel button, .siscomex-settings button { cursor: pointer; }
+.siscomex-panel button:disabled, .siscomex-settings button:disabled { cursor: not-allowed; opacity: .55; }
+.siscomex-panel :is(button, input, summary, a):focus-visible, .siscomex-settings :is(button, a):focus-visible { outline: 2px solid var(--sc-ink); outline-offset: 3px; }
+.siscomex-notice, .siscomex-error { padding: 12px 14px; background: var(--sc-paper); border-radius: 8px; }
+.siscomex-error { border: 1px solid var(--sc-ink); }
+.siscomex-operators summary { cursor: pointer; color: var(--sc-muted); margin: 10px 0; }
+.siscomex-operators > button { margin: 6px 0 12px; }
+.siscomex-comparison { margin-top: 16px; }
+.siscomex-diff-row { display: grid; grid-template-columns: minmax(130px, 1fr) repeat(2, minmax(0, 1.3fr)); gap: 20px; padding: 16px 0; border-top: 1px solid var(--sc-line); }
+.siscomex-diff-row > div { min-width: 0; }
+.siscomex-diff-row p { margin: 4px 0 0; white-space: pre-wrap; }
+.siscomex-diff-row small { color: var(--sc-muted); font-size: 10px; }
+.siscomex-diff-status { display: block; color: var(--sc-muted); font-size: 11px; margin-top: 4px; }
+.siscomex-diff-status.is-conflict { color: var(--sc-ink); font-weight: 700; }
+.siscomex-requirements { list-style: none; padding: 0; }
+.siscomex-requirements li { padding: 12px 0; border-top: 1px solid var(--sc-line); }
+.siscomex-requirements li > span { display: block; color: var(--sc-muted); font-size: 12px; }
+.siscomex-settings-details { padding: 12px 0; max-width: 72ch; }
+.siscomex-settings-details code { font-size: 11px; overflow-wrap: anywhere; }
+.siscomex-settings-details a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+[data-theme="dark"] :is(.siscomex-panel, .siscomex-settings) { --sc-ink: #f4f4f0; --sc-muted: #a0a09a; --sc-line: #383834; --sc-paper: #242421; --sc-white: #1d1d1b; }
+@media (max-width: 640px) {
+  .siscomex-panel { padding: 18px; }
+  .siscomex-fields { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .siscomex-actions > button, .siscomex-heading > button { width: 100%; }
+  .siscomex-diff-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .siscomex-diff-row > div:first-child { grid-column: 1 / -1; }
+}

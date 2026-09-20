@@ -1,0 +1,218 @@
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../src/generated/prisma/client";
+import "dotenv/config";
+
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({
+  adapter,
+});
+
+import fs from "fs";
+import path from "path";
+import bcrypt from "bcryptjs";
+
+interface SeedNotification {
+  action: string;
+  description: string;
+}
+
+interface SeedUser {
+  email: string;
+  name: string;
+  password: string;
+  cnpj: string;
+  enterprise: string;
+  notification?: SeedNotification;
+}
+
+interface SeedBroker extends SeedUser {
+  specialty: string;
+}
+
+interface SeedField {
+  title: string;
+  label: string;
+  type: string;
+}
+
+interface SeedRecord {
+  createdBy: string; // e-mail do usuário que criou o registro
+  createdAt: string;
+  responses: Record<string, string>; // title do campo -> resposta
+}
+
+interface SeedProduct {
+  name: string;
+  code: string;
+  ncm: string;
+  completeness: string;
+  status: string;
+  identifierStatus: boolean;
+  updatedAt: string;
+  identifier?: { duimpId: string };
+  fields: SeedField[];
+  records: SeedRecord[];
+}
+
+interface SeedEnterprise extends SeedUser {
+  products: SeedProduct[];
+}
+
+async function readJson(filename: string) {
+  const filePath = path.join(__dirname, "seed", filename);
+  const data = fs.readFileSync(filePath, "utf-8");
+  return JSON.parse(data);
+}
+
+// e-mail -> id do usuário criado (usado para vincular os registros)
+const userIdByEmail = new Map<string, string>();
+const importerIdByEmail = new Map<string, string>();
+const brokerIdByEmail = new Map<string, string>();
+
+async function createUser(data: SeedUser) {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  const user = await prisma.user.create({
+    data: {
+      email: data.email,
+      name: data.name,
+      password: hashedPassword,
+      cnpj: data.cnpj,
+      enterprise: data.enterprise,
+    },
+  });
+  userIdByEmail.set(user.email, user.id);
+
+  if (data.notification) {
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        action: data.notification.action,
+        description: data.notification.description,
+      },
+    });
+  }
+
+  return user;
+}
+
+async function main() {
+  console.log("🌱 Iniciando o seed...");
+
+  // Despachantes primeiro, pois podem ser autores de registros dos produtos
+  const brokers: SeedBroker[] = await readJson("customsbrokers.json");
+  for (const brokerSeed of brokers) {
+    const user = await createUser(brokerSeed);
+    await prisma.customsbroker.create({
+      data: {
+        userId: user.id,
+        specialty: brokerSeed.specialty,
+      },
+    });
+    const createdBroker = await prisma.customsbroker.findUniqueOrThrow({ where: { userId: user.id } });
+    brokerIdByEmail.set(user.email, createdBroker.id);
+  }
+  console.log(`✅ ${brokers.length} despachantes criados.`);
+
+  const enterprises: SeedEnterprise[] = await readJson("enterprises.json");
+  let productsCount = 0;
+  let recordsCount = 0;
+
+  for (const enterprise of enterprises) {
+    const user = await createUser(enterprise);
+    const importer = await prisma.importer.create({
+      data: { userId: user.id },
+    });
+    importerIdByEmail.set(user.email, importer.id);
+
+    for (const p of enterprise.products) {
+      const product = await prisma.product.create({
+        data: {
+          importerId: importer.id,
+          name: p.name,
+          code: p.code,
+          ncm: p.ncm,
+          completeness: p.completeness,
+          status: p.status,
+          identifierStatus: p.identifierStatus,
+          updatedAt: new Date(p.updatedAt),
+          fields: { create: p.fields },
+          ...(p.identifier && {
+            identifier: { create: { duimpId: p.identifier.duimpId } },
+          }),
+        },
+        include: { fields: true },
+      });
+      productsCount++;
+
+      // title do campo -> id do campo
+      const fieldIdByTitle = new Map(product.fields.map((f) => [f.title, f.id]));
+
+      for (const r of p.records) {
+        const authorId = userIdByEmail.get(r.createdBy);
+        if (!authorId) {
+          throw new Error(
+            `Usuário "${r.createdBy}" (registro do produto ${p.code}) não encontrado nos seeds.`
+          );
+        }
+
+        await prisma.record.create({
+          data: {
+            productId: product.id,
+            userId: authorId,
+            createdAt: new Date(r.createdAt),
+            fieldResp: {
+              create: Object.entries(r.responses).map(([title, response]) => {
+                const fieldId = fieldIdByTitle.get(title);
+                if (!fieldId) {
+                  throw new Error(
+                    `Campo "${title}" não existe no produto ${p.code}.`
+                  );
+                }
+                return { fieldId, response };
+              }),
+            },
+          },
+        });
+        recordsCount++;
+      }
+    }
+  }
+
+  const brokerEmails = [...brokerIdByEmail.keys()];
+  const importerEmails = [...importerIdByEmail.keys()];
+  for (const [index, companyEmail] of importerEmails.entries()) {
+    const brokerId = brokerIdByEmail.get(brokerEmails[index % brokerEmails.length]!);
+    const companyId = importerIdByEmail.get(companyEmail);
+    if (brokerId && companyId) await prisma.customsBrokerCompanyAccess.create({ data: { customsBrokerId: brokerId, companyId } });
+  }
+
+  const techImportId = importerIdByEmail.get("marina.azevedo@techimportbrasil.com.br");
+  const carlosId = userIdByEmail.get("carlos.menezes@portoseguro-despachos.com.br");
+  const marinaId = userIdByEmail.get("marina.azevedo@techimportbrasil.com.br");
+  if (techImportId && carlosId && marinaId) {
+    const [product] = await prisma.product.findMany({ where: { importerId: techImportId }, orderBy: { createdAt: "asc" }, take: 1 });
+    await prisma.activityEvent.createMany({ data: [
+      { companyId: techImportId, actorUserId: carlosId, type: "PRODUCT_APPROVED", visibility: "SHARED", productId: product?.id, entityType: "product", entityId: product?.id },
+      { companyId: techImportId, actorUserId: marinaId, type: "PRODUCT_UPDATED", visibility: "SHARED", productId: product?.id, entityType: "product", entityId: product?.id, metadata: { fieldKey: "fabricante", fieldLabel: "Fabricante" } },
+      { companyId: techImportId, type: "CATALOG_INCONSISTENCY_FOUND", visibility: "DISPATCHER_ONLY", entityType: "catalog", metadata: { count: 3, fileName: "catalogo_setembro.xlsx" } },
+      { companyId: techImportId, actorUserId: carlosId, type: "REMINDER_SENT", visibility: "SHARED", entityType: "company", entityId: techImportId },
+    ] });
+  }
+
+  console.log(`✅ ${enterprises.length} importadores criados.`);
+  console.log(`✅ ${productsCount} produtos criados.`);
+  console.log(`✅ ${recordsCount} registros criados.`);
+  console.log("🌳 Seed finalizado.");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

@@ -1,0 +1,34 @@
+[
+  {
+    "email": "carlos.menezes@portoseguro-despachos.com.br",
+    "name": "Carlos Menezes",
+    "password": "Despachante@123",
+    "cnpj": "50.607.080/0001-16",
+    "enterprise": "Porto Seguro Despachos Aduaneiros",
+    "specialty": "Importação de eletrônicos e telecomunicações",
+    "notification": {
+      "action": "NOVO_VINCULO",
+      "description": "Você foi vinculado a novos processos de importação de eletrônicos."
+    }
+  },
+  {
+    "email": "fernanda.lopes@santosaduana.com.br",
+    "name": "Fernanda Lopes",
+    "password": "Despachante@123",
+    "cnpj": "80.901.020/0001-72",
+    "enterprise": "Santos Aduana e Logística",
+    "specialty": "Autopeças e produtos industriais",
+    "notification": {
+      "action": "REGISTRO_PENDENTE",
+      "description": "Há registros de produtos aguardando a sua revisão."
+    }
+  },
+  {
+    "email": "ricardo.tavares@atlanticocomex.com.br",
+    "name": "Ricardo Tavares",
+    "password": "Despachante@123",
+    "cnpj": "30.405.060/0001-55",
+    "enterprise": "Atlântico Comex Despachos",
+    "specialty": "Alimentos, bebidas e produtos sujeitos a controle sanitário"
+  }
+]

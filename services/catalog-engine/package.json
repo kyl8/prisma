@@ -1,0 +1,18 @@
+{
+  "name": "@prisma/catalog-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/policy.test.js test/ingestion.test.js test/findings-flow.test.js test/operational-flow.test.js test/server.test.js test/persistence-milestone.test.js test/product-identity.test.js test/upload-and-http-versioning.test.js test/catalog-consolidation.test.js test/catalog-http.test.js test/siscomex-client.test.js test/siscomex-mapping.test.js test/siscomex-integration.test.js test/siscomex-persistence.test.js test/siscomex-http.test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.9.0",
+    "busboy": "1.6.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}

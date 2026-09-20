@@ -1,0 +1,89 @@
+{
+  "product": {
+    "codigo": 1,
+    "cpfCnpjRaiz": "12345678",
+    "versao": "1",
+    "situacao": "Ativado",
+    "modalidade": "IMPORTACAO",
+    "ncm": "22042100",
+    "denominacao": "VINHO FINO BRANCO SECO PETIT CHABLIS",
+    "descricao": "Em recipientes de capacidade não superior a 2 l",
+    "codigosInterno": ["PETIT CHABLIS 750ML"],
+    "dataReferencia": "2026-01-01T00:00:00Z",
+    "atributos": [
+      { "atributo": "ATT_CATEGORY", "valor": "VINHO FINO" },
+      { "atributo": "ATT_COLOR", "valor": "BRANCO" },
+      { "atributo": "ATT_SUGAR", "valor": "SECO" },
+      { "atributo": "ATT_GI", "valor": "AOC PETIT CHABLIS" },
+      { "atributo": "ATT_GTIN", "valor": "3578760500025" }
+    ],
+    "atributosMultivalorados": [],
+    "atributosCompostos": [],
+    "atributosCompostosMultivalorados": []
+  },
+  "foreignOperator": {
+    "cpfCnpjRaiz": "12345678",
+    "codigo": "OPE_2",
+    "versao": "1",
+    "situacao": "Ativado",
+    "codigoPais": "FR",
+    "tin": "FR-WINE-001",
+    "nome": "SAS MOREAU NAUDET",
+    "logradouro": "RUE DE CHABLIS",
+    "nomeCidade": "CHABLIS",
+    "codigoSubdivisaoPais": "Bourgogne",
+    "cep": "89800",
+    "codigoInterno": "MOREAU",
+    "email": "contact@example.invalid",
+    "dataReferencia": "2026-01-01T00:00:00Z",
+    "identificacoesAdicionais": []
+  },
+  "cada": [
+    {
+      "codigo": "ATT_CATEGORY",
+      "nome": "Categoria da bebida",
+      "definicao": "Categoria oficial",
+      "formaPreenchimento": "LISTA_ESTATICA",
+      "obrigatorio": true,
+      "multivalorado": false,
+      "dataInicioVigencia": "2024-01-01",
+      "dataFimVigencia": null,
+      "dominio": [{ "codigo": "VINHO FINO", "descricao": "Vinho fino" }],
+      "condicionados": [],
+      "listaSubatributos": []
+    },
+    {
+      "codigo": "ATT_COLOR",
+      "nome": "Cor",
+      "definicao": "Cor da bebida",
+      "formaPreenchimento": "LISTA_ESTATICA",
+      "obrigatorio": true,
+      "multivalorado": false,
+      "dataInicioVigencia": "2024-01-01",
+      "dataFimVigencia": null,
+      "dominio": [{ "codigo": "BRANCO", "descricao": "Branco" }],
+      "condicionados": [
+        {
+          "obrigatorio": true,
+          "multivalorado": false,
+          "dataInicioVigencia": "2024-01-01",
+          "dataFimVigencia": null,
+          "descricaoCondicao": "Quando a cor exigir detalhamento",
+          "condicao": { "operador": "IGUAL", "valor": "BRANCO" },
+          "atributo": {
+            "codigo": "ATT_VINTAGE",
+            "nome": "Safra",
+            "definicao": "Ano da safra",
+            "formaPreenchimento": "NUMERO_INTEIRO",
+            "obrigatorio": true,
+            "multivalorado": false,
+            "dominio": [],
+            "condicionados": [],
+            "listaSubatributos": []
+          }
+        }
+      ],
+      "listaSubatributos": []
+    }
+  ]
+}

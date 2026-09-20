@@ -1,0 +1,285 @@
+[
+  {
+    "email": "marina.azevedo@techimportbrasil.com.br",
+    "name": "Marina Azevedo",
+    "password": "Importador@123",
+    "cnpj": "11.222.333/0001-81",
+    "enterprise": "TechImport Brasil Ltda",
+    "notification": {
+      "action": "PRODUTO_ATUALIZADO",
+      "description": "O produto Notebook Ultrafino 14\" foi atualizado e está com o cadastro completo."
+    },
+    "products": [
+      {
+        "name": "Notebook Ultrafino 14\"",
+        "code": "TI-NB-001",
+        "ncm": "8471.30.19",
+        "completeness": "100%",
+        "status": "Ativo",
+        "identifierStatus": true,
+        "updatedAt": "2026-08-12T14:30:00.000Z",
+        "identifier": { "duimpId": "25BR0000123456-1" },
+        "fields": [
+          { "title": "origem_pais", "label": "País de origem", "type": "text" },
+          { "title": "fabricante", "label": "Fabricante", "type": "text" },
+          { "title": "potencia_fonte_w", "label": "Potência da fonte (W)", "type": "number" }
+        ],
+        "records": [
+          {
+            "createdBy": "marina.azevedo@techimportbrasil.com.br",
+            "createdAt": "2026-08-10T10:15:00.000Z",
+            "responses": {
+              "origem_pais": "China",
+              "fabricante": "Shenzhen Nova Electronics Co.",
+              "potencia_fonte_w": "65"
+            }
+          },
+          {
+            "createdBy": "carlos.menezes@portoseguro-despachos.com.br",
+            "createdAt": "2026-08-12T14:30:00.000Z",
+            "responses": {
+              "origem_pais": "China",
+              "fabricante": "Shenzhen Nova Electronics Co.",
+              "potencia_fonte_w": "65"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Smartphone 5G 256GB",
+        "code": "TI-SP-002",
+        "ncm": "8517.13.00",
+        "completeness": "75%",
+        "status": "Em análise",
+        "identifierStatus": false,
+        "updatedAt": "2026-09-02T09:00:00.000Z",
+        "fields": [
+          { "title": "origem_pais", "label": "País de origem", "type": "text" },
+          { "title": "fabricante", "label": "Fabricante", "type": "text" },
+          { "title": "homologacao_anatel", "label": "Nº de homologação Anatel", "type": "text" }
+        ],
+        "records": [
+          {
+            "createdBy": "carlos.menezes@portoseguro-despachos.com.br",
+            "createdAt": "2026-09-02T09:00:00.000Z",
+            "responses": {
+              "origem_pais": "Vietnã",
+              "fabricante": "Hanoi Mobile Tech",
+              "homologacao_anatel": "12345-25-0001"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "email": "eduardo.prado@autopecasglobal.com.br",
+    "name": "Eduardo Prado",
+    "password": "Importador@123",
+    "cnpj": "44.555.666/0001-81",
+    "enterprise": "AutoPeças Global Importação S.A.",
+    "notification": {
+      "action": "IDENTIFICADOR_PENDENTE",
+      "description": "O produto Amortecedor Dianteiro ainda não possui identificador DUIMP."
+    },
+    "products": [
+      {
+        "name": "Pastilha de Freio Cerâmica",
+        "code": "AP-PF-001",
+        "ncm": "8708.30.90",
+        "completeness": "100%",
+        "status": "Ativo",
+        "identifierStatus": true,
+        "updatedAt": "2026-07-28T16:45:00.000Z",
+        "identifier": { "duimpId": "25BR0000234567-2" },
+        "fields": [
+          { "title": "origem_pais", "label": "País de origem", "type": "text" },
+          { "title": "material_atrito", "label": "Material de atrito", "type": "select" },
+          { "title": "veiculo_compativel", "label": "Veículo compatível", "type": "text" }
+        ],
+        "records": [
+          {
+            "createdBy": "eduardo.prado@autopecasglobal.com.br",
+            "createdAt": "2026-07-25T11:00:00.000Z",
+            "responses": {
+              "origem_pais": "Alemanha",
+              "material_atrito": "Cerâmico",
+              "veiculo_compativel": "Sedãs e hatches compactos"
+            }
+          },
+          {
+            "createdBy": "fernanda.lopes@santosaduana.com.br",
+            "createdAt": "2026-07-28T16:45:00.000Z",
+            "responses": {
+              "origem_pais": "Alemanha",
+              "material_atrito": "Cerâmico",
+              "veiculo_compativel": "Sedãs e hatches compactos"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Amortecedor Dianteiro",
+        "code": "AP-AM-002",
+        "ncm": "8708.80.00",
+        "completeness": "50%",
+        "status": "Pendente",
+        "identifierStatus": false,
+        "updatedAt": "2026-09-05T13:20:00.000Z",
+        "fields": [
+          { "title": "origem_pais", "label": "País de origem", "type": "text" },
+          { "title": "fabricante", "label": "Fabricante", "type": "text" },
+          { "title": "pressao_gas_bar", "label": "Pressão do gás (bar)", "type": "number" }
+        ],
+        "records": [
+          {
+            "createdBy": "fernanda.lopes@santosaduana.com.br",
+            "createdAt": "2026-09-05T13:20:00.000Z",
+            "responses": {
+              "origem_pais": "Japão",
+              "fabricante": "Kobe Suspension Works",
+              "pressao_gas_bar": "25"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "email": "beatriz.nogueira@vinhosesabores.com.br",
+    "name": "Beatriz Nogueira",
+    "password": "Importador@123",
+    "cnpj": "77.888.999/0001-81",
+    "enterprise": "Vinhos & Sabores Importadora Ltda",
+    "notification": {
+      "action": "REGISTRO_CRIADO",
+      "description": "Um novo registro foi criado para o produto Vinho Tinto Malbec 750ml."
+    },
+    "products": [
+      {
+        "name": "Vinho Tinto Malbec 750ml",
+        "code": "VS-VT-001",
+        "ncm": "2204.21.00",
+        "completeness": "100%",
+        "status": "Ativo",
+        "identifierStatus": true,
+        "updatedAt": "2026-08-20T10:10:00.000Z",
+        "identifier": { "duimpId": "25BR0000345678-3" },
+        "fields": [
+          { "title": "origem_pais", "label": "País de origem", "type": "text" },
+          { "title": "safra", "label": "Safra", "type": "number" },
+          { "title": "teor_alcoolico", "label": "Teor alcoólico (%)", "type": "number" }
+        ],
+        "records": [
+          {
+            "createdBy": "beatriz.nogueira@vinhosesabores.com.br",
+            "createdAt": "2026-08-18T15:00:00.000Z",
+            "responses": {
+              "origem_pais": "Argentina",
+              "safra": "2022",
+              "teor_alcoolico": "13.5"
+            }
+          },
+          {
+            "createdBy": "ricardo.tavares@atlanticocomex.com.br",
+            "createdAt": "2026-08-20T10:10:00.000Z",
+            "responses": {
+              "origem_pais": "Argentina",
+              "safra": "2022",
+              "teor_alcoolico": "13.5"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Azeite de Oliva Extra Virgem 500ml",
+        "code": "VS-AZ-002",
+        "ncm": "1509.20.00",
+        "completeness": "75%",
+        "status": "Em análise",
+        "identifierStatus": false,
+        "updatedAt": "2026-09-08T08:40:00.000Z",
+        "fields": [
+          { "title": "origem_pais", "label": "País de origem", "type": "text" },
+          { "title": "acidez_maxima", "label": "Acidez máxima (%)", "type": "number" },
+          { "title": "data_validade", "label": "Data de validade", "type": "date" }
+        ],
+        "records": [
+          {
+            "createdBy": "ricardo.tavares@atlanticocomex.com.br",
+            "createdAt": "2026-09-08T08:40:00.000Z",
+            "responses": {
+              "origem_pais": "Portugal",
+              "acidez_maxima": "0.5",
+              "data_validade": "2027-11-30"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "email": "lucas.ferraz@medequipsaude.com.br",
+    "name": "Lucas Ferraz",
+    "password": "Importador@123",
+    "cnpj": "20.304.050/0001-70",
+    "enterprise": "MedEquip Saúde Importações Ltda",
+    "notification": {
+      "action": "PRODUTO_PENDENTE",
+      "description": "O produto Luvas Cirúrgicas Estéreis está com o cadastro incompleto."
+    },
+    "products": [
+      {
+        "name": "Oxímetro de Pulso Digital",
+        "code": "ME-OX-001",
+        "ncm": "9018.19.80",
+        "completeness": "100%",
+        "status": "Ativo",
+        "identifierStatus": true,
+        "updatedAt": "2026-08-30T17:05:00.000Z",
+        "identifier": { "duimpId": "25BR0000456789-4" },
+        "fields": [
+          { "title": "origem_pais", "label": "País de origem", "type": "text" },
+          { "title": "registro_anvisa", "label": "Registro ANVISA", "type": "text" },
+          { "title": "precisao_spo2", "label": "Precisão SpO2 (%)", "type": "number" }
+        ],
+        "records": [
+          {
+            "createdBy": "lucas.ferraz@medequipsaude.com.br",
+            "createdAt": "2026-08-29T09:30:00.000Z",
+            "responses": {
+              "origem_pais": "Estados Unidos",
+              "registro_anvisa": "80123450001",
+              "precisao_spo2": "2"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Luvas Cirúrgicas Estéreis",
+        "code": "ME-LC-002",
+        "ncm": "4015.12.00",
+        "completeness": "25%",
+        "status": "Pendente",
+        "identifierStatus": false,
+        "updatedAt": "2026-09-10T12:00:00.000Z",
+        "fields": [
+          { "title": "origem_pais", "label": "País de origem", "type": "text" },
+          { "title": "registro_anvisa", "label": "Registro ANVISA", "type": "text" },
+          { "title": "metodo_esterilizacao", "label": "Método de esterilização", "type": "select" }
+        ],
+        "records": [
+          {
+            "createdBy": "ricardo.tavares@atlanticocomex.com.br",
+            "createdAt": "2026-09-10T12:00:00.000Z",
+            "responses": {
+              "origem_pais": "Malásia",
+              "registro_anvisa": "80123450002",
+              "metodo_esterilizacao": "Radiação gama"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]
