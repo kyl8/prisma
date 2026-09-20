@@ -106,7 +106,7 @@ function RealActivityList({ items, go }: { items: WorkspaceActivityItem[]; go: (
 }
 
 
-function Status({ children }: { children: string }) {
+function Status({ children = "—" }: { children?: string }) {
   return (
     <span
       className={`ws-status ${children.includes("Aprovado") || children.includes("Completo") ? "is-done" : children.includes("Atenção") || children.includes("Correção") || children.includes("pendência") ? "is-warn" : ""}`}
