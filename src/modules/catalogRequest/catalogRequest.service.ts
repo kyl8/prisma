@@ -168,6 +168,16 @@ export async function listCompanies(userId: string) {
   }));
 }
 
+export async function reissueCatalogRequest(requestId: string, userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: true } });
+  if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem gerar links.", 403);
+  const request = await prisma.catalogRequest.findUnique({ where: { id: requestId }, include: { company: { include: { user: true } }, _count: { select: { products: true } } } });
+  if (!request) throw new CatalogRequestError("REQUEST_NOT_FOUND", "Solicitação não encontrada.", 404);
+  const token = crypto.randomBytes(32).toString("hex");
+  await prisma.catalogRequest.update({ where: { id: request.id }, data: { tokenHash: hashToken(token) } });
+  return { id: request.id, status: request.status, token, url: publicUrl(token), recipientName: request.recipientName, recipientEmail: request.recipientEmail, expiresAt: request.expiresAt.toISOString(), productCount: request._count.products, createdAt: request.createdAt.toISOString() };
+}
+
 export async function getPublicCatalogRequest(token: string) {
   return dto(await findByToken(token));
 }
