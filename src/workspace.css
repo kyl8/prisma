@@ -2808,6 +2808,9 @@
 .ws-request-actions .ws-primary {
   margin-left: 8px;
 }
+.ws-field select + input[readonly] {
+  display: none;
+}
 .ws-danger {
   min-height: 34px;
   padding: 0 11px;
