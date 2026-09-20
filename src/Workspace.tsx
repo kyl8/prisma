@@ -29,6 +29,7 @@ import "./workspace.css";
 
 type View =
   | "overview"
+  | "requests"
   | "clients"
   | "client"
   | "catalog"
@@ -491,6 +492,7 @@ const nav: [View, GlyphName, string][] = [
   ["overview", "home", "Visão geral"],
   ["clients", "people", "Clientes"],
   ["catalog", "boxes", "Catálogos"],
+  ["requests", "file", "Solicitações"],
   ["pending", "alert", "Pendências"],
   ["import", "download", "Importar"],
   ["assistant", "robot", "Assistente"],
@@ -831,6 +833,22 @@ function ClientDetail({ go }: { go: (v: View) => void }) {
     </>
   );
 }
+function RequestsPage() {
+  return (
+    <>
+      <div className="ws-page-title">
+        <div>
+          <h1>Solicitações</h1>
+          <p>Links de preenchimento enviados aos importadores.</p>
+        </div>
+      </div>
+      <div className="ws-layout">
+        <RequestsCard />
+      </div>
+    </>
+  );
+}
+
 function RequestsCard() {
   const [open, setOpen] = useState(false);
   const [created, setCreated] = useState<CatalogRequest | null>(null);
@@ -2785,6 +2803,8 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
         return <ClientDetail go={go} />;
       case "catalog":
         return <Catalog go={go} />;
+      case "requests":
+        return <RequestsPage />;
       case "product":
         return <Product go={go} />;
       case "review":
