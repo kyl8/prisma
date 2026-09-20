@@ -114,6 +114,7 @@ export async function createCatalogRequest(input: CreateCatalogRequestInput, use
   if (input.expiresAt <= new Date()) throw new CatalogRequestError("INVALID_EXPIRY", "O prazo precisa estar no futuro.");
   const creator = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: true } });
   if (!creator?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem criar solicitações.", 403);
+  const broker = creator.custbrok;
   const company = await prisma.importer.findUnique({ where: { id: input.companyId }, include: { user: true } });
   if (!company) throw new CatalogRequestError("COMPANY_NOT_FOUND", "Empresa não encontrada.", 404);
   const uniqueProductIds = [...new Set(input.productIds)];
@@ -130,6 +131,11 @@ export async function createCatalogRequest(input: CreateCatalogRequestInput, use
   }
   const token = crypto.randomBytes(32).toString("hex");
   const request = await prisma.$transaction(async (tx) => {
+    await tx.customsBrokerCompanyAccess.upsert({
+      where: { customsBrokerId_companyId: { customsBrokerId: broker.id, companyId: company.id } },
+      update: {},
+      create: { customsBrokerId: broker.id, companyId: company.id },
+    });
     const created = await tx.catalogRequest.create({
       data: {
         tokenHash: hashToken(token), companyId: company.id, createdById: userId,
@@ -165,8 +171,9 @@ export async function createCatalogRequest(input: CreateCatalogRequestInput, use
 }
 
 export async function listCatalogRequests(companyId: string, userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: true } });
+  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: { include: { companyAccesses: { select: { companyId: true } } } } } });
   if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem consultar solicitações.", 403);
+  if (!user.custbrok.companyAccesses.some((access) => access.companyId === companyId)) throw new CatalogRequestError("FORBIDDEN", "Sem acesso a esta empresa.", 403);
   const company = await prisma.importer.findUnique({ where: { id: companyId } });
   if (!company) throw new CatalogRequestError("COMPANY_NOT_FOUND", "Empresa não encontrada.", 404);
   const requests = await prisma.catalogRequest.findMany({ where: { companyId }, include: { products: { select: { productId: true } }, _count: { select: { products: true } } }, orderBy: { createdAt: "desc" } });
@@ -174,9 +181,10 @@ export async function listCatalogRequests(companyId: string, userId: string) {
 }
 
 export async function listCompanies(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: true } });
+  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: { include: { companyAccesses: { select: { companyId: true } } } } } });
   if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem consultar empresas.", 403);
-  const companies = await prisma.importer.findMany({ include: { user: true, products: { include: { fields: true, records: { orderBy: { createdAt: "desc" }, include: { fieldResp: true } } } } }, orderBy: { user: { enterprise: "asc" } } });
+  const companyIds = user.custbrok.companyAccesses.map((access) => access.companyId);
+  const companies = await prisma.importer.findMany({ where: { id: { in: companyIds } }, include: { user: true, products: { include: { fields: true, records: { orderBy: { createdAt: "desc" }, include: { fieldResp: true } } } } }, orderBy: { user: { enterprise: "asc" } } });
   return companies.map((company) => ({
     id: company.id,
     name: company.user.enterprise,
@@ -188,8 +196,7 @@ export async function listCompanies(userId: string) {
 }
 
 export async function reissueCatalogRequest(requestId: string, userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: true } });
-  if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem gerar links.", 403);
+  await ownedRequest(requestId, userId);
   const request = await prisma.catalogRequest.findUnique({ where: { id: requestId }, include: { company: { include: { user: true } }, _count: { select: { products: true } } } });
   if (!request) throw new CatalogRequestError("REQUEST_NOT_FOUND", "Solicitação não encontrada.", 404);
   if (request.status === "cancelled") throw new CatalogRequestError("REQUEST_CANCELLED", "Não é possível gerar link para uma solicitação cancelada.", 409);
@@ -203,10 +210,11 @@ export async function getPublicCatalogRequest(token: string) {
 }
 
 async function ownedRequest(requestId: string, userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: true } });
+  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: { include: { companyAccesses: { select: { companyId: true } } } } } });
   if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem alterar solicitações.", 403);
   const request = await prisma.catalogRequest.findUnique({ where: { id: requestId }, include: { products: true } });
   if (!request) throw new CatalogRequestError("REQUEST_NOT_FOUND", "Solicitação não encontrada.", 404);
+  if (!user.custbrok.companyAccesses.some((access) => access.companyId === request.companyId)) throw new CatalogRequestError("FORBIDDEN", "Sem acesso a esta solicitação.", 403);
   return request;
 }
 
