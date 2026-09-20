@@ -20,6 +20,7 @@ import {
 import { ThemeToggle } from "./theme";
 import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
 import { playUISound } from "./utils/uiSounds";
+import { ImporterActivityPage } from "./features/activity/ImporterActivityPage";
 import "./importer.css";
 
 type ImpView =
@@ -28,6 +29,7 @@ type ImpView =
   | { name: "product"; productId: string; focusField?: string }
   | { name: "pending" }
   | { name: "notifications" }
+  | { name: "activity" }
   | { name: "help" }
   | { name: "assistant" };
 
@@ -58,6 +60,7 @@ const navItems: { view: ImpView; icon: GlyphName; label: string }[] = [
   { view: { name: "catalog" }, icon: "boxes", label: "Meu catálogo" },
   { view: { name: "pending" }, icon: "alert", label: "Pendências" },
   { view: { name: "notifications" }, icon: "bell", label: "Notificações" },
+  { view: { name: "activity" }, icon: "pulse", label: "Atividade" },
   { view: { name: "assistant" }, icon: "robot", label: "Assistente" },
   { view: { name: "help" }, icon: "chat", label: "Ajuda" },
 ];
@@ -1065,6 +1068,8 @@ export function ImporterPortal({ onLogout }: { onLogout: () => void }) {
             companyName={company.name}
           />
         );
+      case "activity":
+        return <ImporterActivityPage viewer={user} onProduct={() => go({ name: "catalog" })} />;
       case "assistant":
         return <ImpAssistant go={go} companyId={company.id} />;
       default:
