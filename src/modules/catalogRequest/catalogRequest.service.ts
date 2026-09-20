@@ -335,6 +335,12 @@ export async function approveCatalogRequest(requestId: string, userId: string) {
   return { id: requestId, status: "completed" };
 }
 
+export async function getCatalogRequestReview(requestId: string, userId: string) {
+  await ownedRequest(requestId, userId);
+  const request = await prisma.catalogRequest.findUniqueOrThrow({ where: { id: requestId }, include: { responses: true, products: { include: { product: { include: { fields: true } } } } } });
+  return { id: request.id, status: request.status, products: request.products.map(({ product }) => ({ id: product.id, name: product.name, sku: product.code, attributes: product.fields.map((field) => ({ key: field.id, label: field.label, value: request.responses.find((response) => response.productId === product.id && response.fieldKey === field.id)?.value ?? "", status: request.responses.find((response) => response.productId === product.id && response.fieldKey === field.id)?.status ?? "pending" })) })) };
+}
+
 /** Removes the request, its responses and product links, and invalidates its bearer link. */
 export async function deleteCatalogRequest(requestId: string, userId: string) {
   const request = await ownedRequest(requestId, userId);
