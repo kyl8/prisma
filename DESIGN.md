@@ -174,6 +174,26 @@ The palette moves from warm paper to near-black through close gray intervals; hi
 
 **The Warm Neutral Rule.** Light grays should retain the slightly warm paper character of the existing palette, not drift toward blue-gray software chrome.
 
+### Dark Mode
+
+The same monochrome system inverts into a warm near-black environment without changing layout, radii, spacing, type scale, shadows, or interaction. Toggled from the marketing header, the mobile menu header, the login screen, and the workspace utility bar. The choice persists as `prisma-theme` and falls back to `prefers-color-scheme` on first visit. The theme is applied through a `data-theme="dark"` attribute on `<html>`, set before paint by an inline script in `index.html` and managed by `src/theme.tsx`.
+
+**Inverted Ramp:**
+
+- **Canvas:** `#121211` (marketing) and `#141412` (workspace) replace warm paper.
+- **Card / Modal Surface:** `#1d1d1b` replaces clean white.
+- **Elevated Surface:** `#222220`–`#242421` replace quiet panels and soft fills.
+- **Fine Rule:** `#2e2e2a`, with `#33332e` and `#383834` for stronger field and control outlines.
+- **Operational Gray:** `#a0a09a` replaces `#666661`; secondary detail text uses `#999990`.
+- **Inverse Dark:** `#f4f4f0` replaces graphite for primary buttons, active rail states, done badges, progress fills, and active step/tab emphasis, with `#121211` text on top.
+- **Grounded sections** (statement, final CTA, ink canvases) stay dark — `#0d0d0c`, `#181917`, `#0e0e0d` — while success surfaces invert to light to keep their "grounded close" weight.
+
+**Dark Named Rules:**
+
+**The Inversion Rule.** Every tonal relationship inverts: dark-on-light becomes light-on-dark, and vice versa. Elements that are dark fills in light mode (primary buttons, done chips, active rails, progress) become `#f4f4f0` fills in dark mode.
+
+**The Faithful Geometry Rule.** Dark mode only remaps color values. It never adds backgrounds, fills, borders, or emphasis that the light design does not have; section rhythm, radii, spacing, and shadow vocabulary stay identical in both themes.
+
 ## Typography
 
 **Display Font:** Manrope Variable (with sans-serif fallback)  

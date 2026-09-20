@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ThemeToggle } from "./theme";
 import "./workspace.css";
 
 type View =
@@ -490,6 +491,7 @@ function AppTop({
         <span>P</span>PRISMA
       </button>
       <div className="ws-utilities">
+        <ThemeToggle className="ws-utility-theme" />
         <button aria-label="Buscar" onClick={onSearch}>
           <Glyph name="search" />
         </button>

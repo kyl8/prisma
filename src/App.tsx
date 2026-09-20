@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Lenis from "lenis";
 import { useEffect, useState } from "react";
+import { ThemeToggle } from "./theme";
 import { Workspace } from "./Workspace";
 
 type IconName =
@@ -148,15 +149,19 @@ function Header() {
           <a className="button button--dark header-cta" href="#demo">
             Ver demonstração <Icon name="arrow" size={17} />
           </a>
+          <ThemeToggle />
         </div>
-        <button
-          className="menu-button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Fechar menu" : "Abrir menu"}
-          aria-expanded={open}
-        >
-          <Icon name={open ? "close" : "menu"} />
-        </button>
+        <div className="header-mobile-tools">
+          <ThemeToggle />
+          <button
+            className="menu-button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={open}
+          >
+            <Icon name={open ? "close" : "menu"} />
+          </button>
+        </div>
       </div>
       <AnimatePresence>
         {open && (
@@ -198,6 +203,7 @@ function LoginScreen({ onEnter }: { onEnter: () => void }) {
       <a className="login-brand" href="/" aria-label="PRISMA — início">
         <span className="logo-mark">P</span> PRISMA
       </a>
+      <ThemeToggle className="login-theme" />
       <form
         className="login-card"
         onSubmit={(event) => {
