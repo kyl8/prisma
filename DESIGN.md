@@ -194,6 +194,20 @@ The same monochrome system inverts into a warm near-black environment without ch
 
 **The Faithful Geometry Rule.** Dark mode only remaps color values. It never adds backgrounds, fills, borders, or emphasis that the light design does not have; section rhythm, radii, spacing, and shadow vocabulary stay identical in both themes.
 
+## Profiles & the Importer Portal
+
+PRISMA ships two connected surfaces under one identity: the **Workspace** for dispatchers (multi-client administration) and the **Portal** for importers (single-company, single focus). The logged user's role decides which surface renders; the demo login (`/app`) offers "Explorar demonstração como — Despachante / Importador".
+
+**Importer Portal:** the same shell language (top bar, floating rail, cards, metrics, tables) with destinations — Início, Meu catálogo, Pendências, Notificações, Assistente, Ajuda. Global search (company-scoped), an AI assistant (drawer + full view) and the notification center mirror the dispatcher workspace. Statuses are simplified to "Precisa de você", "Enviado para revisão", "Correção solicitada", "Aprovado", reusing the monochrome badge system. Product detail presents attributes grouped by Identificação / Classificação / Características / Solicitado pelo despachante, with an "Atributos para a NCM" callout simulating NCM-driven guidance.
+
+**Custom fields:** dispatchers can add per-product custom attributes (label, required, instruction note) from the product view; they appear in the importer's form with the note attached, count toward completeness, and flow into link-based requests. Custom fields are the mock equivalent of free-form information requests.
+
+**Isolation:** every importer query filters by `companyId` — `productsForCompany()` in the store, and `products.filter(p => p.companyId === user.companyId)` in the portal. Mocks include Atlas Importações and Ocean Trade to prove the boundary.
+
+**Link-based requests (`/r/:token/catalogo`):** dispatchers generate a `CatalogRequest` (companyId, productIds, token, prazo) from the client detail. The public screen shows only the intersection `product.companyId === request.companyId && request.productIds.includes(product.id)` — no rail, no admin chrome, just PRISMA branding. Statuses: Aguardando preenchimento → Em preenchimento → Enviado para revisão → Concluído/Expirado.
+
+**Simulated e-mail:** `sendNotificationEvent()` in `src/store.ts` marks where transactional e-mail/push would be integrated (Resend, AWS SES, SendGrid); for now events only feed the in-app notification center, which supports read state and per-company filtering.
+
 ## Typography
 
 **Display Font:** Manrope Variable (with sans-serif fallback)  
@@ -224,7 +238,7 @@ The marketing shell uses a 1216px maximum width with 24px desktop gutters. Core 
 
 At 900px, editorial pairs collapse to a single column, navigation changes to a menu, and section spacing contracts. At 620px, gutters become 18px, major sections use 88px vertical padding, product cards reduce internal padding, and application sidebars disappear while every workflow demonstration remains available. Full-width dashboard frames may intentionally meet the viewport edge on mobile, but the page itself must never overflow horizontally.
 
-The internal workspace uses a 1320px maximum canvas beneath a 68px sticky top bar. On wide screens its asymmetric inset (`44px 52px 88px 116px`) leaves room for a fixed left navigation rail while keeping data views centered. Operational layouts use 18px gaps and ratios around 1.35/0.65; metric summaries use four or five equal columns. At 1000px, top navigation hides, content insets contract, five-up metrics become three columns, and wide tables retain an 840px intrinsic width inside horizontal overflow. At 700px, the rail becomes a bottom floating dock, the canvas uses 16px side gutters and 104px bottom clearance, all major content grids become one column, and metrics become two columns.
+The internal workspace uses a 1320px maximum canvas beneath a 68px sticky top bar. On wide screens its asymmetric inset (`44px 52px 88px 116px`) leaves room for a fixed left navigation rail while keeping data views centered. Operational layouts use 18px gaps and ratios around 1.35/0.65; metric summaries use four or five equal columns. At 1000px, top navigation hides and content insets contract. At 700px, the rail becomes a bottom floating dock, the canvas uses 16px side gutters and 104px bottom clearance, all major content grids become one column, metrics become two columns, and dense tables become labeled record cards with no page-level horizontal overflow.
 
 **The Narrative Alternation Rule.** Repeated feature sections alternate copy and product evidence on desktop, then become one complete linear story on mobile.
 
@@ -300,7 +314,7 @@ The `/app` entry opens the frontend workspace directly; the homepage “Entrar�
 
 ### Metrics, Tables, and Task Rows
 
-Metrics are warm-gray inset blocks with oversized tabular values and compact labels. Tables are border-led rather than boxed: a pale header row, 10–11px data, 13px vertical row padding, and a quiet hover fill. Wide operational tables scroll within their card below 1000px instead of collapsing columns into ambiguous fragments. Timeline, review, CNPJ, product, and action rows reuse hairline separation and strong-first/secondary-second typography.
+Metrics are warm-gray inset blocks with oversized tabular values and compact labels. Tables are border-led rather than boxed: a pale header row, 10–11px data, 13px vertical row padding, and a quiet hover fill. On phones, each row becomes a complete two-column record with explicit field labels, preserving all operational information without clipping or page-level horizontal scrolling. Timeline, review, CNPJ, product, and action rows reuse hairline separation and strong-first/secondary-second typography.
 
 ### Overlays
 
@@ -308,7 +322,7 @@ Search uses a centered 620px maximum modal over a translucent graphite scrim. No
 
 ### Motion
 
-Marketing entrances settle vertically with an exponential ease (`cubic-bezier(0.16, 1, 0.3, 1)`), the hero product is revealed through a clipped frame, progress responds once, and local state changes crossfade in roughly 300ms. GSAP ScrollTrigger adds only scrubbed depth: the hero product shifts upward 56px and scales to 0.98, the central statement traverses from 34px to -30px, and feature visuals traverse from 24px to -18px. These scroll effects use linear scrub and are not registered when reduced motion is requested.
+Marketing entrances settle with an exponential ease (`cubic-bezier(0.16, 1, 0.3, 1)`), the hero product is revealed through a clipped frame, and local state changes crossfade in roughly 300ms. Lenis owns the desktop scroll surface: each meaningful wheel gesture eases to the next or previous `data-scroll-section`, with the header offset preserved and a lock preventing accidental double jumps. Section content reveals through opacity and clip-path as it enters the viewport, without parallax transforms or floating cards. On small screens, Lenis remains smooth but the native continuous scroll is preserved for comfortable reading; reduced-motion users bypass the custom scroll layer.
 
 Inside the workspace, page content uses a 240ms fade with a small 10px entrance and -7px exit. The assistant drawer uses a spring (`stiffness: 290`, `damping: 28`) over a 440px horizontal path. Persistent shell chrome does not animate between views. Content is readable at rest before motion completes.
 
@@ -322,7 +336,7 @@ Inside the workspace, page content uses a 240ms fade with a small 10px entrance 
 - **Do** label illustrative data and simulated limitations in visible, readable text.
 - **Do** use line icons with consistent rounded strokes and no filled decorative icon style.
 - **Do** preserve the top bar and rail while workspace task views change.
-- **Do** keep operational tables horizontally scrollable when their real column structure cannot collapse safely.
+- **Do** convert dense operational tables into labeled record cards when the viewport cannot support the full column structure.
 
 ### Don't:
 
@@ -332,4 +346,4 @@ Inside the workspace, page content uses a 240ms fade with a small 10px entrance 
 - **Don't** shrink marketing typography into application density, or enlarge operational labels until the simulations lose credibility.
 - **Don't** hide product demonstrations on mobile; remove only nonessential application chrome.
 - **Don't** present the `/app` entry as authenticated, integrated, or production-backed; the built route is a frontend workspace simulation.
-- **Don't** reuse scroll-scrub motion inside the workspace; task-state changes use short fades, popovers, modals, or the contextual drawer.
+- **Don't** reuse section snapping or scroll choreography inside the workspace; task-state changes use short fades, popovers, modals, or the contextual drawer.

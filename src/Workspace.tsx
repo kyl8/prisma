@@ -1,6 +1,28 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import { CatalogRequest } from "./data";
+import { Glyph, GlyphName } from "./icons";
+import {
+  addCompany,
+  addCustomField,
+  approveProduct,
+  createCatalogRequest,
+  customFieldsOf,
+  dispatcherStatusLabel,
+  login,
+  markNotificationRead,
+  navigate,
+  productCompleteness,
+  productsForCompany,
+  removeCustomField,
+  removeProduct,
+  requestCorrection,
+  requestStatusLabel,
+  showToast,
+  useStoreState,
+} from "./store";
 import { ThemeToggle } from "./theme";
+import { Dropdown, Modal, NoticePopover } from "./ui";
 import "./workspace.css";
 
 type View =
@@ -14,160 +36,12 @@ type View =
   | "pending-detail"
   | "import"
   | "import-result"
-  | "importer-home"
-  | "importer-catalog"
-  | "guided"
-  | "corrections"
   | "activity"
   | "users"
   | "settings"
   | "assistant"
   | "add-client"
   | "create-product";
-
-type GlyphName =
-  | "home"
-  | "people"
-  | "boxes"
-  | "alert"
-  | "download"
-  | "chat"
-  | "robot"
-  | "pulse"
-  | "settings"
-  | "search"
-  | "bell"
-  | "plus"
-  | "more"
-  | "arrow"
-  | "check"
-  | "close"
-  | "upload"
-  | "filter"
-  | "file"
-  | "chevron";
-const paths: Record<GlyphName, React.ReactNode> = {
-  home: (
-    <>
-      <path d="m4 11 8-7 8 7v9H4z" />
-      <path d="M9 20v-5h6v5" />
-    </>
-  ),
-  people: (
-    <>
-      <circle cx="9" cy="8" r="3" />
-      <path d="M3.5 20c.4-4 2.2-6 5.5-6s5.1 2 5.5 6M16 5.5a3 3 0 0 1 0 5M16 14c2.5.5 3.8 2.5 4 5" />
-    </>
-  ),
-  boxes: (
-    <>
-      <path d="m12 3 7 4-7 4-7-4 7-4Z" />
-      <path d="m5 12 7 4 7-4" />
-      <path d="m5 17 7 4 7-4" />
-    </>
-  ),
-  alert: (
-    <>
-      <path d="M12 3 2.8 20h18.4L12 3Z" />
-      <path d="M12 9v5M12 17h.01" />
-    </>
-  ),
-  download: (
-    <>
-      <path d="M12 3v12" />
-      <path d="m7 10 5 5 5-5" />
-      <path d="M5 21h14" />
-    </>
-  ),
-  chat: (
-    <>
-      <path d="M7 18.5 3.5 21l.8-4.4A8.5 8.5 0 1 1 7 18.5Z" />
-      <path d="M8 11h.01M12 11h.01M16 11h.01" />
-    </>
-  ),
-  robot: (
-    <>
-      <rect x="6" y="8" width="12" height="10" rx="2.5" />
-      <path d="M12 4v3M8.5 13h.01M15.5 13h.01M9.5 16h5" />
-    </>
-  ),
-  pulse: (
-    <>
-      <path d="M3 12h4l2-6 4 12 2-6h6" />
-    </>
-  ),
-  settings: (
-    <>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.1 2.1-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-3v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.1-2.1.1-.1A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.6-1H5.2v-3h.2A1.7 1.7 0 0 0 7 10a1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.1-2.1.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h3v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.1 2.1-.1.1A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.6 1h.2v3H21a1.7 1.7 0 0 0-1.6 1Z" />
-    </>
-  ),
-  search: (
-    <>
-      <circle cx="10.5" cy="10.5" r="6.5" />
-      <path d="m16 16 4 4" />
-    </>
-  ),
-  bell: (
-    <>
-      <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
-    </>
-  ),
-  plus: (
-    <>
-      <path d="M12 5v14M5 12h14" />
-    </>
-  ),
-  more: (
-    <>
-      <path d="M5 12h.01M12 12h.01M19 12h.01" />
-    </>
-  ),
-  arrow: (
-    <>
-      <path d="M5 12h14" />
-      <path d="m14 7 5 5-5 5" />
-    </>
-  ),
-  check: <path d="m5 12 4.2 4L19 6.5" />,
-  close: (
-    <>
-      <path d="m6 6 12 12M18 6 6 18" />
-    </>
-  ),
-  upload: (
-    <>
-      <path d="M12 16V3" />
-      <path d="m7 8 5-5 5 5" />
-      <path d="M5 21h14" />
-    </>
-  ),
-  filter: <path d="M4 6h16M7 12h10M10 18h4" />,
-  file: (
-    <>
-      <path d="M7 3h7l4 4v14H7z" />
-      <path d="M14 3v5h5M10 13h5M10 17h5" />
-    </>
-  ),
-  chevron: <path d="m8 10 4 4 4-4" />,
-};
-function Glyph({ name, size = 18 }: { name: GlyphName; size?: number }) {
-  return (
-    <svg
-      aria-hidden="true"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {paths[name]}
-    </svg>
-  );
-}
 
 const clients = [
   [
@@ -201,35 +75,7 @@ const clients = [
     "Completo",
   ],
 ];
-const products = [
-  [
-    "Motor Elétrico XP-200",
-    "MTR-0021",
-    "8501.10.19",
-    "92%",
-    "Aguardando importador",
-    "Importador",
-    "Hoje",
-  ],
-  [
-    "Sensor Industrial A12",
-    "SNS-119",
-    "9031.80.99",
-    "100%",
-    "Aprovado",
-    "—",
-    "Ontem",
-  ],
-  [
-    "Válvula Industrial VX-80",
-    "VLV-089",
-    "8481.80.99",
-    "78%",
-    "Correção solicitada",
-    "Importador",
-    "17 set",
-  ],
-];
+
 
 function Status({ children }: { children: string }) {
   return (
@@ -275,6 +121,96 @@ function Breadcrumb({ children }: { children: string }) {
   return <div className="ws-breadcrumb">{children}</div>;
 }
 
+type PendingFilters = {
+  cliente?: string;
+  cnpj?: string;
+  responsavel?: string;
+  tipo?: string;
+  status?: string;
+};
+
+const pendingRows = [
+  {
+    pendencia: "Informar composição do material",
+    produto: "Motor XP-200",
+    cliente: "Atlas Importações",
+    cnpj: "12.345.678/0001-90",
+    responsavel: "Importador",
+    criada: "17/09",
+    status: "Aguardando cliente",
+    tipo: "Informação",
+  },
+  {
+    pendencia: "Revisar NCM informada",
+    produto: "Válvula VX-80",
+    cliente: "Ocean Trade",
+    cnpj: "32.147.890/0001-12",
+    responsavel: "Despachante",
+    criada: "16/09",
+    status: "Em revisão",
+    tipo: "Revisão",
+  },
+  {
+    pendencia: "Anexar ficha técnica",
+    produto: "Sensor A12",
+    cliente: "Atlas Importações",
+    cnpj: "12.345.678/0001-90",
+    responsavel: "Importador",
+    criada: "15/09",
+    status: "Atrasada",
+    tipo: "Documento",
+  },
+  {
+    pendencia: "Confirmar país de origem",
+    produto: "Válvula VX-80",
+    cliente: "Ocean Trade",
+    cnpj: "32.147.890/0001-12",
+    responsavel: "Importador",
+    criada: "12/09",
+    status: "Atrasada",
+    tipo: "Informação",
+  },
+];
+
+const timelineEvents = [
+  {
+    time: "14:10",
+    actor: "Carlos aprovou",
+    subject: "Motor Elétrico XP-200",
+    user: "Carlos",
+    type: "Aprovação",
+    client: "Atlas Importações",
+    order: 4,
+  },
+  {
+    time: "13:42",
+    actor: "Mariana atualizou",
+    subject: "Material",
+    user: "Mariana",
+    type: "Atualização",
+    client: "Atlas Importações",
+    order: 3,
+  },
+  {
+    time: "11:03",
+    actor: "Sistema encontrou",
+    subject: "3 inconsistências em catalogo_setembro.xlsx",
+    user: "Sistema",
+    type: "Importação",
+    client: "—",
+    order: 2,
+  },
+  {
+    time: "Ontem",
+    actor: "Carlos enviou lembrete",
+    subject: "Atlas Importações",
+    user: "Carlos",
+    type: "Lembrete",
+    client: "Atlas Importações",
+    order: 1,
+  },
+];
+
 function Table({
   onProduct,
   onClient,
@@ -283,6 +219,8 @@ function Table({
   statusFilter = "Todos",
   ncmFilter = "Todas",
   completudeFilter = "Todas",
+  pendingFilters,
+  companyId,
 }: {
   onProduct?: () => void;
   onClient?: () => void;
@@ -291,31 +229,40 @@ function Table({
   statusFilter?: string;
   ncmFilter?: string;
   completudeFilter?: string;
+  pendingFilters?: PendingFilters;
+  /** Restringe os produtos ao catálogo de uma empresa (isolamento por cliente). */
+  companyId?: string;
 }) {
   const [menu, setMenu] = useState<number | null>(null);
-  const [productList, setProductList] = useState(products);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const { products: storeProducts } = useStoreState();
+
+  const productList = useMemo(
+    () => (companyId ? productsForCompany(companyId) : storeProducts),
+    [storeProducts, companyId],
+  );
 
   const filteredProducts = useMemo(() => {
     return productList.filter((row) => {
       const matchSearch =
         !search ||
-        row[0].toLowerCase().includes(search.toLowerCase()) ||
-        row[1].toLowerCase().includes(search.toLowerCase()) ||
-        row[2].includes(search);
+        row.name.toLowerCase().includes(search.toLowerCase()) ||
+        row.sku.toLowerCase().includes(search.toLowerCase()) ||
+        row.ncm.includes(search);
       const matchStatus =
-        statusFilter === "Todos" || row[4] === statusFilter;
-      const matchNcm =
-        ncmFilter === "Todas" || row[2] === ncmFilter;
+        statusFilter === "Todos" || dispatcherStatusLabel(row) === statusFilter;
+      const matchNcm = ncmFilter === "Todas" || row.ncm === ncmFilter;
       const matchComp =
         completudeFilter === "Todas" ||
-        (completudeFilter === "100%" ? row[3] === "100%" : row[3] !== "100%");
+        (completudeFilter === "100%"
+          ? productCompleteness(row) === 100
+          : productCompleteness(row) !== 100);
       return matchSearch && matchStatus && matchNcm && matchComp;
     });
   }, [productList, search, statusFilter, ncmFilter, completudeFilter]);
 
-  const handleDelete = (idx: number) => {
-    setProductList((prev) => prev.filter((_, i) => i !== idx));
+  const handleDelete = (id: string) => {
+    removeProduct(id);
     setMenu(null);
   };
 
@@ -326,7 +273,19 @@ function Table({
     setMenu(null);
   };
 
-  if (pending)
+  if (pending) {
+    const rows = pendingRows.filter((row) => {
+      const f = pendingFilters ?? {};
+      return (
+        (!f.cliente || f.cliente === "Todos" || row.cliente === f.cliente) &&
+        (!f.cnpj || f.cnpj === "Todos" || row.cnpj === f.cnpj) &&
+        (!f.responsavel ||
+          f.responsavel === "Todos" ||
+          row.responsavel === f.responsavel) &&
+        (!f.tipo || f.tipo === "Todos" || row.tipo === f.tipo) &&
+        (!f.status || f.status === "Todos" || row.status === f.status)
+      );
+    });
     return (
       <div className="ws-table">
         <div className="ws-tr ws-th pending-cols">
@@ -337,40 +296,30 @@ function Table({
           <span>Criada em</span>
           <span>Status</span>
         </div>
-        {[
-          [
-            "Informar composição do material",
-            "Motor XP-200",
-            "Atlas Importações",
-            "Importador",
-            "17/09",
-            "Aguardando cliente",
-          ],
-          [
-            "Revisar NCM informada",
-            "Válvula VX-80",
-            "Ocean Trade",
-            "Despachante",
-            "16/09",
-            "Em revisão",
-          ],
-          [
-            "Anexar ficha técnica",
-            "Sensor A12",
-            "Atlas Importações",
-            "Importador",
-            "15/09",
-            "Atrasada",
-          ],
-        ].map((r) => (
-          <button className="ws-tr pending-cols" onClick={onProduct} key={r[0]}>
-            {r.map((v, i) => (
-              <span key={v}>{i === 5 ? <Status>{v}</Status> : v}</span>
-            ))}
+        {rows.map((row) => (
+          <button
+            className="ws-tr pending-cols"
+            onClick={onProduct}
+            key={row.pendencia}
+          >
+            <span>{row.pendencia}</span>
+            <span>{row.produto}</span>
+            <span>{row.cliente}</span>
+            <span>{row.responsavel}</span>
+            <span>{row.criada}</span>
+            <span>
+              <Status>{row.status}</Status>
+            </span>
           </button>
         ))}
+        {rows.length === 0 && (
+          <p className="ws-empty">
+            Nenhuma pendência corresponde aos filtros selecionados.
+          </p>
+        )}
       </div>
     );
+  }
   return (
     <>
       {menu !== null && (
@@ -388,27 +337,33 @@ function Table({
           <span />
         </div>
         {filteredProducts.map((row, idx) => (
-          <div className="ws-row-wrap" key={row[0]}>
+          <div className="ws-row-wrap" key={row.id}>
             <div
               className="ws-tr product-cols"
               onClick={onProduct}
               role="button"
               tabIndex={0}
             >
-              <strong>{row[0]}</strong>
-              <span>{row[1]}</span>
-              <span>{row[2]}</span>
+              <strong>{row.name}</strong>
+              <span>{row.sku}</span>
+              <span>{row.ncm}</span>
               <span>
                 <i className="ws-bar">
-                  <b style={{ width: row[3] }} />
+                  <b style={{ width: `${productCompleteness(row)}%` }} />
                 </i>
-                {row[3]}
+                {productCompleteness(row)}%
               </span>
               <span>
-                <Status>{row[4]}</Status>
+                <Status>{dispatcherStatusLabel(row)}</Status>
               </span>
-              <span>{row[5]}</span>
-              <span>{row[6]}</span>
+              <span>
+                {row.status === "sent_for_review"
+                  ? "Despachante"
+                  : row.status === "approved"
+                    ? "—"
+                    : "Importador"}
+              </span>
+              <span>{row.updatedAt}</span>
               <span
                 className="ws-more-btn"
                 onClick={(e) => {
@@ -450,16 +405,18 @@ function Table({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleCopyNcm(idx, row[2]);
+                      handleCopyNcm(idx, row.ncm);
                     }}
                   >
-                    {copiedIndex === idx ? "✓ Copiado!" : `Copiar NCM (${row[2]})`}
+                    {copiedIndex === idx
+                      ? "✓ Copiado!"
+                      : `Copiar NCM (${row.ncm})`}
                   </button>
                   <button
                     className="is-danger"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(idx);
+                      handleDelete(row.id);
                     }}
                   >
                     Excluir do catálogo
@@ -469,6 +426,11 @@ function Table({
             </AnimatePresence>
           </div>
         ))}
+        {filteredProducts.length === 0 && (
+          <p className="ws-empty">
+            Nenhum produto corresponde aos filtros selecionados.
+          </p>
+        )}
       </div>
     </>
   );
@@ -479,11 +441,13 @@ function AppTop({
   onSearch,
   onNotify,
   onLogout,
+  unread = 0,
 }: {
   go: (v: View) => void;
   onSearch: () => void;
   onNotify: () => void;
   onLogout: () => void;
+  unread?: number;
 }) {
   return (
     <header className="ws-top">
@@ -495,9 +459,12 @@ function AppTop({
         <button aria-label="Buscar" onClick={onSearch}>
           <Glyph name="search" />
         </button>
-        <button aria-label="Notificações" onClick={onNotify}>
+        <button
+          aria-label={`Notificações (${unread} não lidas)`}
+          onClick={onNotify}
+        >
           <Glyph name="bell" />
-          <i />
+          {unread > 0 && <i />}
         </button>
         <button
           className="ws-profile"
@@ -536,15 +503,26 @@ function Rail({
   return (
     <aside className="ws-rail" aria-label="Navegação rápida">
       {nav.map(([id, icon, label]) => (
-        <button
-          key={id}
-          title={label}
-          className={active === id ? "active" : ""}
-          onClick={() => (id === "assistant" ? openChat() : go(id))}
-          aria-label={label}
-        >
-          <Glyph name={icon} />
-        </button>
+        <div className="ws-rail-item" key={id}>
+          <button
+            title={label}
+            className={active === id ? "active" : ""}
+            onClick={() => (id === "assistant" ? openChat() : go(id))}
+            aria-label={label}
+          >
+            <Glyph name={icon} />
+          </button>
+          {id === "assistant" && (
+            <button
+              className="ws-rail-full"
+              title="Assistente completo"
+              aria-label="Abrir assistente completo"
+              onClick={() => go("assistant")}
+            >
+              <Glyph name="spark" />
+            </button>
+          )}
+        </div>
       ))}
     </aside>
   );
@@ -658,31 +636,25 @@ function Clients({ go }: { go: (v: View) => void }) {
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
-          <div className="ws-tool-select-wrap">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              aria-label="Filtrar por Status"
-            >
-              <option value="Todos">Status: Todos</option>
-              <option value="Em andamento">Em andamento</option>
-              <option value="Atenção necessária">Atenção necessária</option>
-              <option value="Completo">Completo</option>
-            </select>
-            <Glyph name="chevron" size={15} />
-          </div>
-          <div className="ws-tool-select-wrap">
-            <select
-              value={responsavelFilter}
-              onChange={(e) => setResponsavelFilter(e.target.value)}
-              aria-label="Filtrar por Responsável"
-            >
-              <option value="Todos">Responsável: Todos</option>
-              <option value="Importador">Importador</option>
-              <option value="Despachante">Despachante</option>
-            </select>
-            <Glyph name="chevron" size={15} />
-          </div>
+          <Dropdown
+            label="Status"
+            options={[
+              "Todos",
+              "Em andamento",
+              "Atenção necessária",
+              "Completo",
+            ]}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            ariaLabel="Filtrar por Status"
+          />
+          <Dropdown
+            label="Responsável"
+            options={["Todos", "Importador", "Despachante"]}
+            value={responsavelFilter}
+            onChange={setResponsavelFilter}
+            ariaLabel="Filtrar por Responsável"
+          />
         </div>
         <div className="ws-table">
           <div className="ws-tr ws-th client-cols">
@@ -755,8 +727,12 @@ function Clients({ go }: { go: (v: View) => void }) {
                     >
                       Ver pendências
                     </button>
-                    <button onClick={() => setMenu(null)}>Convidar usuário</button>
-                    <button onClick={() => setMenu(null)}>Editar cliente</button>
+                    <button onClick={() => setMenu(null)}>
+                      Convidar usuário
+                    </button>
+                    <button onClick={() => setMenu(null)}>
+                      Editar cliente
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -843,7 +819,335 @@ function ClientDetail({ go }: { go: (v: View) => void }) {
         <Card title="Atividade recente" className="ws-card--wide">
           <Timeline go={go} />
         </Card>
+        <RequestsCard />
       </div>
+    </>
+  );
+}
+function RequestsCard() {
+  const [open, setOpen] = useState(false);
+  const [created, setCreated] = useState<CatalogRequest | null>(null);
+  const [recipientName, setRecipientName] = useState("Mariana Costa");
+  const [recipientEmail, setRecipientEmail] = useState("mariana@atlas.com.br");
+  const [deadline, setDeadline] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 10);
+  });
+  const [message, setMessage] = useState("");
+  const [kind, setKind] = useState<"fill" | "correction">("fill");
+  const [allIncomplete, setAllIncomplete] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>(["p-motor", "p-valvula"]);
+  const [correctionProductId, setCorrectionProductId] = useState("p-valvula");
+  const [correctionFieldKey, setCorrectionFieldKey] = useState("material");
+  const [correctionNote, setCorrectionNote] = useState(
+    "Especifique o tipo de aço utilizado.",
+  );
+  const { requests, products } = useStoreState();
+  const atlasRequests = requests.filter((r) => r.companyId === "atlas");
+  const atlasProducts = productsForCompany("atlas");
+
+  const RequestStatus = ({ status }: { status: CatalogRequest["status"] }) => (
+    <span
+      className={`ws-status ${status === "completed" ? "is-done" : status === "expired" ? "is-warn" : ""}`}
+    >
+      {requestStatusLabel(status)}
+    </span>
+  );
+
+  const close = () => {
+    setOpen(false);
+    setCreated(null);
+  };
+
+  const generate = () => {
+    const incompleteIds = atlasProducts
+      .filter((p) => productCompleteness(p) < 100)
+      .map((p) => p.id);
+    const productIds =
+      kind === "correction"
+        ? [correctionProductId]
+        : allIncomplete
+          ? incompleteIds
+          : selectedIds;
+    const request = createCatalogRequest({
+      companyId: "atlas",
+      recipientName,
+      recipientEmail,
+      productIds,
+      expiresAt: deadline,
+      message: message || undefined,
+      kind,
+      correctionFieldKey: kind === "correction" ? correctionFieldKey : undefined,
+      correctionNote: kind === "correction" ? correctionNote : undefined,
+    });
+    setCreated(request);
+  };
+
+  return (
+    <>
+      <Card
+        title="Solicitações de preenchimento"
+        className="ws-card--wide"
+        action={
+          <button className="ws-quiet" onClick={() => setOpen(true)}>
+            <Glyph name="plus" /> Solicitar informações
+          </button>
+        }
+      >
+        {atlasRequests.length === 0 && (
+          <p className="ws-card-copy">
+            Nenhuma solicitação criada para esta empresa.
+          </p>
+        )}
+        {atlasRequests.map((request) => (
+          <div className="ws-request" key={request.id}>
+            <div>
+              <strong>#{request.id}</strong>
+              <span>
+                {request.productIds.length} produto
+                {request.productIds.length > 1 ? "s" : ""} · {request.recipientName}{" "}
+                · vence {request.expiresAt.split("-").reverse().join("/")}
+              </span>
+              <p>{request.recipientEmail}</p>
+            </div>
+            <RequestStatus status={request.status} />
+            <button
+              className="ws-quiet"
+              onClick={() => navigate(`/r/${request.token}/catalogo`)}
+            >
+              Abrir link
+            </button>
+          </div>
+        ))}
+      </Card>
+      <Modal
+        open={open}
+        onClose={close}
+        title={created ? "Solicitação criada" : "Solicitar informações"}
+      >
+        {!created ? (
+          <>
+            <p className="ws-card-copy" style={{ marginBottom: 16 }}>
+              Gere um link único para o importador preencher somente os produtos
+              incluídos nesta solicitação.
+            </p>
+            <div className="ws-segmented-row">
+              <button
+                className={kind === "fill" ? "active" : ""}
+                onClick={() => setKind("fill")}
+              >
+                Preencher informações
+              </button>
+              <button
+                className={kind === "correction" ? "active" : ""}
+                onClick={() => setKind("correction")}
+              >
+                Corrigir informação
+              </button>
+            </div>
+            <label className="ws-field">
+              <span>Empresa</span>
+              <input value="Atlas Importações · 12.345.678/0001-90" readOnly />
+            </label>
+            <label className="ws-field">
+              <span>Responsável</span>
+              <input
+                value={recipientName}
+                onChange={(e) => setRecipientName(e.target.value)}
+              />
+            </label>
+            <label className="ws-field">
+              <span>E-mail</span>
+              <input
+                type="email"
+                value={recipientEmail}
+                onChange={(e) => setRecipientEmail(e.target.value)}
+              />
+            </label>
+            {kind === "fill" ? (
+              <>
+                <label className="ws-field">
+                  <span>Produtos solicitados</span>
+                  <div className="ws-check-list">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={allIncomplete}
+                        onChange={(e) => setAllIncomplete(e.target.checked)}
+                      />
+                      Todos os produtos incompletos
+                    </label>
+                    {atlasProducts.map((p) => (
+                      <label key={p.id}>
+                        <input
+                          type="checkbox"
+                          disabled={allIncomplete}
+                          checked={selectedIds.includes(p.id)}
+                          onChange={(e) =>
+                            setSelectedIds((ids) =>
+                              e.target.checked
+                                ? [...ids, p.id]
+                                : ids.filter((id) => id !== p.id),
+                            )
+                          }
+                        />
+                        <span>
+                          {p.name} <small>· {productCompleteness(p)}%</small>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </label>
+              </>
+            ) : (
+              <>
+                <label className="ws-field">
+                  <span>Produto</span>
+                  <select
+                    value={correctionProductId}
+                    onChange={(e) => setCorrectionProductId(e.target.value)}
+                  >
+                    {atlasProducts.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="ws-field">
+                  <span>Campo</span>
+                  <select
+                    value={correctionFieldKey}
+                    onChange={(e) => setCorrectionFieldKey(e.target.value)}
+                  >
+                    {(
+                      atlasProducts.find((p) => p.id === correctionProductId)
+                        ?.attributes ?? []
+                    ).map((a) => (
+                      <option key={a.key} value={a.key}>
+                        {a.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="ws-field">
+                  <span>Observação</span>
+                  <textarea
+                    value={correctionNote}
+                    onChange={(e) => setCorrectionNote(e.target.value)}
+                    placeholder="Descreva a correção necessária"
+                  />
+                </label>
+              </>
+            )}
+            <label className="ws-field">
+              <span>Prazo</span>
+              <input
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+              />
+            </label>
+            <label className="ws-field">
+              <span>Mensagem opcional</span>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Ex.: Precisamos destas informações antes do embarque."
+              />
+            </label>
+            <div className="ws-modal-actions">
+              <button className="ws-quiet" onClick={close}>
+                Cancelar
+              </button>
+              <button
+                className="ws-primary"
+                onClick={generate}
+                disabled={
+                  kind === "correction"
+                    ? !correctionProductId
+                    : !allIncomplete && selectedIds.length === 0
+                }
+              >
+                Gerar solicitação
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="ws-request-created">
+            <span className="ws-request-check">
+              <Glyph name="check" size={22} />
+            </span>
+            <h3>Convite enviado para {created.recipientEmail}</h3>
+            <p className="ws-card-copy">
+              O importador poderá preencher somente os produtos desta
+              solicitação.
+            </p>
+            <div className="ws-request-link">
+              prisma.com/r/{created.token}/catalogo
+            </div>
+            <div className="ws-request-meta">
+              <div>
+                <span>Destinatário</span>
+                <strong>{created.recipientName}</strong>
+              </div>
+              <div>
+                <span>Prazo</span>
+                <strong>{created.expiresAt.split("-").reverse().join("/")}</strong>
+              </div>
+              <div>
+                <span>Produtos</span>
+                <strong>{created.productIds.length}</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <RequestStatus status={created.status} />
+              </div>
+            </div>
+            <div className="ws-modal-actions">
+              <button
+                className="ws-quiet"
+                onClick={() => {
+                  navigator.clipboard?.writeText(
+                    `https://prisma.com/r/${created.token}/catalogo`,
+                  );
+                  showToast("Link copiado");
+                }}
+              >
+                Copiar link
+              </button>
+              <button
+                className="ws-quiet"
+                onClick={() =>
+                  showToast(
+                    `Convite enviado para ${created.recipientEmail} — simulação`,
+                  )
+                }
+              >
+                Enviar por e-mail
+              </button>
+              <button
+                className="ws-primary"
+                onClick={() => navigate(`/r/${created.token}/catalogo`)}
+              >
+                Abrir link
+              </button>
+            </div>
+            <button
+              className="ws-link"
+              style={{ marginTop: 14 }}
+              onClick={() => {
+                // Atalho de demonstração: entra como o importador da empresa.
+                login("u-mariana");
+                navigate("/app");
+              }}
+            >
+              Abrir como importador (demonstração)
+            </button>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }
@@ -892,46 +1196,44 @@ function Catalog({ go }: { go: (v: View) => void }) {
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
-          <div className="ws-tool-select-wrap">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              aria-label="Filtrar por Status"
-            >
-              <option value="Todos">Status: Todos</option>
-              <option value="Aguardando importador">Aguardando importador</option>
-              <option value="Aprovado">Aprovado</option>
-              <option value="Correção solicitada">Correção solicitada</option>
-            </select>
-            <Glyph name="chevron" size={15} />
-          </div>
-          <div className="ws-tool-select-wrap">
-            <select
-              value={ncmFilter}
-              onChange={(e) => setNcmFilter(e.target.value)}
-              aria-label="Filtrar por NCM"
-            >
-              <option value="Todas">NCM: Todas</option>
-              <option value="8501.10.19">8501.10.19</option>
-              <option value="9031.80.99">9031.80.99</option>
-              <option value="8481.80.99">8481.80.99</option>
-              <option value="8413.70.90">8413.70.90</option>
-              <option value="8537.10.90">8537.10.90</option>
-            </select>
-            <Glyph name="chevron" size={15} />
-          </div>
-          <div className="ws-tool-select-wrap">
-            <select
-              value={completudeFilter}
-              onChange={(e) => setCompletudeFilter(e.target.value)}
-              aria-label="Filtrar por Completude"
-            >
-              <option value="Todas">Completude: Todas</option>
-              <option value="100%">100% (Completo)</option>
-              <option value="incomplete">&lt; 100% (Incompleto)</option>
-            </select>
-            <Glyph name="chevron" size={15} />
-          </div>
+          <Dropdown
+            label="Status"
+            options={[
+              "Todos",
+              "Aguardando importador",
+              "Aguardando despachante",
+              "Correção solicitada",
+              "Aprovado",
+            ]}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            ariaLabel="Filtrar por Status"
+          />
+          <Dropdown
+            label="NCM"
+            options={[
+              "Todas",
+              "8501.10.19",
+              "9031.80.99",
+              "8481.80.99",
+              "8413.70.90",
+              "8537.10.90",
+            ]}
+            value={ncmFilter}
+            onChange={setNcmFilter}
+            ariaLabel="Filtrar por NCM"
+          />
+          <Dropdown
+            label="Completude"
+            options={[
+              ["Todas", "Todas"],
+              ["100% (Completo)", "100%"],
+              ["< 100% (Incompleto)", "incomplete"],
+            ]}
+            value={completudeFilter}
+            onChange={setCompletudeFilter}
+            ariaLabel="Filtrar por Completude"
+          />
         </div>
         {selected && (
           <div className="ws-bulk">
@@ -957,6 +1259,7 @@ function Catalog({ go }: { go: (v: View) => void }) {
           statusFilter={statusFilter}
           ncmFilter={ncmFilter}
           completudeFilter={completudeFilter}
+          companyId="atlas"
         />
       </Card>
     </>
@@ -970,6 +1273,28 @@ function Product({
   review?: boolean;
 }) {
   const [correction, setCorrection] = useState(false);
+  const [askCorrection, setAskCorrection] = useState(false);
+  const [corrField, setCorrField] = useState("material");
+  const [corrNote, setCorrNote] = useState("");
+  const [addFieldOpen, setAddFieldOpen] = useState(false);
+  const [fieldLabel, setFieldLabel] = useState("");
+  const [fieldRequired, setFieldRequired] = useState(true);
+  const [fieldNote, setFieldNote] = useState("");
+  const { products: storeProducts } = useStoreState();
+  const motorProduct = storeProducts.find((p) => p.id === "p-motor");
+  const correctionFields =
+    motorProduct?.attributes.map((a) => ({ key: a.key, label: a.label })) ?? [];
+  const customFields = motorProduct ? customFieldsOf(motorProduct) : [];
+  const closeAskCorrection = () => {
+    setAskCorrection(false);
+    setCorrNote("");
+  };
+  const closeAddField = () => {
+    setAddFieldOpen(false);
+    setFieldLabel("");
+    setFieldNote("");
+    setFieldRequired(true);
+  };
   if (review)
     return (
       <>
@@ -1003,10 +1328,20 @@ function Product({
               setCorrection={setCorrection}
             />
             <div className="ws-form-actions">
-              <button className="ws-quiet">
+              <button
+                className="ws-quiet"
+                onClick={() => showToast("Correções enviadas ao importador")}
+              >
                 Enviar correções ao importador
               </button>
-              <button className="ws-primary" onClick={() => go("product")}>
+              <button
+                className="ws-primary"
+                onClick={() => {
+                  approveProduct("p-motor");
+                  showToast("Produto aprovado");
+                  go("catalog");
+                }}
+              >
                 Aprovar produto
               </button>
             </div>
@@ -1046,14 +1381,71 @@ function Product({
           <button className="ws-quiet" onClick={() => go("create-product")}>
             Editar
           </button>
-          <button className="ws-quiet" onClick={() => go("pending-detail")}>
+          <button className="ws-quiet" onClick={() => setAskCorrection(true)}>
             Solicitar correção
           </button>
-          <button className="ws-primary" onClick={() => go("review")}>
+          <button
+            className="ws-primary"
+            onClick={() => {
+              approveProduct("p-motor");
+              showToast("Produto aprovado");
+              go("catalog");
+            }}
+          >
             Aprovar
           </button>
         </div>
       </div>
+      <Modal
+        open={askCorrection}
+        onClose={closeAskCorrection}
+        title="Solicitar correção"
+      >
+        <p className="ws-card-copy" style={{ marginBottom: 14 }}>
+          Aponte o campo e descreva o ajuste necessário. O importador receberá a
+          solicitação no portal.
+        </p>
+        <label className="ws-field">
+          <span>Campo</span>
+          <select
+            value={corrField}
+            onChange={(e) => setCorrField(e.target.value)}
+          >
+            {correctionFields.map((f) => (
+              <option key={f.key} value={f.key}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="ws-field">
+          <span>Observação</span>
+          <textarea
+            value={corrNote}
+            onChange={(e) => setCorrNote(e.target.value)}
+            placeholder="Descreva a correção necessária"
+          />
+        </label>
+        <div className="ws-modal-actions">
+          <button className="ws-quiet" onClick={closeAskCorrection}>
+            Cancelar
+          </button>
+          <button
+            className="ws-primary"
+            onClick={() => {
+              requestCorrection(
+                "p-motor",
+                corrField,
+                corrNote || "Complete as informações deste campo.",
+              );
+              closeAskCorrection();
+              showToast("Correção solicitada ao importador");
+            }}
+          >
+            Solicitar correção
+          </button>
+        </div>
+      </Modal>
       <div className="ws-tabs">
         <button className="active">Dados</button>
         <button onClick={() => go("pending")}>Pendências</button>
@@ -1112,7 +1504,99 @@ function Product({
             </div>
           </Card>
         </div>
+        <Card
+          title="Informações solicitadas ao importador"
+          action={
+            <button className="ws-quiet" onClick={() => setAddFieldOpen(true)}>
+              <Glyph name="plus" /> Adicionar campo
+            </button>
+          }
+        >
+          <p className="ws-card-copy" style={{ marginBottom: 10 }}>
+            Campos personalizados que o importador precisa preencher neste
+            produto.
+          </p>
+          {customFields.length === 0 && (
+            <p className="ws-card-copy">Nenhum campo personalizado.</p>
+          )}
+          {customFields.map((field) => (
+            <div className="ws-custom-field" key={field.key}>
+              <div>
+                <strong>
+                  {field.label}
+                  {field.required ? " *" : ""}
+                </strong>
+                {field.note && <p>{field.note}</p>}
+              </div>
+              <Status>{field.required ? "Obrigatório" : "Opcional"}</Status>
+              <button
+                className="ws-icon"
+                aria-label={`Remover campo ${field.label}`}
+                onClick={() => {
+                  removeCustomField("p-motor", field.key);
+                  showToast("Campo removido");
+                }}
+              >
+                <Glyph name="close" size={14} />
+              </button>
+            </div>
+          ))}
+        </Card>
       </div>
+      <Modal
+        open={addFieldOpen}
+        onClose={closeAddField}
+        title="Adicionar campo personalizado"
+      >
+        <p className="ws-card-copy" style={{ marginBottom: 16 }}>
+          O campo será exibido no portal do importador, com a instrução abaixo,
+          e passará a contar na completude do produto.
+        </p>
+        <label className="ws-field">
+          <span>Nome do campo</span>
+          <input
+            value={fieldLabel}
+            onChange={(e) => setFieldLabel(e.target.value)}
+            placeholder="Ex.: Número de série do fabricante"
+          />
+        </label>
+        <label className="ws-switch" style={{ marginBottom: 14 }}>
+          <input
+            type="checkbox"
+            checked={fieldRequired}
+            onChange={(e) => setFieldRequired(e.target.checked)}
+          />{" "}
+          Campo obrigatório
+        </label>
+        <label className="ws-field">
+          <span>Instrução para o importador (opcional)</span>
+          <textarea
+            value={fieldNote}
+            onChange={(e) => setFieldNote(e.target.value)}
+            placeholder="Ex.: informe o número gravado na placa de identificação."
+          />
+        </label>
+        <div className="ws-modal-actions">
+          <button className="ws-quiet" onClick={closeAddField}>
+            Cancelar
+          </button>
+          <button
+            className="ws-primary"
+            disabled={!fieldLabel.trim()}
+            onClick={() => {
+              addCustomField("p-motor", {
+                label: fieldLabel,
+                required: fieldRequired,
+                note: fieldNote,
+              });
+              closeAddField();
+              showToast("Campo adicionado e solicitado ao importador");
+            }}
+          >
+            Adicionar campo
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }
@@ -1176,6 +1660,11 @@ function Pending({
   go: (v: View) => void;
   detail?: boolean;
 }) {
+  const [clientFilter, setClientFilter] = useState("Todos");
+  const [cnpjFilter, setCnpjFilter] = useState("Todos");
+  const [responsavelFilter, setResponsavelFilter] = useState("Todos");
+  const [tipoFilter, setTipoFilter] = useState("Todos");
+  const [statusFilter, setStatusFilter] = useState("Todos");
   if (detail)
     return (
       <>
@@ -1232,23 +1721,58 @@ function Pending({
       </div>
       <Card title="Pendências" className="ws-table-card">
         <div className="ws-tools">
-          <button>
-            Cliente <Glyph name="chevron" />
-          </button>
-          <button>
-            CNPJ <Glyph name="chevron" />
-          </button>
-          <button>
-            Responsável <Glyph name="chevron" />
-          </button>
-          <button>
-            Tipo <Glyph name="chevron" />
-          </button>
-          <button>
-            Status <Glyph name="chevron" />
-          </button>
+          <Dropdown
+            label="Cliente"
+            options={["Todos", "Atlas Importações", "Ocean Trade"]}
+            value={clientFilter}
+            onChange={setClientFilter}
+            hideAllLabel
+            ariaLabel="Filtrar por Cliente"
+          />
+          <Dropdown
+            label="CNPJ"
+            options={["Todos", "12.345.678/0001-90", "32.147.890/0001-12"]}
+            value={cnpjFilter}
+            onChange={setCnpjFilter}
+            hideAllLabel
+            ariaLabel="Filtrar por CNPJ"
+          />
+          <Dropdown
+            label="Responsável"
+            options={["Todos", "Importador", "Despachante"]}
+            value={responsavelFilter}
+            onChange={setResponsavelFilter}
+            hideAllLabel
+            ariaLabel="Filtrar por Responsável"
+          />
+          <Dropdown
+            label="Tipo"
+            options={["Todos", "Informação", "Revisão", "Documento"]}
+            value={tipoFilter}
+            onChange={setTipoFilter}
+            hideAllLabel
+            ariaLabel="Filtrar por Tipo"
+          />
+          <Dropdown
+            label="Status"
+            options={["Todos", "Aguardando cliente", "Em revisão", "Atrasada"]}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            hideAllLabel
+            ariaLabel="Filtrar por Status"
+          />
         </div>
-        <Table pending onProduct={() => go("pending-detail")} />
+        <Table
+          pending
+          onProduct={() => go("pending-detail")}
+          pendingFilters={{
+            cliente: clientFilter,
+            cnpj: cnpjFilter,
+            responsavel: responsavelFilter,
+            tipo: tipoFilter,
+            status: statusFilter,
+          }}
+        />
       </Card>
     </>
   );
@@ -1268,11 +1792,31 @@ const prismaFieldOptions = [
 ];
 
 const initialMappingRows = [
-  { col: "Produto", sample: "Motor Elétrico XP-200", defaultMap: "Nome do produto" },
-  { col: "NCM", sample: "8501.10.19", defaultMap: "NCM (Classificação Fiscal)" },
-  { col: "Descrição", sample: "Motores elétricos de potência inferior...", defaultMap: "Descrição comercial" },
-  { col: "Código / SKU", sample: "MTR-0021", defaultMap: "Código interno / SKU" },
-  { col: "Fabricante", sample: "Volter Tech", defaultMap: "Fabricante / Marca" },
+  {
+    col: "Produto",
+    sample: "Motor Elétrico XP-200",
+    defaultMap: "Nome do produto",
+  },
+  {
+    col: "NCM",
+    sample: "8501.10.19",
+    defaultMap: "NCM (Classificação Fiscal)",
+  },
+  {
+    col: "Descrição",
+    sample: "Motores elétricos de potência inferior...",
+    defaultMap: "Descrição comercial",
+  },
+  {
+    col: "Código / SKU",
+    sample: "MTR-0021",
+    defaultMap: "Código interno / SKU",
+  },
+  {
+    col: "Fabricante",
+    sample: "Volter Tech",
+    defaultMap: "Fabricante / Marca",
+  },
   { col: "Peso Líquido", sample: "4,50 kg", defaultMap: "Peso líquido (kg)" },
 ];
 
@@ -1383,7 +1927,9 @@ function Import({
           {step === 2 && (
             <Card title="Mapeamento de colunas">
               <p className="ws-card-copy" style={{ marginBottom: "18px" }}>
-                Associe as colunas detectadas no arquivo <strong>catalogo_setembro.xlsx</strong> aos campos cadastrais do PRISMA.
+                Associe as colunas detectadas no arquivo{" "}
+                <strong>catalogo_setembro.xlsx</strong> aos campos cadastrais do
+                PRISMA.
               </p>
               <div className="ws-map">
                 <div className="ws-map-th">Coluna da planilha</div>
@@ -1398,18 +1944,14 @@ function Import({
                       <code>{row.sample}</code>
                     </div>
                     <div className="ws-map-select-wrap">
-                      <select
+                      <Dropdown
+                        options={prismaFieldOptions}
                         value={columnMappings[row.col] || row.defaultMap}
-                        onChange={(e) => handleMappingChange(row.col, e.target.value)}
-                        aria-label={`Mapeamento para coluna ${row.col}`}
-                      >
-                        {prismaFieldOptions.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                      <Glyph name="chevron" size={16} />
+                        onChange={(v) => handleMappingChange(row.col, v)}
+                        ariaLabel={`Mapeamento para coluna ${row.col}`}
+                        triggerClass="ws-map-select"
+                        menuClass="ws-menu--scroll"
+                      />
                     </div>
                   </div>
                 ))}
@@ -1444,7 +1986,9 @@ function Import({
             <Card className="ws-confirm-card">
               <div className="ws-confirm-head">
                 <h2>Confirmar importação</h2>
-                <p>Revise o resumo da operação antes de atualizar o catálogo.</p>
+                <p>
+                  Revise o resumo da operação antes de atualizar o catálogo.
+                </p>
               </div>
               <div className="ws-confirm-grid">
                 <div className="ws-confirm-item">
@@ -1468,7 +2012,10 @@ function Import({
                 <button className="ws-quiet" onClick={() => setStep(3)}>
                   Voltar
                 </button>
-                <button className="ws-primary" onClick={() => go("import-result")}>
+                <button
+                  className="ws-primary"
+                  onClick={() => go("import-result")}
+                >
                   Confirmar importação <Glyph name="arrow" />
                 </button>
               </div>
@@ -1479,221 +2026,11 @@ function Import({
     </>
   );
 }
-function ImporterHome({ go }: { go: (v: View) => void }) {
-  return (
-    <>
-      <div className="ws-page-title">
-        <div>
-          <h1>Olá, Mariana</h1>
-          <p>Veja o que precisa da sua atenção.</p>
-        </div>
-      </div>
-      <Card title="Seu catálogo" className="ws-card--large">
-        <div className="ws-catalog-summary">
-          <div>
-            <h2>Atlas Importações</h2>
-            <p>12.345.678/0001-90</p>
-          </div>
-          <div>
-            <strong>88%</strong>
-            <span>completo</span>
-          </div>
-        </div>
-        <i className="ws-progress big">
-          <b style={{ width: "88%" }} />
-        </i>
-      </Card>
-      <div className="ws-metrics-grid">
-        <Metric value="182" label="Produtos" />
-        <Metric value="18" label="Precisam de informação" />
-        <Metric value="4" label="Correções solicitadas" />
-        <Metric value="7" label="Em revisão" />
-      </div>
-      <Card title="O que você precisa fazer">
-        <div className="ws-action-row">
-          <p>
-            <strong>
-              11 produtos possuem informações obrigatórias pendentes.
-            </strong>
-            <span>Complete dados antes do envio para revisão.</span>
-          </p>
-          <button onClick={() => go("guided")}>
-            Continuar preenchimento <Glyph name="arrow" />
-          </button>
-        </div>
-        <div className="ws-action-row">
-          <p>
-            <strong>4 produtos possuem correções solicitadas.</strong>
-            <span>Seu despachante deixou instruções em cada produto.</span>
-          </p>
-          <button onClick={() => go("corrections")}>
-            Corrigir produto <Glyph name="arrow" />
-          </button>
-        </div>
-      </Card>
-    </>
-  );
-}
-function ImporterCatalog({ go }: { go: (v: View) => void }) {
-  return (
-    <>
-      <div className="ws-page-title">
-        <div>
-          <h1>Meu Catálogo</h1>
-          <p>Complete as informações que faltam antes da revisão.</p>
-        </div>
-      </div>
-      <Card className="ws-table-card">
-        <div className="ws-tools">
-          <label>
-            <Glyph name="search" />
-            <input placeholder="Buscar produto" />
-          </label>
-        </div>
-        <div className="ws-tabs">
-          <button className="active">Todos</button>
-          <button>Preciso preencher</button>
-          <button>Correções solicitadas</button>
-          <button>Em revisão</button>
-          <button>Aprovados</button>
-        </div>
-        {products.map((p) => (
-          <button
-            className="ws-importer-product"
-            key={p[0]}
-            onClick={() =>
-              go(p[0].includes("Válvula") ? "corrections" : "guided")
-            }
-          >
-            <div>
-              <strong>{p[0]}</strong>
-              <span>NCM {p[2]}</span>
-            </div>
-            <span>{p[3]} completo</span>
-            <p>
-              {p[0].includes("Motor")
-                ? "Faltam 3 informações."
-                : "Em revisão pelo despachante."}
-            </p>
-            <b>
-              {p[0].includes("Motor")
-                ? "Continuar preenchimento"
-                : "Ver produto"}
-              <Glyph name="arrow" />
-            </b>
-          </button>
-        ))}
-      </Card>
-    </>
-  );
-}
-function Guided({ go }: { go: (v: View) => void }) {
-  const [done, setDone] = useState(0);
-  const fields = ["Material", "Potência", "Tensão", "Aplicação"];
-  return (
-    <>
-      <Breadcrumb>Meu Catálogo / Motor Elétrico XP-200</Breadcrumb>
-      <div className="ws-page-title">
-        <div>
-          <h1>Complete as informações</h1>
-          <p>Motor Elétrico XP-200 · 8 de 12 informações concluídas</p>
-        </div>
-      </div>
-      <div className="ws-layout guided-layout">
-        <Card title="Informações pendentes" className="ws-card--large">
-          {fields.map((f, i) => (
-            <label className="ws-guided-field" key={f}>
-              <strong>{f} *</strong>
-              <span>
-                {f === "Material"
-                  ? "Informe o material principal utilizado no produto."
-                  : `Informe ${f.toLowerCase()} indicada pelo fabricante.`}
-              </span>
-              <input
-                placeholder={`Adicionar ${f.toLowerCase()}`}
-                onChange={() => setDone(Math.max(done, i + 1))}
-              />
-            </label>
-          ))}
-          <div className="ws-form-actions">
-            <button className="ws-quiet">Salvar</button>
-            <button
-              className="ws-primary"
-              onClick={() => go("importer-catalog")}
-            >
-              Salvar e próximo produto
-            </button>
-          </div>
-        </Card>
-        <Card title="Progresso">
-          <div className="ws-big-number">
-            {8 + done} <span>/ 12</span>
-          </div>
-          <i className="ws-progress">
-            <b style={{ width: `${((8 + done) / 12) * 100}%` }} />
-          </i>
-          <p className="ws-card-copy">4 produtos restantes</p>
-        </Card>
-      </div>
-    </>
-  );
-}
-function Corrections({ go }: { go: (v: View) => void }) {
-  const [resolved, setResolved] = useState(2);
-  const corrections = [
-    ["Material", "Alumínio", "Informe também a composição percentual."],
-    ["Aplicação", "—", "Explique onde o equipamento será utilizado."],
-  ];
-  return (
-    <>
-      <Breadcrumb>Meu Catálogo / Motor Elétrico XP-200</Breadcrumb>
-      <div className="ws-page-title">
-        <div>
-          <h1>Correções solicitadas</h1>
-          <p>
-            O despachante precisa de algumas informações antes da aprovação.
-          </p>
-        </div>
-      </div>
-      <div className="ws-layout guided-layout">
-        <Card title="Motor Elétrico XP-200" className="ws-card--large">
-          <p className="ws-card-copy">{resolved} de 3 correções concluídas</p>
-          <i className="ws-progress">
-            <b style={{ width: `${(resolved / 3) * 100}%` }} />
-          </i>
-          {corrections.map(([field, value, message]) => (
-            <div className="ws-guided-field" key={field}>
-              <strong>{field}</strong>
-              <span>Valor atual: {value}</span>
-              <span>
-                <b>Mensagem do despachante:</b> {message}
-              </span>
-              <input placeholder={`Corrigir ${field.toLowerCase()}`} />
-              <button className="ws-quiet" onClick={() => setResolved(3)}>
-                Marcar como resolvido
-              </button>
-            </div>
-          ))}
-          <div className="ws-form-actions">
-            <button
-              className="ws-primary"
-              onClick={() => go("importer-catalog")}
-            >
-              Enviar novamente para revisão <Glyph name="arrow" />
-            </button>
-          </div>
-        </Card>
-        <Card title="Próximo passo">
-          <p className="ws-card-copy">
-            Quando todas as correções estiverem resolvidas, envie o produto
-            novamente para o despachante.
-          </p>
-        </Card>
-      </div>
-    </>
-  );
-}
 function Activity({ go }: { go: (v: View) => void }) {
+  const [clientFilter, setClientFilter] = useState("Todos");
+  const [userFilter, setUserFilter] = useState("Todos");
+  const [typeFilter, setTypeFilter] = useState("Todos");
+  const [orderFilter, setOrderFilter] = useState("Mais recentes");
   return (
     <>
       <div className="ws-page-title">
@@ -1704,20 +2041,53 @@ function Activity({ go }: { go: (v: View) => void }) {
       </div>
       <Card title="Atividade" className="ws-card--large">
         <div className="ws-tools">
-          <button>
-            Cliente <Glyph name="chevron" />
-          </button>
-          <button>
-            Usuário <Glyph name="chevron" />
-          </button>
-          <button>
-            Tipo <Glyph name="chevron" />
-          </button>
-          <button>
-            Data <Glyph name="chevron" />
-          </button>
+          <Dropdown
+            label="Cliente"
+            options={["Todos", "Atlas Importações", "Ocean Trade"]}
+            value={clientFilter}
+            onChange={setClientFilter}
+            hideAllLabel
+            ariaLabel="Filtrar por Cliente"
+          />
+          <Dropdown
+            label="Usuário"
+            options={["Todos", "Carlos", "Mariana", "Sistema"]}
+            value={userFilter}
+            onChange={setUserFilter}
+            hideAllLabel
+            ariaLabel="Filtrar por Usuário"
+          />
+          <Dropdown
+            label="Tipo"
+            options={[
+              "Todos",
+              "Aprovação",
+              "Atualização",
+              "Importação",
+              "Lembrete",
+            ]}
+            value={typeFilter}
+            onChange={setTypeFilter}
+            hideAllLabel
+            ariaLabel="Filtrar por Tipo"
+          />
+          <Dropdown
+            label="Data"
+            options={["Mais recentes", "Mais antigas"]}
+            value={orderFilter}
+            onChange={setOrderFilter}
+            ariaLabel="Ordenar por Data"
+          />
         </div>
-        <Timeline go={go} />
+        <Timeline
+          go={go}
+          filters={{
+            client: clientFilter,
+            user: userFilter,
+            type: typeFilter,
+            order: orderFilter,
+          }}
+        />
       </Card>
     </>
   );
@@ -1785,7 +2155,7 @@ function Users() {
               {r.map((v, i) => (
                 <span key={v}>{i === 6 ? <Status>{v}</Status> : v}</span>
               ))}
-              <button>
+              <button className="ws-more-btn" aria-label={`Opções de ${r[0]}`}>
                 <Glyph name="more" />
               </button>
             </div>
@@ -1859,37 +2229,61 @@ function Assistant({ go }: { go: (v: View) => void }) {
   const [prompt, setPrompt] = useState(
     "Quais produtos da Atlas Importações estão incompletos?",
   );
+  const [context, setContext] = useState("Todos os clientes");
+  const [conversations, setConversations] = useState([
+    "Atlas — produtos incompletos",
+    "Pendências desta semana",
+    "Importação setembro",
+    "Revisões pendentes",
+  ]);
   const messages = useMemo(
     () =>
-      prompt.includes("Motor")
+      context === "Ocean Trade"
         ? {
             answer:
-              "O produto está 78% completo. Ainda faltam três campos obrigatórios: Material, Potência e Aplicação.",
-            items: ["Material", "Potência", "Aplicação"],
-            action: "Abrir produto",
+              "A Ocean Trade tem 17 pendências abertas, concentradas em 9 produtos. A maioria aguarda informação do importador.",
+            items: [
+              "Válvula VX-80 · 78% · 3 campos pendentes",
+              "4 produtos aguardam ficha técnica",
+            ],
+            action: "Ver todos",
           }
-        : prompt.includes("planilha")
+        : context === "Brava Equipamentos"
           ? {
               answer:
-                "A última importação encontrou 10 registros que precisam de atenção.",
-              items: [
-                "3 NCMs inválidas",
-                "4 produtos sem atributos obrigatórios",
-                "2 códigos duplicados",
-                "1 produto sem descrição",
-              ],
-              action: "Ver inconsistências",
+                "O catálogo da Brava Equipamentos está 100% completo. Não há pendências abertas neste momento.",
+              items: ["48 produtos · 100% · 0 pendências"],
+              action: "Ver catálogo",
             }
-          : {
-              answer:
-                "Encontrei 18 produtos incompletos no CNPJ 12.345.678/0001-90. 11 aguardam informações do importador, 4 possuem erros de validação e 3 estão aguardando revisão.",
-              items: [
-                "Motor XP-200 · 78% · 3 campos pendentes",
-                "Sensor Industrial A12 · 82% · 2 campos pendentes",
-              ],
-              action: "Ver todos",
-            },
-    [prompt],
+          : prompt.includes("Motor")
+            ? {
+                answer:
+                  "O produto está 78% completo. Ainda faltam três campos obrigatórios: Material, Potência e Aplicação.",
+                items: ["Material", "Potência", "Aplicação"],
+                action: "Abrir produto",
+              }
+            : prompt.includes("planilha")
+              ? {
+                  answer:
+                    "A última importação encontrou 10 registros que precisam de atenção.",
+                  items: [
+                    "3 NCMs inválidas",
+                    "4 produtos sem atributos obrigatórios",
+                    "2 códigos duplicados",
+                    "1 produto sem descrição",
+                  ],
+                  action: "Ver inconsistências",
+                }
+              : {
+                  answer:
+                    "Encontrei 18 produtos incompletos no CNPJ 12.345.678/0001-90. 11 aguardam informações do importador, 4 possuem erros de validação e 3 estão aguardando revisão.",
+                  items: [
+                    "Motor XP-200 · 78% · 3 campos pendentes",
+                    "Sensor Industrial A12 · 82% · 2 campos pendentes",
+                  ],
+                  action: "Ver todos",
+                },
+    [prompt, context],
   );
   return (
     <>
@@ -1903,9 +2297,19 @@ function Assistant({ go }: { go: (v: View) => void }) {
         <Card className="ws-chat-card">
           <div className="ws-context">
             <span>Contexto:</span>
-            <button>
-              Todos os clientes <Glyph name="chevron" />
-            </button>
+            <Dropdown
+              options={[
+                "Todos os clientes",
+                "Atlas Importações",
+                "Ocean Trade",
+                "Brava Equipamentos",
+              ]}
+              value={context}
+              onChange={setContext}
+              ariaLabel="Selecionar contexto do assistente"
+              triggerClass="ws-context-trigger"
+              chevronSize={12}
+            />
           </div>
           <div className="ws-chat-log">
             <div className="ws-user-message">{prompt}</div>
@@ -1929,7 +2333,9 @@ function Assistant({ go }: { go: (v: View) => void }) {
                     go(
                       messages.action === "Abrir produto"
                         ? "product"
-                        : "pending",
+                        : messages.action === "Ver catálogo"
+                          ? "catalog"
+                          : "pending",
                     )
                   }
                 >
@@ -1937,21 +2343,6 @@ function Assistant({ go }: { go: (v: View) => void }) {
                 </button>
               </div>
             </div>
-          </div>
-          <div className="ws-suggest">
-            <button
-              onClick={() => setPrompt("Quais clientes precisam de atenção?")}
-            >
-              Quais clientes precisam de atenção?
-            </button>
-            <button onClick={() => setPrompt("O que falta no Motor XP-200?")}>
-              O que falta no Motor XP-200?
-            </button>
-            <button
-              onClick={() => setPrompt("O que deu errado na última planilha?")}
-            >
-              Analise a última importação
-            </button>
           </div>
           <form
             className="ws-chat-input"
@@ -1983,15 +2374,23 @@ function Assistant({ go }: { go: (v: View) => void }) {
         <Card
           title="Conversas"
           className="ws-chat-history"
-          action={<button className="ws-quiet">Nova conversa</button>}
+          action={
+            <button
+              className="ws-quiet"
+              onClick={() => {
+                setConversations((c) => ["Nova conversa", ...c]);
+                setContext("Todos os clientes");
+                setPrompt(
+                  "Quais produtos da Atlas Importações estão incompletos?",
+                );
+              }}
+            >
+              Nova conversa
+            </button>
+          }
         >
-          {[
-            "Atlas — produtos incompletos",
-            "Pendências desta semana",
-            "Importação setembro",
-            "Revisões pendentes",
-          ].map((x) => (
-            <button key={x}>
+          {conversations.map((x) => (
+            <button key={x} onClick={() => setPrompt(x)}>
               {x}
               <Glyph name="arrow" />
             </button>
@@ -2009,30 +2408,75 @@ function FormPage({
   type: "client" | "product";
 }) {
   const [success, setSuccess] = useState(false);
+  const [inviteSent, setInviteSent] = useState(false);
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [accessEmail, setAccessEmail] = useState("mariana@atlas.com.br");
   const isProduct = type === "product";
 
   if (success) {
     return (
-      <Card className="ws-success">
-        <span>
-          <Glyph name="check" size={26} />
-        </span>
-        <h2>
-          {isProduct
-            ? "Produto salvo com sucesso."
-            : "Cliente criado com sucesso."}
-        </h2>
-        <p>O fluxo demonstrativo foi concluído.</p>
-        <div>
-          <button
-            className="ws-primary"
-            onClick={() => go(isProduct ? "product" : "client")}
-          >
-            {isProduct ? "Abrir produto" : "Abrir cliente"}
-          </button>
-          {!isProduct && <button className="ws-quiet">Copiar convite</button>}
-        </div>
-      </Card>
+      <>
+        <Card className="ws-success">
+          <span>
+            <Glyph name="check" size={26} />
+          </span>
+          <h2>
+            {isProduct
+              ? "Produto salvo com sucesso."
+              : "Cliente criado com sucesso."}
+          </h2>
+          <p>O fluxo demonstrativo foi concluído.</p>
+          <div>
+            <button
+              className="ws-primary"
+              onClick={() => go(isProduct ? "product" : "client")}
+            >
+              {isProduct ? "Abrir produto" : "Abrir cliente"}
+            </button>
+          </div>
+        </Card>
+        {!isProduct && (
+          <Card title="Acesso do importador">
+            <div className="ws-access">
+              <div className="ws-access-row">
+                <span>Status:</span>
+                <Status>
+                  {inviteSent ? "Convite enviado" : "Convite pendente"}
+                </Status>
+              </div>
+              <p className="ws-card-copy">
+                {inviteSent
+                  ? `Convite enviado para ${accessEmail}. O importador poderá acessar o portal com este e-mail.`
+                  : "O acesso do importador será liberado após o envio do convite, associado ao CNPJ desta empresa."}
+              </p>
+              <div className="ws-access-actions">
+                <button
+                  className="ws-primary"
+                  disabled={inviteSent}
+                  onClick={() => {
+                    setInviteSent(true);
+                    // Simulação: em produção, dispararia e-mail transacional.
+                    showToast(`Convite enviado para ${accessEmail} — simulação`);
+                  }}
+                >
+                  {inviteSent ? "Convite enviado" : "Enviar convite"}
+                </button>
+                <button
+                  className="ws-quiet"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(
+                      "https://prisma.com/convidar/atlas",
+                    );
+                    showToast("Link de acesso copiado");
+                  }}
+                >
+                  Copiar link de acesso
+                </button>
+              </div>
+            </div>
+          </Card>
+        )}
+      </>
     );
   }
 
@@ -2050,10 +2494,18 @@ function FormPage({
           <FormCard
             title="Empresa"
             fields={["Razão social", "Nome fantasia", "CNPJ"]}
+            values={form}
+            onChange={(field, value) =>
+              setForm((f) => ({ ...f, [field]: value }))
+            }
           />
           <FormCard
             title="Responsável"
             fields={["Nome", "E-mail", "Telefone"]}
+            values={form}
+            onChange={(field, value) =>
+              setForm((f) => ({ ...f, [field]: value }))
+            }
           />
           <Card title="Acesso à plataforma">
             <label className="ws-switch">
@@ -2069,7 +2521,20 @@ function FormPage({
             <button className="ws-quiet" onClick={() => go("clients")}>
               Cancelar
             </button>
-            <button className="ws-primary" onClick={() => setSuccess(true)}>
+            <button
+              className="ws-primary"
+              onClick={() => {
+                // Armazena a empresa no mock associando companyId, CNPJ e e-mail.
+                addCompany({
+                  name: form["Razão social"] || "Nova Importadora Ltda.",
+                  cnpj: form["CNPJ"] || "00.000.000/0001-00",
+                  contactName: form["Nome"] || "Responsável",
+                  contactEmail: form["E-mail"] || accessEmail,
+                });
+                setAccessEmail(form["E-mail"] || accessEmail);
+                setSuccess(true);
+              }}
+            >
               Criar cliente <Glyph name="arrow" />
             </button>
           </div>
@@ -2148,7 +2613,17 @@ function FormPage({
     </>
   );
 }
-function FormCard({ title, fields }: { title?: string; fields: string[] }) {
+function FormCard({
+  title,
+  fields,
+  values,
+  onChange,
+}: {
+  title?: string;
+  fields: string[];
+  values?: Record<string, string>;
+  onChange?: (field: string, value: string) => void;
+}) {
   return (
     <Card title={title}>
       <div className="ws-form-fields">
@@ -2156,6 +2631,12 @@ function FormCard({ title, fields }: { title?: string; fields: string[] }) {
           <label key={x}>
             <span>{x}</span>
             <input
+              value={values ? (values[x] ?? "") : undefined}
+              onChange={
+                onChange
+                  ? (e) => onChange(x, e.target.value)
+                  : undefined
+              }
               placeholder={`Adicionar ${x.replace(" *", "").toLowerCase()}`}
             />
           </label>
@@ -2164,32 +2645,61 @@ function FormCard({ title, fields }: { title?: string; fields: string[] }) {
     </Card>
   );
 }
-function Timeline({ go }: { go: (v: View) => void }) {
+function Timeline({
+  go,
+  filters,
+}: {
+  go: (v: View) => void;
+  filters?: {
+    client?: string;
+    user?: string;
+    type?: string;
+    order?: string;
+  };
+}) {
+  const events = useMemo(() => {
+    let list = timelineEvents;
+    if (filters) {
+      if (filters.client && filters.client !== "Todos") {
+        list = list.filter((e) => e.client === filters.client);
+      }
+      if (filters.user && filters.user !== "Todos") {
+        list = list.filter((e) => e.user === filters.user);
+      }
+      if (filters.type && filters.type !== "Todos") {
+        list = list.filter((e) => e.type === filters.type);
+      }
+      list = [...list].sort((a, b) =>
+        filters.order === "Mais antigas"
+          ? a.order - b.order
+          : b.order - a.order,
+      );
+    }
+    return list;
+  }, [filters]);
   return (
     <div className="ws-timeline">
-      {[
-        ["14:10", "Carlos aprovou", "Motor Elétrico XP-200"],
-        ["13:42", "Mariana atualizou", "Material"],
-        [
-          "11:03",
-          "Sistema encontrou",
-          "3 inconsistências em catalogo_setembro.xlsx",
-        ],
-        ["Ontem", "Carlos enviou lembrete", "Atlas Importações"],
-      ].map((x) => (
+      {events.map((x) => (
         <button
-          onClick={() => go(x[2].includes("Motor") ? "product" : "activity")}
-          key={x.join()}
+          onClick={() =>
+            go(x.subject.includes("Motor") ? "product" : "activity")
+          }
+          key={x.time + x.actor}
         >
-          <time>{x[0]}</time>
+          <time>{x.time}</time>
           <span />
           <p>
-            <strong>{x[1]}</strong>
-            {x[2]}
+            <strong>{x.actor}</strong>
+            {x.subject}
           </p>
           <Glyph name="arrow" />
         </button>
       ))}
+      {events.length === 0 && (
+        <p className="ws-empty">
+          Nenhuma atividade corresponde aos filtros selecionados.
+        </p>
+      )}
     </div>
   );
 }
@@ -2198,31 +2708,14 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
   const [view, setView] = useState<View>("overview"),
     [chat, setChat] = useState(false),
     [search, setSearch] = useState(false),
-    [notice, setNotice] = useState(false),
-    [openingNotice, setOpeningNotice] = useState<View | null>(null);
-  const noticeTimerRef = useRef<number | null>(null);
+    [notice, setNotice] = useState(false);
+  const { notifications } = useStoreState();
+  const unread = notifications.filter((n) => !n.read).length;
   const go = (v: View) => {
     setView(v);
-    setChat(false);
+    setNotice(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const openFromNotice = (target: View) => {
-    if (openingNotice) return;
-    setOpeningNotice(target);
-    noticeTimerRef.current = window.setTimeout(() => {
-      setNotice(false);
-      setOpeningNotice(null);
-      go(target);
-    }, 220);
-  };
-  useEffect(
-    () => () => {
-      if (noticeTimerRef.current !== null) {
-        window.clearTimeout(noticeTimerRef.current);
-      }
-    },
-    [],
-  );
   const Page = () => {
     switch (view) {
       case "clients":
@@ -2243,14 +2736,6 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
         return <Import go={go} />;
       case "import-result":
         return <Import go={go} result />;
-      case "importer-home":
-        return <ImporterHome go={go} />;
-      case "importer-catalog":
-        return <ImporterCatalog go={go} />;
-      case "guided":
-        return <Guided go={go} />;
-      case "corrections":
-        return <Corrections go={go} />;
       case "activity":
         return <Activity go={go} />;
       case "users":
@@ -2274,6 +2759,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
         onSearch={() => setSearch(true)}
         onNotify={() => setNotice((v) => !v)}
         onLogout={onLogout}
+        unread={unread}
       />
       <Rail active={view} go={go} openChat={() => setChat(true)} />
       <main className="ws-main">
@@ -2290,30 +2776,13 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
         </AnimatePresence>
       </main>
       {notice && (
-        <div className="ws-popover notice">
-          <h3>Notificações</h3>
-          <button
-            className={openingNotice === "catalog" ? "is-active" : ""}
-            onClick={() => openFromNotice("catalog")}
-          >
-            <span>Atlas Importações atualizou 4 produtos.</span>
-            {openingNotice === "catalog" && <small>Abrindo…</small>}
-          </button>
-          <button
-            className={openingNotice === "pending" ? "is-active" : ""}
-            onClick={() => openFromNotice("pending")}
-          >
-            <span>7 produtos aguardam sua revisão.</span>
-            {openingNotice === "pending" && <small>Abrindo…</small>}
-          </button>
-          <button
-            className={openingNotice === "import-result" ? "is-active" : ""}
-            onClick={() => openFromNotice("import-result")}
-          >
-            <span>Importação concluída com 3 inconsistências.</span>
-            {openingNotice === "import-result" && <small>Abrindo…</small>}
-          </button>
-        </div>
+        <NoticePopover
+          notifications={notifications}
+          onNavigate={(n) => {
+            markNotificationRead(n.id);
+            go(n.productId ? "product" : "catalog");
+          }}
+        />
       )}
       <AnimatePresence>
         {search && (
@@ -2328,9 +2797,9 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
             <motion.div
               className="ws-search-modal"
               onClick={(e) => e.stopPropagation()}
-              initial={{ opacity: 0, y: -16, scale: 0.97, filter: "blur(5px)" }}
-              animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -10, scale: 0.985, filter: "blur(2px)" }}
+              initial={{ opacity: 0, y: -16, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.985 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <button className="ws-close" onClick={() => setSearch(false)}>

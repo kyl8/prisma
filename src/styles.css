@@ -36,6 +36,9 @@ body {
   background: var(--paper);
   color: var(--ink);
 }
+#root {
+  background: var(--paper);
+}
 button,
 a {
   font: inherit;
@@ -160,6 +163,37 @@ a {
   top: 24px;
   right: 24px;
 }
+.login-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: #171715;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.login-veil-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.login-veil-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 800;
+}
+.login-veil strong {
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
 .login-card {
   width: min(100%, 420px);
   background: #fff;
@@ -215,6 +249,48 @@ a {
   color: #33332f;
   font-size: 12px;
   text-align: center;
+}
+.login-wrap {
+  width: min(100%, 420px);
+  display: grid;
+  gap: 0;
+}
+.login-demo {
+  border-top: 1px solid #dddeda;
+  margin-top: 20px;
+  padding-top: 20px;
+  display: grid;
+  gap: 10px;
+}
+.login-demo > p {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  color: #666660;
+  text-transform: uppercase;
+}
+.login-demo-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.login-demo-row .button {
+  width: 100%;
+}
+.login-demo-alt {
+  background: none;
+  border: 0;
+  padding: 6px;
+  color: #565651;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  justify-self: center;
+}
+.login-demo-alt:hover {
+  color: #171715;
 }
 .button {
   display: inline-flex;
@@ -1801,8 +1877,9 @@ button:disabled {
   border-color: #1d1d1b;
 }
 [data-theme="dark"] .site-header {
-  background: rgba(18, 18, 17, 0.92);
+  background: rgba(18, 18, 17, 0.94);
   border-color: #2a2a26;
+  backdrop-filter: none;
 }
 [data-theme="dark"] .desktop-nav a {
   color: #a0a09a;
@@ -1869,6 +1946,22 @@ button:disabled {
 }
 [data-theme="dark"] .login-card > a {
   color: #a0a09a;
+}
+[data-theme="dark"] .login-demo {
+  border-color: #2e2e2a;
+}
+[data-theme="dark"] .login-demo > p {
+  color: #a0a09a;
+}
+[data-theme="dark"] .login-demo-alt {
+  color: #a0a09a;
+}
+[data-theme="dark"] .login-demo-alt:hover {
+  color: #f4f4f0;
+}
+[data-theme="dark"] .login-veil {
+  background: #f4f4f0;
+  color: #121211;
 }
 [data-theme="dark"] .demo-label {
   color: #a0a09a;

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-20T02:03:21.6446623Z",
+  "generatedAt": "2026-09-20T05:23:15.2697922Z",
   "title": "Design System: PRISMA",
   "extensions": {
     "colorMeta": {
@@ -69,6 +69,24 @@
       "metric": { "displayName": "Operational Metric", "purpose": "Tabular readiness totals, percentages, and count summaries." },
       "control-label": { "displayName": "Workspace Control Label", "purpose": "Compact 11px bold labels on workspace actions." }
     },
+    "darkMode": {
+      "selector": "[data-theme=\"dark\"]",
+      "storageKey": "prisma-theme",
+      "initialPreference": "prefers-color-scheme",
+      "principle": "Invert the warm monochrome tonal relationships without changing geometry, layout, spacing, or interaction.",
+      "surfaces": {
+        "marketingCanvas": "#121211",
+        "workspaceCanvas": "#141412",
+        "cardAndModal": "#1d1d1b",
+        "elevated": ["#222220", "#242421"],
+        "fineRule": "#2e2e2a",
+        "strongerOutlines": ["#33332e", "#383834"],
+        "secondaryText": "#a0a09a",
+        "detailText": "#999990",
+        "inversePrimaryFill": "#f4f4f0",
+        "inversePrimaryText": "#121211"
+      }
+    },
     "shadows": [
       { "name": "application-window", "value": "0 34px 80px -52px rgba(0, 0, 0, 0.55)", "purpose": "Anchors the main dashboard demonstration." },
       { "name": "assistant-shell", "value": "0 30px 70px -48px rgba(0, 0, 0, 0.5)", "purpose": "Separates the assistant from its soft gray section." },
@@ -84,9 +102,10 @@
       { "name": "state-crossfade", "value": "300ms ease", "purpose": "Tabs, panels, and local product state changes." },
       { "name": "control-hover", "value": "250ms ease", "purpose": "Button lift and surface-color feedback." },
       { "name": "reduced-motion", "value": "0.01ms", "purpose": "Effectively removes nonessential CSS animation when reduced motion is requested." },
-      { "name": "scroll-hero", "value": "translateY(-56px) scale(0.98), scrub 0.8", "purpose": "GSAP ScrollTrigger depth for the marketing hero product only." },
-      { "name": "scroll-statement", "value": "translateY(34px to -30px), scrub 0.7", "purpose": "GSAP ScrollTrigger traversal for the central marketing statement." },
-      { "name": "scroll-feature", "value": "translateY(24px to -18px), scrub 0.65", "purpose": "GSAP ScrollTrigger depth for marketing feature visuals." },
+      { "name": "lenis-smooth-wheel", "value": "duration 1s, wheelMultiplier 0.95", "purpose": "Smooth marketing-page wheel input on desktop when reduced motion is not requested; not used in /app." },
+      { "name": "lenis-section-snap", "value": "duration 0.92s, easeOutCubic, lock true, 120ms release", "purpose": "One wheel step advances to the next visible data-scroll-section above 700px, offset beneath the sticky header." },
+      { "name": "lenis-anchor", "value": "duration 0.9s, header offset -84px desktop / -68px mobile", "purpose": "Marketing in-page links land their destination below the sticky header." },
+      { "name": "section-reveal", "value": "opacity 0 to 1, clip-path inset(0 0 12% 0) to inset(0 0 0% 0), ease-settle", "purpose": "Marketing section content becomes visible on entry without scroll parallax or floating-card transforms." },
       { "name": "workspace-page", "value": "240ms, opacity 0 to 1, translateY(10px to 0)", "purpose": "Short view transition inside persistent workspace chrome." },
       { "name": "workspace-drawer", "value": "spring(stiffness 290, damping 28), translateX(440px to 0)", "purpose": "Contextual assistant entry and exit." }
     ],
@@ -94,7 +113,8 @@
       { "name": "stack", "value": "900px" },
       { "name": "mobile", "value": "620px" },
       { "name": "workspace-stack", "value": "1000px" },
-      { "name": "workspace-mobile", "value": "700px" }
+      { "name": "workspace-mobile", "value": "700px" },
+      { "name": "section-snap-min-width", "value": "701px" }
     ]
   },
   "components": [
@@ -161,9 +181,9 @@
     {
       "name": "Workspace Data Table",
       "kind": "custom",
-      "description": "Border-led operational table with compact metadata and status.",
-      "html": "<div class=\"ds-table\" role=\"table\" aria-label=\"Produtos\"><div class=\"ds-tr ds-th\" role=\"row\"><span>Produto</span><span>NCM</span><span>Status</span></div><button class=\"ds-tr\" role=\"row\"><strong>Motor Elétrico XP-200</strong><span>8501.10.19</span><b>Completo</b></button><button class=\"ds-tr\" role=\"row\"><strong>Válvula industrial VX-80</strong><span>8481.80.99</span><b class=\"ds-warn\">Correção</b></button></div>",
-      "css": ".ds-table { width:100%; min-width:520px; overflow:hidden; color:#5f5f59; font-family:'Manrope Variable', sans-serif; } .ds-tr { width:100%; display:grid; grid-template-columns:1.4fr .75fr .7fr; align-items:center; gap:12px; padding:13px 10px; border:0; border-top:1px solid #e8e8e4; background:transparent; text-align:left; font-size:10px; } button.ds-tr { cursor:pointer; } button.ds-tr:hover { background:#f6f6f2; } .ds-tr strong { color:#21211e; font-size:11px; } .ds-th { border-top:0; background:#f4f4f0; color:#353530; font-size:9px; font-weight:700; } .ds-tr b { justify-self:start; padding:4px 6px; border-radius:5px; background:#1b1b19; color:#fff; font-size:9px; } .ds-tr b.ds-warn { border:1px solid #888880; background:#fff; color:#33332f; } button.ds-tr:focus-visible { outline:2px solid #181816; outline-offset:-2px; }"
+      "description": "Border-led operational table on desktop; complete, labeled record cards on phones.",
+      "html": "<div class=\"ds-table\" role=\"table\" aria-label=\"Produtos\"><div class=\"ds-tr ds-th\" role=\"row\"><span>Produto</span><span>NCM</span><span>Status</span></div><button class=\"ds-tr\" role=\"row\"><strong>Motor Elétrico XP-200</strong><span class=\"ds-cell\" data-label=\"NCM\">8501.10.19</span><b class=\"ds-cell\" data-label=\"Status\">Completo</b></button><button class=\"ds-tr\" role=\"row\"><strong>Válvula industrial VX-80</strong><span class=\"ds-cell\" data-label=\"NCM\">8481.80.99</span><b class=\"ds-cell ds-warn\" data-label=\"Status\">Correção</b></button></div>",
+      "css": ".ds-table { width:100%; color:#5f5f59; font-family:'Manrope Variable', sans-serif; } .ds-tr { width:100%; display:grid; grid-template-columns:1.4fr .75fr .7fr; align-items:center; gap:12px; padding:13px 10px; border:0; border-top:1px solid #e8e8e4; background:transparent; text-align:left; font-size:10px; } button.ds-tr { cursor:pointer; } button.ds-tr:hover { background:#f6f6f2; } .ds-tr strong { color:#21211e; font-size:11px; } .ds-th { border-top:0; background:#f4f4f0; color:#353530; font-size:9px; font-weight:700; } .ds-tr b { justify-self:start; padding:4px 6px; border-radius:5px; background:#1b1b19; color:#fff; font-size:9px; } .ds-tr b.ds-warn { border:1px solid #888880; background:#fff; color:#33332f; } button.ds-tr:focus-visible { outline:2px solid #181816; outline-offset:-2px; } @media (max-width:700px) { .ds-table { display:grid; gap:10px; } .ds-th { display:none; } button.ds-tr { grid-template-columns:1fr 1fr; gap:11px 16px; padding:16px; border:1px solid #e1e1db; border-radius:10px; background:#fbfbf9; font-size:11px; } .ds-tr strong { grid-column:1/-1; font-size:13px; } .ds-cell { display:grid; gap:3px; min-width:0; overflow-wrap:anywhere; } .ds-cell::before { content:attr(data-label); color:#76766f; font-size:9px; font-weight:700; letter-spacing:.02em; } .ds-tr b { background:transparent; color:#171715; padding:0; } .ds-tr b.ds-warn { border:0; } }"
     },
     {
       "name": "FAQ Row",
@@ -187,6 +207,8 @@
     "rules": [
       { "name": "The No Accent Rule", "body": "Do not introduce a chromatic brand color to manufacture emphasis; use contrast, weight, scale, and state instead.", "section": "colors" },
       { "name": "The Warm Neutral Rule", "body": "Light grays should retain the slightly warm paper character of the existing palette, not drift toward blue-gray software chrome.", "section": "colors" },
+      { "name": "The Inversion Rule", "body": "Every tonal relationship inverts: dark-on-light becomes light-on-dark, and vice versa. Elements that are dark fills in light mode (primary buttons, done chips, active rails, progress) become `#f4f4f0` fills in dark mode.", "section": "colors" },
+      { "name": "The Faithful Geometry Rule", "body": "Dark mode only remaps color values. It never adds backgrounds, fills, borders, or emphasis that the light design does not have; section rhythm, radii, spacing, and shadow vocabulary stay identical in both themes.", "section": "colors" },
       { "name": "The Scale Before Color Rule", "body": "Establish hierarchy with size, weight, line length, and whitespace before changing foreground value.", "section": "typography" },
       { "name": "The Product Density Rule", "body": "Marketing copy remains comfortably readable; only the framed product demonstrations descend to the compact 8–13px simulation scale.", "section": "typography" },
       { "name": "The Narrative Alternation Rule", "body": "Repeated feature sections alternate copy and product evidence on desktop, then become one complete linear story on mobile.", "section": "layout" },
@@ -201,7 +223,7 @@
       "Do label illustrative data and simulated limitations in visible, readable text.",
       "Do use line icons with consistent rounded strokes and no filled decorative icon style.",
       "Do preserve the top bar and rail while workspace task views change.",
-      "Do keep operational tables horizontally scrollable when their real column structure cannot collapse safely."
+      "Do convert dense operational tables into labeled record cards when the viewport cannot support the full column structure."
     ],
     "donts": [
       "Don't add a chromatic accent, gradient, or decorative glow to create artificial energy.",
@@ -210,7 +232,7 @@
       "Don't shrink marketing typography into application density, or enlarge operational labels until the simulations lose credibility.",
       "Don't hide product demonstrations on mobile; remove only nonessential application chrome.",
       "Don't present the `/app` entry as authenticated, integrated, or production-backed; the built route is a frontend workspace simulation.",
-      "Don't reuse scroll-scrub motion inside the workspace; task-state changes use short fades, popovers, modals, or the contextual drawer."
+      "Don't reuse section snapping or scroll choreography inside the workspace; task-state changes use short fades, popovers, modals, or the contextual drawer."
     ]
   }
 }

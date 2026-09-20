@@ -1,7 +1,19 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { useEffect, useState } from "react";
+import { CatalogRequestFlow } from "./CatalogRequest";
+import { ImporterPortal } from "./ImporterPortal";
+import {
+  login,
+  logout,
+  useCurrentUser,
+  useRoute,
+  useStoreState,
+} from "./store";
 import { ThemeToggle } from "./theme";
+import { ToastHost } from "./ui";
 import { Workspace } from "./Workspace";
 
 type IconName =
@@ -195,53 +207,131 @@ function Header() {
   );
 }
 
-function LoginScreen({ onEnter }: { onEnter: () => void }) {
+function LoginScreen({
+  onEnter,
+  onDemo,
+}: {
+  onEnter: () => void;
+  onDemo: (role: "dispatcher" | "importer", companyId?: string) => void;
+}) {
+  const reduce = useReducedMotion();
+  const { loginFrom } = useStoreState();
+  const fromLogout = loginFrom === "logout";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   return (
     <main className="login-screen">
-      <a className="login-brand" href="/" aria-label="PRISMA — início">
-        <span className="logo-mark">P</span> PRISMA
-      </a>
-      <ThemeToggle className="login-theme" />
-      <form
-        className="login-card"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (email && password) onEnter();
-        }}
+      {!reduce && (
+        <motion.div
+          className="login-veil"
+          initial={{ x: 0 }}
+          animate={{
+            x: fromLogout ? ["0%", "0%", "100%"] : ["0%", "0%", "-100%"],
+          }}
+          transition={{
+            duration: 1.35,
+            times: [0, 0.3, 1],
+            ease: ["easeOut", ease],
+            delay: 0.1,
+          }}
+        >
+          <motion.span
+            className="login-veil-inner"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.45, ease }}
+          >
+            <span className="login-veil-mark">P</span>
+            <strong>PRISMA</strong>
+          </motion.span>
+        </motion.div>
+      )}
+      <motion.a
+        className="login-brand"
+        href="/"
+        aria-label="PRISMA — início"
+        initial={reduce ? false : { opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: reduce ? 0 : 0.65, duration: 0.55, ease }}
       >
-        <p className="eyebrow">ACESSO À PLATAFORMA</p>
-        <h1>Entre no seu workspace.</h1>
-        <p>
-          Use qualquer e-mail e senha para explorar este protótipo
-          demonstrativo.
-        </p>
-        <label>
-          E-mail
-          <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="voce@empresa.com"
-            required
-          />
-        </label>
-        <label>
-          Senha
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="••••••••"
-            required
-          />
-        </label>
-        <button className="button button--dark" type="submit">
-          Entrar na plataforma <Icon name="arrow" size={17} />
-        </button>
-        <a href="/">Voltar para a página inicial</a>
-      </form>
+        <span className="logo-mark">P</span> PRISMA
+      </motion.a>
+      <motion.div
+        className="login-theme"
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: reduce ? 0 : 0.75, duration: 0.45 }}
+      >
+        <ThemeToggle />
+      </motion.div>
+      <motion.div
+        className="login-wrap"
+        initial={reduce ? false : { opacity: 0, y: 26 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: reduce ? 0 : 0.65, duration: 0.7, ease }}
+      >
+        <form
+          className="login-card"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (email && password) onEnter();
+          }}
+        >
+          <p className="eyebrow">ACESSO À PLATAFORMA</p>
+          <h1>Entre no seu workspace.</h1>
+          <p>
+            Use qualquer e-mail e senha para explorar este protótipo
+            demonstrativo.
+          </p>
+          <label>
+            E-mail
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="voce@empresa.com"
+              required
+            />
+          </label>
+          <label>
+            Senha
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="••••••••"
+              required
+            />
+          </label>
+          <button className="button button--dark" type="submit">
+            Entrar na plataforma <Icon name="arrow" size={17} />
+          </button>
+          <a href="/">Voltar para a página inicial</a>
+        </form>
+        <div className="login-demo">
+          <p>Explorar demonstração como</p>
+          <div className="login-demo-row">
+            <button
+              className="button button--dark"
+              onClick={() => onDemo("dispatcher")}
+            >
+              Despachante
+            </button>
+            <button
+              className="button button--dark"
+              onClick={() => onDemo("importer", "atlas")}
+            >
+              Importador
+            </button>
+          </div>
+          <button
+            className="login-demo-alt"
+            onClick={() => onDemo("importer", "ocean")}
+          >
+            Testar com outra empresa (Ocean Trade)
+          </button>
+        </div>
+      </motion.div>
     </main>
   );
 }
@@ -420,8 +510,8 @@ function Hero() {
     <section className="hero" data-scroll-section id="top">
       <div className="hero-copy">
         <motion.h1
-          initial={reduce ? false : { y: 48, opacity: 0, filter: "blur(12px)" }}
-          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          initial={reduce ? false : { y: 48, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.9, ease }}
         >
           Veja o risco antes da carga chegar.
@@ -469,8 +559,8 @@ function Reveal({
   return (
     <motion.div
       className={className}
-      initial={reduce ? false : { opacity: 1, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={reduce ? false : { opacity: 0, clipPath: "inset(0 0 12% 0)" }}
+      whileInView={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
       viewport={{ once: true, margin: "-12%" }}
       transition={{ duration: 0.8, ease }}
     >
@@ -830,21 +920,45 @@ function Faq() {
 }
 
 export function App() {
-  const isWorkspace = window.location.pathname.startsWith("/app");
-  const [authenticated, setAuthenticated] = useState(
-    () => window.sessionStorage.getItem("prisma-demo-access") === "true",
-  );
+  const route = useRoute();
+  const user = useCurrentUser();
+  const reduce = useReducedMotion();
+  const isMarketing = route.name === "marketing";
+  const [enter, setEnter] = useState<"in" | "out" | null>(null);
+  const demoEnter = (role: "dispatcher" | "importer", companyId?: string) => {
+    const targetId =
+      role === "importer"
+        ? companyId === "ocean"
+          ? "u-ricardo"
+          : "u-mariana"
+        : "u-carlos";
+    if (reduce) {
+      login(targetId);
+      return;
+    }
+    if (enter) return;
+    setEnter("in");
+    window.setTimeout(() => {
+      login(targetId);
+      setEnter("out");
+    }, 950);
+    window.setTimeout(() => setEnter(null), 1850);
+  };
   useEffect(() => {
     document.documentElement.classList.add("js");
     return () => document.documentElement.classList.remove("js");
   }, []);
   useEffect(() => {
-    if (isWorkspace || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    if (
+      !isMarketing ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
       return;
+    gsap.registerPlugin(ScrollTrigger);
     const lenis = new Lenis({
       smoothWheel: true,
-      duration: 1,
-      wheelMultiplier: 0.95,
+      duration: 0.85,
+      wheelMultiplier: 0.82,
     });
 
     let rafId = 0;
@@ -856,9 +970,6 @@ export function App() {
 
     let snapLocked = false;
     let lastSnapAt = 0;
-    let wheelAccumulator = 0;
-    let wheelResetTimeout = 0;
-    let burstStartedAt = 0;
     const getHeaderOffset = () =>
       window.matchMedia("(max-width: 620px)").matches ? 68 : 84;
     const getSections = () =>
@@ -868,75 +979,75 @@ export function App() {
 
     const handleWheel = (event: WheelEvent) => {
       if (event.ctrlKey || event.metaKey) return;
-      if ((event.target as HTMLElement | null)?.closest(".quick-prompts")) return;
+      if (window.matchMedia("(max-width: 700px)").matches) return;
+      if ((event.target as HTMLElement | null)?.closest(".quick-prompts"))
+        return;
       if (snapLocked) {
         event.preventDefault();
         return;
       }
-      if (Date.now() - lastSnapAt < 420) return;
-
-      const now = Date.now();
-      if (burstStartedAt === 0 || now - burstStartedAt > 180) {
-        burstStartedAt = now;
-        wheelAccumulator = 0;
+      const strength = Math.abs(event.deltaY);
+      // Small gestures retain Lenis' natural continuous movement. Strong
+      // gestures intentionally advance exactly one marketing section.
+      if (strength < 76) return;
+      if (Date.now() - lastSnapAt < 720) {
+        event.preventDefault();
+        return;
       }
-      wheelAccumulator += event.deltaY;
-      window.clearTimeout(wheelResetTimeout);
-      wheelResetTimeout = window.setTimeout(() => {
-        wheelAccumulator = 0;
-        burstStartedAt = 0;
-      }, 120);
-
-      const absDelta = Math.abs(event.deltaY);
-      const absAccumulated = Math.abs(wheelAccumulator);
-      const isStrongSingle = absDelta >= 180;
-      const isStrongBurst = absAccumulated >= 280;
-      if (!isStrongSingle && !isStrongBurst) return;
-
-      const direction = wheelAccumulator > 0 ? 1 : -1;
-      wheelAccumulator = 0;
-      burstStartedAt = 0;
+      const direction = event.deltaY > 0 ? 1 : -1;
       const sections = getSections().sort((a, b) => a.offsetTop - b.offsetTop);
       if (sections.length < 2) return;
 
       const headerOffset = getHeaderOffset();
-      const currentPosition = window.scrollY + headerOffset;
-      const threshold = 14;
-      let targetSection: HTMLElement | undefined;
-
-      if (direction > 0) {
-        targetSection = sections.find(
-          (section) => section.offsetTop > currentPosition + threshold,
-        );
-      } else {
-        for (let i = sections.length - 1; i >= 0; i -= 1) {
-          if (sections[i].offsetTop < currentPosition - threshold) {
-            targetSection = sections[i];
-            break;
-          }
-        }
-      }
+      const currentPosition = window.scrollY + headerOffset + 12;
+      const currentIndex = Math.max(
+        0,
+        sections.reduce(
+          (index, section, i) =>
+            section.offsetTop <= currentPosition ? i : index,
+          0,
+        ),
+      );
+      const targetIndex = Math.min(
+        sections.length - 1,
+        Math.max(0, currentIndex + direction),
+      );
+      const targetSection = sections[targetIndex];
       if (!targetSection) return;
 
       event.preventDefault();
       snapLocked = true;
       lastSnapAt = Date.now();
-      lenis.scrollTo(targetSection, {
-        offset: -headerOffset,
-        duration: 1.05,
+      lenis.scrollTo(Math.max(0, targetSection.offsetTop - headerOffset), {
+        duration: 0.82,
         easing: (t) => 1 - Math.pow(1 - t, 3),
         lock: true,
         onComplete: () => {
+          gsap.fromTo(
+            targetSection.querySelectorAll(":scope > *"),
+            { opacity: 0.82, clipPath: "inset(0 0 7% 0)" },
+            {
+              opacity: 1,
+              clipPath: "inset(0 0 0% 0)",
+              duration: 0.48,
+              stagger: 0.035,
+              ease: "power3.out",
+              overwrite: true,
+            },
+          );
+          ScrollTrigger.refresh();
           window.setTimeout(() => {
             snapLocked = false;
-          }, 120);
+          }, 180);
         },
       });
     };
 
     const handleAnchorClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      const trigger = target?.closest('a[href^="#"]') as HTMLAnchorElement | null;
+      const trigger = target?.closest(
+        'a[href^="#"]',
+      ) as HTMLAnchorElement | null;
       const href = trigger?.getAttribute("href");
       if (!href || href.length < 2) return;
       const section = document.querySelector<HTMLElement>(href);
@@ -956,28 +1067,61 @@ export function App() {
       window.removeEventListener("wheel", handleWheel);
       document.removeEventListener("click", handleAnchorClick);
       window.cancelAnimationFrame(rafId);
-      window.clearTimeout(wheelResetTimeout);
       lenis.destroy();
     };
-  }, [isWorkspace]);
-  if (isWorkspace) {
-    if (!authenticated)
-      return (
-        <LoginScreen
-          onEnter={() => {
-            window.sessionStorage.setItem("prisma-demo-access", "true");
-            setAuthenticated(true);
-          }}
-        />
-      );
-    return <Workspace />;
+  }, [isMarketing]);
+  if (route.name === "request") {
+    return (
+      <>
+        <CatalogRequestFlow token={route.token} />
+        <ToastHost />
+      </>
+    );
+  }
+  if (route.name === "app") {
+    return (
+      <>
+        {user ? (
+          user.role === "importer" ? (
+            <ImporterPortal onLogout={logout} />
+          ) : (
+            <Workspace onLogout={logout} />
+          )
+        ) : (
+          <LoginScreen
+            onEnter={() => login("u-carlos")}
+            onDemo={demoEnter}
+          />
+        )}
+        {enter && (
+          <motion.div
+            className="login-veil app-veil"
+            initial={false}
+            animate={
+              enter === "in" ? { x: ["100%", "0%"] } : { x: ["0%", "-100%"] }
+            }
+            transition={{ duration: 0.85, ease }}
+          >
+            <span className="login-veil-inner">
+              <span className="login-veil-mark">P</span>
+              <strong>PRISMA</strong>
+            </span>
+          </motion.div>
+        )}
+        <ToastHost />
+      </>
+    );
   }
   return (
     <>
       <Header />
       <main>
         <Hero />
-        <section className="statement" data-scroll-section aria-label="Proposta central">
+        <section
+          className="statement"
+          data-scroll-section
+          aria-label="Proposta central"
+        >
           <Reveal>
             <p>
               Quando a informação chega tarde, o atraso começa antes do navio
@@ -985,7 +1129,11 @@ export function App() {
             </p>
           </Reveal>
         </section>
-        <section className="feature-section" data-scroll-section id="plataforma">
+        <section
+          className="feature-section"
+          data-scroll-section
+          id="plataforma"
+        >
           <div className="feature-grid">
             <Reveal className="feature-visual">
               <CatalogMock />
@@ -1060,7 +1208,11 @@ export function App() {
             </Reveal>
           </div>
         </section>
-        <section className="assistant-section" data-scroll-section id="assistente">
+        <section
+          className="assistant-section"
+          data-scroll-section
+          id="assistente"
+        >
           <div className="assistant-grid">
             <Reveal className="assistant-copy">
               <h2>
@@ -1121,6 +1273,7 @@ export function App() {
           </Reveal>
         </section>
       </main>
+      <ToastHost />
     </>
   );
 }
