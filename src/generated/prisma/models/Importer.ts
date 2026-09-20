@@ -160,6 +160,9 @@ export type ImporterWhereInput = {
   userId?: Prisma.StringFilter<"Importer"> | string
   products?: Prisma.ProductListRelationFilter
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  catalogRequests?: Prisma.CatalogRequestListRelationFilter
+  activityEvents?: Prisma.ActivityEventListRelationFilter
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessListRelationFilter
 }
 
 export type ImporterOrderByWithRelationInput = {
@@ -167,6 +170,9 @@ export type ImporterOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   products?: Prisma.ProductOrderByRelationAggregateInput
   user?: Prisma.UserOrderByWithRelationInput
+  catalogRequests?: Prisma.CatalogRequestOrderByRelationAggregateInput
+  activityEvents?: Prisma.ActivityEventOrderByRelationAggregateInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessOrderByRelationAggregateInput
 }
 
 export type ImporterWhereUniqueInput = Prisma.AtLeast<{
@@ -177,6 +183,9 @@ export type ImporterWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ImporterWhereInput | Prisma.ImporterWhereInput[]
   products?: Prisma.ProductListRelationFilter
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  catalogRequests?: Prisma.CatalogRequestListRelationFilter
+  activityEvents?: Prisma.ActivityEventListRelationFilter
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessListRelationFilter
 }, "id" | "userId">
 
 export type ImporterOrderByWithAggregationInput = {
@@ -199,24 +208,36 @@ export type ImporterCreateInput = {
   id?: string
   products?: Prisma.ProductCreateNestedManyWithoutImporterInput
   user: Prisma.UserCreateNestedOneWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestCreateNestedManyWithoutCompanyInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessCreateNestedManyWithoutCompanyInput
 }
 
 export type ImporterUncheckedCreateInput = {
   id?: string
   userId: string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestUncheckedCreateNestedManyWithoutCompanyInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type ImporterUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   products?: Prisma.ProductUpdateManyWithoutImporterNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUpdateManyWithoutCompanyNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUpdateManyWithoutCompanyNestedInput
 }
 
 export type ImporterUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUncheckedUpdateManyWithoutCompanyNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type ImporterCreateManyInput = {
@@ -290,6 +311,20 @@ export type ImporterUncheckedUpdateOneWithoutUserNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ImporterUpdateToOneWithWhereWithoutUserInput, Prisma.ImporterUpdateWithoutUserInput>, Prisma.ImporterUncheckedUpdateWithoutUserInput>
 }
 
+export type ImporterCreateNestedOneWithoutBrokerAccessesInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutBrokerAccessesInput, Prisma.ImporterUncheckedCreateWithoutBrokerAccessesInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutBrokerAccessesInput
+  connect?: Prisma.ImporterWhereUniqueInput
+}
+
+export type ImporterUpdateOneRequiredWithoutBrokerAccessesNestedInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutBrokerAccessesInput, Prisma.ImporterUncheckedCreateWithoutBrokerAccessesInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutBrokerAccessesInput
+  upsert?: Prisma.ImporterUpsertWithoutBrokerAccessesInput
+  connect?: Prisma.ImporterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ImporterUpdateToOneWithWhereWithoutBrokerAccessesInput, Prisma.ImporterUpdateWithoutBrokerAccessesInput>, Prisma.ImporterUncheckedUpdateWithoutBrokerAccessesInput>
+}
+
 export type ImporterCreateNestedOneWithoutProductsInput = {
   create?: Prisma.XOR<Prisma.ImporterCreateWithoutProductsInput, Prisma.ImporterUncheckedCreateWithoutProductsInput>
   connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutProductsInput
@@ -304,14 +339,48 @@ export type ImporterUpdateOneRequiredWithoutProductsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ImporterUpdateToOneWithWhereWithoutProductsInput, Prisma.ImporterUpdateWithoutProductsInput>, Prisma.ImporterUncheckedUpdateWithoutProductsInput>
 }
 
+export type ImporterCreateNestedOneWithoutCatalogRequestsInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutCatalogRequestsInput, Prisma.ImporterUncheckedCreateWithoutCatalogRequestsInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutCatalogRequestsInput
+  connect?: Prisma.ImporterWhereUniqueInput
+}
+
+export type ImporterUpdateOneRequiredWithoutCatalogRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutCatalogRequestsInput, Prisma.ImporterUncheckedCreateWithoutCatalogRequestsInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutCatalogRequestsInput
+  upsert?: Prisma.ImporterUpsertWithoutCatalogRequestsInput
+  connect?: Prisma.ImporterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ImporterUpdateToOneWithWhereWithoutCatalogRequestsInput, Prisma.ImporterUpdateWithoutCatalogRequestsInput>, Prisma.ImporterUncheckedUpdateWithoutCatalogRequestsInput>
+}
+
+export type ImporterCreateNestedOneWithoutActivityEventsInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutActivityEventsInput, Prisma.ImporterUncheckedCreateWithoutActivityEventsInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutActivityEventsInput
+  connect?: Prisma.ImporterWhereUniqueInput
+}
+
+export type ImporterUpdateOneRequiredWithoutActivityEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutActivityEventsInput, Prisma.ImporterUncheckedCreateWithoutActivityEventsInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutActivityEventsInput
+  upsert?: Prisma.ImporterUpsertWithoutActivityEventsInput
+  connect?: Prisma.ImporterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ImporterUpdateToOneWithWhereWithoutActivityEventsInput, Prisma.ImporterUpdateWithoutActivityEventsInput>, Prisma.ImporterUncheckedUpdateWithoutActivityEventsInput>
+}
+
 export type ImporterCreateWithoutUserInput = {
   id?: string
   products?: Prisma.ProductCreateNestedManyWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestCreateNestedManyWithoutCompanyInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessCreateNestedManyWithoutCompanyInput
 }
 
 export type ImporterUncheckedCreateWithoutUserInput = {
   id?: string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestUncheckedCreateNestedManyWithoutCompanyInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type ImporterCreateOrConnectWithoutUserInput = {
@@ -333,21 +402,81 @@ export type ImporterUpdateToOneWithWhereWithoutUserInput = {
 export type ImporterUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   products?: Prisma.ProductUpdateManyWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUpdateManyWithoutCompanyNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUpdateManyWithoutCompanyNestedInput
 }
 
 export type ImporterUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUncheckedUpdateManyWithoutCompanyNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedUpdateManyWithoutCompanyNestedInput
+}
+
+export type ImporterCreateWithoutBrokerAccessesInput = {
+  id?: string
+  products?: Prisma.ProductCreateNestedManyWithoutImporterInput
+  user: Prisma.UserCreateNestedOneWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestCreateNestedManyWithoutCompanyInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutCompanyInput
+}
+
+export type ImporterUncheckedCreateWithoutBrokerAccessesInput = {
+  id?: string
+  userId: string
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestUncheckedCreateNestedManyWithoutCompanyInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutCompanyInput
+}
+
+export type ImporterCreateOrConnectWithoutBrokerAccessesInput = {
+  where: Prisma.ImporterWhereUniqueInput
+  create: Prisma.XOR<Prisma.ImporterCreateWithoutBrokerAccessesInput, Prisma.ImporterUncheckedCreateWithoutBrokerAccessesInput>
+}
+
+export type ImporterUpsertWithoutBrokerAccessesInput = {
+  update: Prisma.XOR<Prisma.ImporterUpdateWithoutBrokerAccessesInput, Prisma.ImporterUncheckedUpdateWithoutBrokerAccessesInput>
+  create: Prisma.XOR<Prisma.ImporterCreateWithoutBrokerAccessesInput, Prisma.ImporterUncheckedCreateWithoutBrokerAccessesInput>
+  where?: Prisma.ImporterWhereInput
+}
+
+export type ImporterUpdateToOneWithWhereWithoutBrokerAccessesInput = {
+  where?: Prisma.ImporterWhereInput
+  data: Prisma.XOR<Prisma.ImporterUpdateWithoutBrokerAccessesInput, Prisma.ImporterUncheckedUpdateWithoutBrokerAccessesInput>
+}
+
+export type ImporterUpdateWithoutBrokerAccessesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  products?: Prisma.ProductUpdateManyWithoutImporterNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUpdateManyWithoutCompanyNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutCompanyNestedInput
+}
+
+export type ImporterUncheckedUpdateWithoutBrokerAccessesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  products?: Prisma.ProductUncheckedUpdateManyWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUncheckedUpdateManyWithoutCompanyNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type ImporterCreateWithoutProductsInput = {
   id?: string
   user: Prisma.UserCreateNestedOneWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestCreateNestedManyWithoutCompanyInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessCreateNestedManyWithoutCompanyInput
 }
 
 export type ImporterUncheckedCreateWithoutProductsInput = {
   id?: string
   userId: string
+  catalogRequests?: Prisma.CatalogRequestUncheckedCreateNestedManyWithoutCompanyInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type ImporterCreateOrConnectWithoutProductsInput = {
@@ -369,11 +498,113 @@ export type ImporterUpdateToOneWithWhereWithoutProductsInput = {
 export type ImporterUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   user?: Prisma.UserUpdateOneRequiredWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUpdateManyWithoutCompanyNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUpdateManyWithoutCompanyNestedInput
 }
 
 export type ImporterUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  catalogRequests?: Prisma.CatalogRequestUncheckedUpdateManyWithoutCompanyNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedUpdateManyWithoutCompanyNestedInput
+}
+
+export type ImporterCreateWithoutCatalogRequestsInput = {
+  id?: string
+  products?: Prisma.ProductCreateNestedManyWithoutImporterInput
+  user: Prisma.UserCreateNestedOneWithoutImporterInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessCreateNestedManyWithoutCompanyInput
+}
+
+export type ImporterUncheckedCreateWithoutCatalogRequestsInput = {
+  id?: string
+  userId: string
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutImporterInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedCreateNestedManyWithoutCompanyInput
+}
+
+export type ImporterCreateOrConnectWithoutCatalogRequestsInput = {
+  where: Prisma.ImporterWhereUniqueInput
+  create: Prisma.XOR<Prisma.ImporterCreateWithoutCatalogRequestsInput, Prisma.ImporterUncheckedCreateWithoutCatalogRequestsInput>
+}
+
+export type ImporterUpsertWithoutCatalogRequestsInput = {
+  update: Prisma.XOR<Prisma.ImporterUpdateWithoutCatalogRequestsInput, Prisma.ImporterUncheckedUpdateWithoutCatalogRequestsInput>
+  create: Prisma.XOR<Prisma.ImporterCreateWithoutCatalogRequestsInput, Prisma.ImporterUncheckedCreateWithoutCatalogRequestsInput>
+  where?: Prisma.ImporterWhereInput
+}
+
+export type ImporterUpdateToOneWithWhereWithoutCatalogRequestsInput = {
+  where?: Prisma.ImporterWhereInput
+  data: Prisma.XOR<Prisma.ImporterUpdateWithoutCatalogRequestsInput, Prisma.ImporterUncheckedUpdateWithoutCatalogRequestsInput>
+}
+
+export type ImporterUpdateWithoutCatalogRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  products?: Prisma.ProductUpdateManyWithoutImporterNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutImporterNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUpdateManyWithoutCompanyNestedInput
+}
+
+export type ImporterUncheckedUpdateWithoutCatalogRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  products?: Prisma.ProductUncheckedUpdateManyWithoutImporterNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedUpdateManyWithoutCompanyNestedInput
+}
+
+export type ImporterCreateWithoutActivityEventsInput = {
+  id?: string
+  products?: Prisma.ProductCreateNestedManyWithoutImporterInput
+  user: Prisma.UserCreateNestedOneWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessCreateNestedManyWithoutCompanyInput
+}
+
+export type ImporterUncheckedCreateWithoutActivityEventsInput = {
+  id?: string
+  userId: string
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutImporterInput
+  catalogRequests?: Prisma.CatalogRequestUncheckedCreateNestedManyWithoutCompanyInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedCreateNestedManyWithoutCompanyInput
+}
+
+export type ImporterCreateOrConnectWithoutActivityEventsInput = {
+  where: Prisma.ImporterWhereUniqueInput
+  create: Prisma.XOR<Prisma.ImporterCreateWithoutActivityEventsInput, Prisma.ImporterUncheckedCreateWithoutActivityEventsInput>
+}
+
+export type ImporterUpsertWithoutActivityEventsInput = {
+  update: Prisma.XOR<Prisma.ImporterUpdateWithoutActivityEventsInput, Prisma.ImporterUncheckedUpdateWithoutActivityEventsInput>
+  create: Prisma.XOR<Prisma.ImporterCreateWithoutActivityEventsInput, Prisma.ImporterUncheckedCreateWithoutActivityEventsInput>
+  where?: Prisma.ImporterWhereInput
+}
+
+export type ImporterUpdateToOneWithWhereWithoutActivityEventsInput = {
+  where?: Prisma.ImporterWhereInput
+  data: Prisma.XOR<Prisma.ImporterUpdateWithoutActivityEventsInput, Prisma.ImporterUncheckedUpdateWithoutActivityEventsInput>
+}
+
+export type ImporterUpdateWithoutActivityEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  products?: Prisma.ProductUpdateManyWithoutImporterNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUpdateManyWithoutCompanyNestedInput
+}
+
+export type ImporterUncheckedUpdateWithoutActivityEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  products?: Prisma.ProductUncheckedUpdateManyWithoutImporterNestedInput
+  catalogRequests?: Prisma.CatalogRequestUncheckedUpdateManyWithoutCompanyNestedInput
+  brokerAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 
@@ -383,10 +614,16 @@ export type ImporterUncheckedUpdateWithoutProductsInput = {
 
 export type ImporterCountOutputType = {
   products: number
+  catalogRequests: number
+  activityEvents: number
+  brokerAccesses: number
 }
 
 export type ImporterCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | ImporterCountOutputTypeCountProductsArgs
+  catalogRequests?: boolean | ImporterCountOutputTypeCountCatalogRequestsArgs
+  activityEvents?: boolean | ImporterCountOutputTypeCountActivityEventsArgs
+  brokerAccesses?: boolean | ImporterCountOutputTypeCountBrokerAccessesArgs
 }
 
 /**
@@ -406,12 +643,36 @@ export type ImporterCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.ProductWhereInput
 }
 
+/**
+ * ImporterCountOutputType without action
+ */
+export type ImporterCountOutputTypeCountCatalogRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CatalogRequestWhereInput
+}
+
+/**
+ * ImporterCountOutputType without action
+ */
+export type ImporterCountOutputTypeCountActivityEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ActivityEventWhereInput
+}
+
+/**
+ * ImporterCountOutputType without action
+ */
+export type ImporterCountOutputTypeCountBrokerAccessesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CustomsBrokerCompanyAccessWhereInput
+}
+
 
 export type ImporterSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
   products?: boolean | Prisma.Importer$productsArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  catalogRequests?: boolean | Prisma.Importer$catalogRequestsArgs<ExtArgs>
+  activityEvents?: boolean | Prisma.Importer$activityEventsArgs<ExtArgs>
+  brokerAccesses?: boolean | Prisma.Importer$brokerAccessesArgs<ExtArgs>
   _count?: boolean | Prisma.ImporterCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["importer"]>
 
@@ -436,6 +697,9 @@ export type ImporterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type ImporterInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.Importer$productsArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  catalogRequests?: boolean | Prisma.Importer$catalogRequestsArgs<ExtArgs>
+  activityEvents?: boolean | Prisma.Importer$activityEventsArgs<ExtArgs>
+  brokerAccesses?: boolean | Prisma.Importer$brokerAccessesArgs<ExtArgs>
   _count?: boolean | Prisma.ImporterCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ImporterIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -450,6 +714,9 @@ export type $ImporterPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     products: Prisma.$ProductPayload<ExtArgs>[]
     user: Prisma.$UserPayload<ExtArgs>
+    catalogRequests: Prisma.$CatalogRequestPayload<ExtArgs>[]
+    activityEvents: Prisma.$ActivityEventPayload<ExtArgs>[]
+    brokerAccesses: Prisma.$CustomsBrokerCompanyAccessPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -850,6 +1117,9 @@ export interface Prisma__ImporterClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   products<T extends Prisma.Importer$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Importer$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  catalogRequests<T extends Prisma.Importer$catalogRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Importer$catalogRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CatalogRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  activityEvents<T extends Prisma.Importer$activityEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Importer$activityEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  brokerAccesses<T extends Prisma.Importer$brokerAccessesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Importer$brokerAccessesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomsBrokerCompanyAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1303,6 +1573,78 @@ export type Importer$productsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * Importer.catalogRequests
+ */
+export type Importer$catalogRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CatalogRequest
+   */
+  select?: Prisma.CatalogRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CatalogRequest
+   */
+  omit?: Prisma.CatalogRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CatalogRequestInclude<ExtArgs> | null
+  where?: Prisma.CatalogRequestWhereInput
+  orderBy?: Prisma.CatalogRequestOrderByWithRelationInput | Prisma.CatalogRequestOrderByWithRelationInput[]
+  cursor?: Prisma.CatalogRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CatalogRequestScalarFieldEnum | Prisma.CatalogRequestScalarFieldEnum[]
+}
+
+/**
+ * Importer.activityEvents
+ */
+export type Importer$activityEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ActivityEvent
+   */
+  select?: Prisma.ActivityEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ActivityEvent
+   */
+  omit?: Prisma.ActivityEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityEventInclude<ExtArgs> | null
+  where?: Prisma.ActivityEventWhereInput
+  orderBy?: Prisma.ActivityEventOrderByWithRelationInput | Prisma.ActivityEventOrderByWithRelationInput[]
+  cursor?: Prisma.ActivityEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ActivityEventScalarFieldEnum | Prisma.ActivityEventScalarFieldEnum[]
+}
+
+/**
+ * Importer.brokerAccesses
+ */
+export type Importer$brokerAccessesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CustomsBrokerCompanyAccess
+   */
+  select?: Prisma.CustomsBrokerCompanyAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CustomsBrokerCompanyAccess
+   */
+  omit?: Prisma.CustomsBrokerCompanyAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomsBrokerCompanyAccessInclude<ExtArgs> | null
+  where?: Prisma.CustomsBrokerCompanyAccessWhereInput
+  orderBy?: Prisma.CustomsBrokerCompanyAccessOrderByWithRelationInput | Prisma.CustomsBrokerCompanyAccessOrderByWithRelationInput[]
+  cursor?: Prisma.CustomsBrokerCompanyAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CustomsBrokerCompanyAccessScalarFieldEnum | Prisma.CustomsBrokerCompanyAccessScalarFieldEnum[]
 }
 
 /**

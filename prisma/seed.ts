@@ -69,6 +69,8 @@ async function readJson(filename: string) {
 
 // e-mail -> id do usuário criado (usado para vincular os registros)
 const userIdByEmail = new Map<string, string>();
+const importerIdByEmail = new Map<string, string>();
+const brokerIdByEmail = new Map<string, string>();
 
 async function createUser(data: SeedUser) {
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -83,7 +85,6 @@ async function createUser(data: SeedUser) {
   });
   userIdByEmail.set(user.email, user.id);
 
-  // Notification.userId é @unique: no máximo uma notificação por usuário
   if (data.notification) {
     await prisma.notification.create({
       data: {
@@ -102,14 +103,16 @@ async function main() {
 
   // Despachantes primeiro, pois podem ser autores de registros dos produtos
   const brokers: SeedBroker[] = await readJson("customsbrokers.json");
-  for (const broker of brokers) {
-    const user = await createUser(broker);
+  for (const brokerSeed of brokers) {
+    const user = await createUser(brokerSeed);
     await prisma.customsbroker.create({
       data: {
         userId: user.id,
-        specialty: broker.specialty,
+        specialty: brokerSeed.specialty,
       },
     });
+    const createdBroker = await prisma.customsbroker.findUniqueOrThrow({ where: { userId: user.id } });
+    brokerIdByEmail.set(user.email, createdBroker.id);
   }
   console.log(`✅ ${brokers.length} despachantes criados.`);
 
@@ -122,6 +125,7 @@ async function main() {
     const importer = await prisma.importer.create({
       data: { userId: user.id },
     });
+    importerIdByEmail.set(user.email, importer.id);
 
     for (const p of enterprise.products) {
       const product = await prisma.product.create({
@@ -175,6 +179,27 @@ async function main() {
         recordsCount++;
       }
     }
+  }
+
+  const brokerEmails = [...brokerIdByEmail.keys()];
+  const importerEmails = [...importerIdByEmail.keys()];
+  for (const [index, companyEmail] of importerEmails.entries()) {
+    const brokerId = brokerIdByEmail.get(brokerEmails[index % brokerEmails.length]!);
+    const companyId = importerIdByEmail.get(companyEmail);
+    if (brokerId && companyId) await prisma.customsBrokerCompanyAccess.create({ data: { customsBrokerId: brokerId, companyId } });
+  }
+
+  const techImportId = importerIdByEmail.get("marina.azevedo@techimportbrasil.com.br");
+  const carlosId = userIdByEmail.get("carlos.menezes@portoseguro-despachos.com.br");
+  const marinaId = userIdByEmail.get("marina.azevedo@techimportbrasil.com.br");
+  if (techImportId && carlosId && marinaId) {
+    const [product] = await prisma.product.findMany({ where: { importerId: techImportId }, orderBy: { createdAt: "asc" }, take: 1 });
+    await prisma.activityEvent.createMany({ data: [
+      { companyId: techImportId, actorUserId: carlosId, type: "PRODUCT_APPROVED", visibility: "SHARED", productId: product?.id, entityType: "product", entityId: product?.id },
+      { companyId: techImportId, actorUserId: marinaId, type: "PRODUCT_UPDATED", visibility: "SHARED", productId: product?.id, entityType: "product", entityId: product?.id, metadata: { fieldKey: "fabricante", fieldLabel: "Fabricante" } },
+      { companyId: techImportId, type: "CATALOG_INCONSISTENCY_FOUND", visibility: "DISPATCHER_ONLY", entityType: "catalog", metadata: { count: 3, fileName: "catalogo_setembro.xlsx" } },
+      { companyId: techImportId, actorUserId: carlosId, type: "REMINDER_SENT", visibility: "SHARED", entityType: "company", entityId: techImportId },
+    ] });
   }
 
   console.log(`✅ ${enterprises.length} importadores criados.`);

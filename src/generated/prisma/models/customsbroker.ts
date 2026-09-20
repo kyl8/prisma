@@ -167,6 +167,7 @@ export type customsbrokerWhereInput = {
   userId?: Prisma.StringFilter<"customsbroker"> | string
   specialty?: Prisma.StringFilter<"customsbroker"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessListRelationFilter
 }
 
 export type customsbrokerOrderByWithRelationInput = {
@@ -174,6 +175,7 @@ export type customsbrokerOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   specialty?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessOrderByRelationAggregateInput
 }
 
 export type customsbrokerWhereUniqueInput = Prisma.AtLeast<{
@@ -184,6 +186,7 @@ export type customsbrokerWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.customsbrokerWhereInput | Prisma.customsbrokerWhereInput[]
   specialty?: Prisma.StringFilter<"customsbroker"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessListRelationFilter
 }, "id" | "userId">
 
 export type customsbrokerOrderByWithAggregationInput = {
@@ -208,24 +211,28 @@ export type customsbrokerCreateInput = {
   id?: string
   specialty?: string
   user: Prisma.UserCreateNestedOneWithoutCustbrokInput
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessCreateNestedManyWithoutCustomsBrokerInput
 }
 
 export type customsbrokerUncheckedCreateInput = {
   id?: string
   userId: string
   specialty?: string
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedCreateNestedManyWithoutCustomsBrokerInput
 }
 
 export type customsbrokerUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   specialty?: Prisma.StringFieldUpdateOperationsInput | string
   user?: Prisma.UserUpdateOneRequiredWithoutCustbrokNestedInput
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessUpdateManyWithoutCustomsBrokerNestedInput
 }
 
 export type customsbrokerUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   specialty?: Prisma.StringFieldUpdateOperationsInput | string
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedUpdateManyWithoutCustomsBrokerNestedInput
 }
 
 export type customsbrokerCreateManyInput = {
@@ -268,6 +275,11 @@ export type customsbrokerMinOrderByAggregateInput = {
   specialty?: Prisma.SortOrder
 }
 
+export type CustomsbrokerScalarRelationFilter = {
+  is?: Prisma.customsbrokerWhereInput
+  isNot?: Prisma.customsbrokerWhereInput
+}
+
 export type customsbrokerCreateNestedOneWithoutUserInput = {
   create?: Prisma.XOR<Prisma.customsbrokerCreateWithoutUserInput, Prisma.customsbrokerUncheckedCreateWithoutUserInput>
   connectOrCreate?: Prisma.customsbrokerCreateOrConnectWithoutUserInput
@@ -300,14 +312,30 @@ export type customsbrokerUncheckedUpdateOneWithoutUserNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.customsbrokerUpdateToOneWithWhereWithoutUserInput, Prisma.customsbrokerUpdateWithoutUserInput>, Prisma.customsbrokerUncheckedUpdateWithoutUserInput>
 }
 
+export type customsbrokerCreateNestedOneWithoutCompanyAccessesInput = {
+  create?: Prisma.XOR<Prisma.customsbrokerCreateWithoutCompanyAccessesInput, Prisma.customsbrokerUncheckedCreateWithoutCompanyAccessesInput>
+  connectOrCreate?: Prisma.customsbrokerCreateOrConnectWithoutCompanyAccessesInput
+  connect?: Prisma.customsbrokerWhereUniqueInput
+}
+
+export type customsbrokerUpdateOneRequiredWithoutCompanyAccessesNestedInput = {
+  create?: Prisma.XOR<Prisma.customsbrokerCreateWithoutCompanyAccessesInput, Prisma.customsbrokerUncheckedCreateWithoutCompanyAccessesInput>
+  connectOrCreate?: Prisma.customsbrokerCreateOrConnectWithoutCompanyAccessesInput
+  upsert?: Prisma.customsbrokerUpsertWithoutCompanyAccessesInput
+  connect?: Prisma.customsbrokerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.customsbrokerUpdateToOneWithWhereWithoutCompanyAccessesInput, Prisma.customsbrokerUpdateWithoutCompanyAccessesInput>, Prisma.customsbrokerUncheckedUpdateWithoutCompanyAccessesInput>
+}
+
 export type customsbrokerCreateWithoutUserInput = {
   id?: string
   specialty?: string
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessCreateNestedManyWithoutCustomsBrokerInput
 }
 
 export type customsbrokerUncheckedCreateWithoutUserInput = {
   id?: string
   specialty?: string
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedCreateNestedManyWithoutCustomsBrokerInput
 }
 
 export type customsbrokerCreateOrConnectWithoutUserInput = {
@@ -329,13 +357,84 @@ export type customsbrokerUpdateToOneWithWhereWithoutUserInput = {
 export type customsbrokerUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   specialty?: Prisma.StringFieldUpdateOperationsInput | string
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessUpdateManyWithoutCustomsBrokerNestedInput
 }
 
 export type customsbrokerUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   specialty?: Prisma.StringFieldUpdateOperationsInput | string
+  companyAccesses?: Prisma.CustomsBrokerCompanyAccessUncheckedUpdateManyWithoutCustomsBrokerNestedInput
 }
 
+export type customsbrokerCreateWithoutCompanyAccessesInput = {
+  id?: string
+  specialty?: string
+  user: Prisma.UserCreateNestedOneWithoutCustbrokInput
+}
+
+export type customsbrokerUncheckedCreateWithoutCompanyAccessesInput = {
+  id?: string
+  userId: string
+  specialty?: string
+}
+
+export type customsbrokerCreateOrConnectWithoutCompanyAccessesInput = {
+  where: Prisma.customsbrokerWhereUniqueInput
+  create: Prisma.XOR<Prisma.customsbrokerCreateWithoutCompanyAccessesInput, Prisma.customsbrokerUncheckedCreateWithoutCompanyAccessesInput>
+}
+
+export type customsbrokerUpsertWithoutCompanyAccessesInput = {
+  update: Prisma.XOR<Prisma.customsbrokerUpdateWithoutCompanyAccessesInput, Prisma.customsbrokerUncheckedUpdateWithoutCompanyAccessesInput>
+  create: Prisma.XOR<Prisma.customsbrokerCreateWithoutCompanyAccessesInput, Prisma.customsbrokerUncheckedCreateWithoutCompanyAccessesInput>
+  where?: Prisma.customsbrokerWhereInput
+}
+
+export type customsbrokerUpdateToOneWithWhereWithoutCompanyAccessesInput = {
+  where?: Prisma.customsbrokerWhereInput
+  data: Prisma.XOR<Prisma.customsbrokerUpdateWithoutCompanyAccessesInput, Prisma.customsbrokerUncheckedUpdateWithoutCompanyAccessesInput>
+}
+
+export type customsbrokerUpdateWithoutCompanyAccessesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  specialty?: Prisma.StringFieldUpdateOperationsInput | string
+  user?: Prisma.UserUpdateOneRequiredWithoutCustbrokNestedInput
+}
+
+export type customsbrokerUncheckedUpdateWithoutCompanyAccessesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  specialty?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+
+/**
+ * Count Type CustomsbrokerCountOutputType
+ */
+
+export type CustomsbrokerCountOutputType = {
+  companyAccesses: number
+}
+
+export type CustomsbrokerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  companyAccesses?: boolean | CustomsbrokerCountOutputTypeCountCompanyAccessesArgs
+}
+
+/**
+ * CustomsbrokerCountOutputType without action
+ */
+export type CustomsbrokerCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CustomsbrokerCountOutputType
+   */
+  select?: Prisma.CustomsbrokerCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CustomsbrokerCountOutputType without action
+ */
+export type CustomsbrokerCountOutputTypeCountCompanyAccessesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CustomsBrokerCompanyAccessWhereInput
+}
 
 
 export type customsbrokerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -343,6 +442,8 @@ export type customsbrokerSelect<ExtArgs extends runtime.Types.Extensions.Interna
   userId?: boolean
   specialty?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  companyAccesses?: boolean | Prisma.customsbroker$companyAccessesArgs<ExtArgs>
+  _count?: boolean | Prisma.CustomsbrokerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customsbroker"]>
 
 export type customsbrokerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -368,6 +469,8 @@ export type customsbrokerSelectScalar = {
 export type customsbrokerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "specialty", ExtArgs["result"]["customsbroker"]>
 export type customsbrokerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  companyAccesses?: boolean | Prisma.customsbroker$companyAccessesArgs<ExtArgs>
+  _count?: boolean | Prisma.CustomsbrokerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type customsbrokerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -380,6 +483,7 @@ export type $customsbrokerPayload<ExtArgs extends runtime.Types.Extensions.Inter
   name: "customsbroker"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    companyAccesses: Prisma.$CustomsBrokerCompanyAccessPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -780,6 +884,7 @@ readonly fields: customsbrokerFieldRefs;
 export interface Prisma__customsbrokerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  companyAccesses<T extends Prisma.customsbroker$companyAccessesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.customsbroker$companyAccessesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomsBrokerCompanyAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1210,6 +1315,30 @@ export type customsbrokerDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many customsbrokers to delete.
    */
   limit?: number
+}
+
+/**
+ * customsbroker.companyAccesses
+ */
+export type customsbroker$companyAccessesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CustomsBrokerCompanyAccess
+   */
+  select?: Prisma.CustomsBrokerCompanyAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CustomsBrokerCompanyAccess
+   */
+  omit?: Prisma.CustomsBrokerCompanyAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomsBrokerCompanyAccessInclude<ExtArgs> | null
+  where?: Prisma.CustomsBrokerCompanyAccessWhereInput
+  orderBy?: Prisma.CustomsBrokerCompanyAccessOrderByWithRelationInput | Prisma.CustomsBrokerCompanyAccessOrderByWithRelationInput[]
+  cursor?: Prisma.CustomsBrokerCompanyAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CustomsBrokerCompanyAccessScalarFieldEnum | Prisma.CustomsBrokerCompanyAccessScalarFieldEnum[]
 }
 
 /**

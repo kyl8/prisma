@@ -58,12 +58,17 @@ export const ModelName = {
   Authenticator: 'Authenticator',
   Importer: 'Importer',
   customsbroker: 'customsbroker',
+  CustomsBrokerCompanyAccess: 'CustomsBrokerCompanyAccess',
   Product: 'Product',
   ProductField: 'ProductField',
   Record: 'Record',
   ProdFieldResp: 'ProdFieldResp',
   Identifier: 'Identifier',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  CatalogRequest: 'CatalogRequest',
+  ActivityEvent: 'ActivityEvent',
+  CatalogRequestProduct: 'CatalogRequestProduct',
+  CatalogRequestResponse: 'CatalogRequestResponse'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -168,6 +173,16 @@ export const CustomsbrokerScalarFieldEnum = {
 export type CustomsbrokerScalarFieldEnum = (typeof CustomsbrokerScalarFieldEnum)[keyof typeof CustomsbrokerScalarFieldEnum]
 
 
+export const CustomsBrokerCompanyAccessScalarFieldEnum = {
+  id: 'id',
+  customsBrokerId: 'customsBrokerId',
+  companyId: 'companyId',
+  createdAt: 'createdAt'
+} as const
+
+export type CustomsBrokerCompanyAccessScalarFieldEnum = (typeof CustomsBrokerCompanyAccessScalarFieldEnum)[keyof typeof CustomsBrokerCompanyAccessScalarFieldEnum]
+
+
 export const ProductScalarFieldEnum = {
   id: 'id',
   importerId: 'importerId',
@@ -228,10 +243,76 @@ export const NotificationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   action: 'action',
-  description: 'description'
+  description: 'description',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const CatalogRequestScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  companyId: 'companyId',
+  createdById: 'createdById',
+  recipientName: 'recipientName',
+  recipientEmail: 'recipientEmail',
+  status: 'status',
+  kind: 'kind',
+  message: 'message',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  startedAt: 'startedAt',
+  submittedAt: 'submittedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type CatalogRequestScalarFieldEnum = (typeof CatalogRequestScalarFieldEnum)[keyof typeof CatalogRequestScalarFieldEnum]
+
+
+export const ActivityEventScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  actorUserId: 'actorUserId',
+  type: 'type',
+  visibility: 'visibility',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  productId: 'productId',
+  requestId: 'requestId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type ActivityEventScalarFieldEnum = (typeof ActivityEventScalarFieldEnum)[keyof typeof ActivityEventScalarFieldEnum]
+
+
+export const CatalogRequestProductScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  productId: 'productId'
+} as const
+
+export type CatalogRequestProductScalarFieldEnum = (typeof CatalogRequestProductScalarFieldEnum)[keyof typeof CatalogRequestProductScalarFieldEnum]
+
+
+export const CatalogRequestResponseScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  productId: 'productId',
+  fieldKey: 'fieldKey',
+  value: 'value',
+  status: 'status',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type CatalogRequestResponseScalarFieldEnum = (typeof CatalogRequestResponseScalarFieldEnum)[keyof typeof CatalogRequestResponseScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -240,6 +321,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -256,4 +345,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

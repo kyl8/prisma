@@ -226,6 +226,9 @@ export type ProductWhereInput = {
   identifier?: Prisma.XOR<Prisma.IdentifierNullableScalarRelationFilter, Prisma.IdentifierWhereInput> | null
   records?: Prisma.RecordListRelationFilter
   importer?: Prisma.XOR<Prisma.ImporterScalarRelationFilter, Prisma.ImporterWhereInput>
+  catalogRequestProducts?: Prisma.CatalogRequestProductListRelationFilter
+  catalogRequestResponses?: Prisma.CatalogRequestResponseListRelationFilter
+  activityEvents?: Prisma.ActivityEventListRelationFilter
 }
 
 export type ProductOrderByWithRelationInput = {
@@ -243,6 +246,9 @@ export type ProductOrderByWithRelationInput = {
   identifier?: Prisma.IdentifierOrderByWithRelationInput
   records?: Prisma.RecordOrderByRelationAggregateInput
   importer?: Prisma.ImporterOrderByWithRelationInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductOrderByRelationAggregateInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseOrderByRelationAggregateInput
+  activityEvents?: Prisma.ActivityEventOrderByRelationAggregateInput
 }
 
 export type ProductWhereUniqueInput = Prisma.AtLeast<{
@@ -263,6 +269,9 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   identifier?: Prisma.XOR<Prisma.IdentifierNullableScalarRelationFilter, Prisma.IdentifierWhereInput> | null
   records?: Prisma.RecordListRelationFilter
   importer?: Prisma.XOR<Prisma.ImporterScalarRelationFilter, Prisma.ImporterWhereInput>
+  catalogRequestProducts?: Prisma.CatalogRequestProductListRelationFilter
+  catalogRequestResponses?: Prisma.CatalogRequestResponseListRelationFilter
+  activityEvents?: Prisma.ActivityEventListRelationFilter
 }, "id" | "name" | "code" | "ncm">
 
 export type ProductOrderByWithAggregationInput = {
@@ -311,6 +320,9 @@ export type ProductCreateInput = {
   identifier?: Prisma.IdentifierCreateNestedOneWithoutProductInput
   records?: Prisma.RecordCreateNestedManyWithoutProductInput
   importer: Prisma.ImporterCreateNestedOneWithoutProductsInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateInput = {
@@ -327,6 +339,9 @@ export type ProductUncheckedCreateInput = {
   fields?: Prisma.ProductFieldUncheckedCreateNestedManyWithoutProductInput
   identifier?: Prisma.IdentifierUncheckedCreateNestedOneWithoutProductInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductUpdateInput = {
@@ -343,6 +358,9 @@ export type ProductUpdateInput = {
   identifier?: Prisma.IdentifierUpdateOneWithoutProductNestedInput
   records?: Prisma.RecordUpdateManyWithoutProductNestedInput
   importer?: Prisma.ImporterUpdateOneRequiredWithoutProductsNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateInput = {
@@ -359,6 +377,9 @@ export type ProductUncheckedUpdateInput = {
   fields?: Prisma.ProductFieldUncheckedUpdateManyWithoutProductNestedInput
   identifier?: Prisma.IdentifierUncheckedUpdateOneWithoutProductNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductCreateManyInput = {
@@ -453,6 +474,11 @@ export type ProductScalarRelationFilter = {
   isNot?: Prisma.ProductWhereInput
 }
 
+export type ProductNullableScalarRelationFilter = {
+  is?: Prisma.ProductWhereInput | null
+  isNot?: Prisma.ProductWhereInput | null
+}
+
 export type ProductCreateNestedManyWithoutImporterInput = {
   create?: Prisma.XOR<Prisma.ProductCreateWithoutImporterInput, Prisma.ProductUncheckedCreateWithoutImporterInput> | Prisma.ProductCreateWithoutImporterInput[] | Prisma.ProductUncheckedCreateWithoutImporterInput[]
   connectOrCreate?: Prisma.ProductCreateOrConnectWithoutImporterInput | Prisma.ProductCreateOrConnectWithoutImporterInput[]
@@ -537,6 +563,50 @@ export type ProductUpdateOneRequiredWithoutIdentifierNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutIdentifierInput, Prisma.ProductUpdateWithoutIdentifierInput>, Prisma.ProductUncheckedUpdateWithoutIdentifierInput>
 }
 
+export type ProductCreateNestedOneWithoutActivityEventsInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutActivityEventsInput, Prisma.ProductUncheckedCreateWithoutActivityEventsInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutActivityEventsInput
+  connect?: Prisma.ProductWhereUniqueInput
+}
+
+export type ProductUpdateOneWithoutActivityEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutActivityEventsInput, Prisma.ProductUncheckedCreateWithoutActivityEventsInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutActivityEventsInput
+  upsert?: Prisma.ProductUpsertWithoutActivityEventsInput
+  disconnect?: Prisma.ProductWhereInput | boolean
+  delete?: Prisma.ProductWhereInput | boolean
+  connect?: Prisma.ProductWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutActivityEventsInput, Prisma.ProductUpdateWithoutActivityEventsInput>, Prisma.ProductUncheckedUpdateWithoutActivityEventsInput>
+}
+
+export type ProductCreateNestedOneWithoutCatalogRequestProductsInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutCatalogRequestProductsInput, Prisma.ProductUncheckedCreateWithoutCatalogRequestProductsInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutCatalogRequestProductsInput
+  connect?: Prisma.ProductWhereUniqueInput
+}
+
+export type ProductUpdateOneRequiredWithoutCatalogRequestProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutCatalogRequestProductsInput, Prisma.ProductUncheckedCreateWithoutCatalogRequestProductsInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutCatalogRequestProductsInput
+  upsert?: Prisma.ProductUpsertWithoutCatalogRequestProductsInput
+  connect?: Prisma.ProductWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutCatalogRequestProductsInput, Prisma.ProductUpdateWithoutCatalogRequestProductsInput>, Prisma.ProductUncheckedUpdateWithoutCatalogRequestProductsInput>
+}
+
+export type ProductCreateNestedOneWithoutCatalogRequestResponsesInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutCatalogRequestResponsesInput, Prisma.ProductUncheckedCreateWithoutCatalogRequestResponsesInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutCatalogRequestResponsesInput
+  connect?: Prisma.ProductWhereUniqueInput
+}
+
+export type ProductUpdateOneRequiredWithoutCatalogRequestResponsesNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutCatalogRequestResponsesInput, Prisma.ProductUncheckedCreateWithoutCatalogRequestResponsesInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutCatalogRequestResponsesInput
+  upsert?: Prisma.ProductUpsertWithoutCatalogRequestResponsesInput
+  connect?: Prisma.ProductWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutCatalogRequestResponsesInput, Prisma.ProductUpdateWithoutCatalogRequestResponsesInput>, Prisma.ProductUncheckedUpdateWithoutCatalogRequestResponsesInput>
+}
+
 export type ProductCreateWithoutImporterInput = {
   id?: string
   name: string
@@ -550,6 +620,9 @@ export type ProductCreateWithoutImporterInput = {
   fields?: Prisma.ProductFieldCreateNestedManyWithoutProductInput
   identifier?: Prisma.IdentifierCreateNestedOneWithoutProductInput
   records?: Prisma.RecordCreateNestedManyWithoutProductInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutImporterInput = {
@@ -565,6 +638,9 @@ export type ProductUncheckedCreateWithoutImporterInput = {
   fields?: Prisma.ProductFieldUncheckedCreateNestedManyWithoutProductInput
   identifier?: Prisma.IdentifierUncheckedCreateNestedOneWithoutProductInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutImporterInput = {
@@ -622,6 +698,9 @@ export type ProductCreateWithoutFieldsInput = {
   identifier?: Prisma.IdentifierCreateNestedOneWithoutProductInput
   records?: Prisma.RecordCreateNestedManyWithoutProductInput
   importer: Prisma.ImporterCreateNestedOneWithoutProductsInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutFieldsInput = {
@@ -637,6 +716,9 @@ export type ProductUncheckedCreateWithoutFieldsInput = {
   createdAt?: Date | string
   identifier?: Prisma.IdentifierUncheckedCreateNestedOneWithoutProductInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutFieldsInput = {
@@ -668,6 +750,9 @@ export type ProductUpdateWithoutFieldsInput = {
   identifier?: Prisma.IdentifierUpdateOneWithoutProductNestedInput
   records?: Prisma.RecordUpdateManyWithoutProductNestedInput
   importer?: Prisma.ImporterUpdateOneRequiredWithoutProductsNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutFieldsInput = {
@@ -683,6 +768,9 @@ export type ProductUncheckedUpdateWithoutFieldsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   identifier?: Prisma.IdentifierUncheckedUpdateOneWithoutProductNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductCreateWithoutRecordsInput = {
@@ -698,6 +786,9 @@ export type ProductCreateWithoutRecordsInput = {
   fields?: Prisma.ProductFieldCreateNestedManyWithoutProductInput
   identifier?: Prisma.IdentifierCreateNestedOneWithoutProductInput
   importer: Prisma.ImporterCreateNestedOneWithoutProductsInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutRecordsInput = {
@@ -713,6 +804,9 @@ export type ProductUncheckedCreateWithoutRecordsInput = {
   createdAt?: Date | string
   fields?: Prisma.ProductFieldUncheckedCreateNestedManyWithoutProductInput
   identifier?: Prisma.IdentifierUncheckedCreateNestedOneWithoutProductInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutRecordsInput = {
@@ -744,6 +838,9 @@ export type ProductUpdateWithoutRecordsInput = {
   fields?: Prisma.ProductFieldUpdateManyWithoutProductNestedInput
   identifier?: Prisma.IdentifierUpdateOneWithoutProductNestedInput
   importer?: Prisma.ImporterUpdateOneRequiredWithoutProductsNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutRecordsInput = {
@@ -759,6 +856,9 @@ export type ProductUncheckedUpdateWithoutRecordsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.ProductFieldUncheckedUpdateManyWithoutProductNestedInput
   identifier?: Prisma.IdentifierUncheckedUpdateOneWithoutProductNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductCreateWithoutIdentifierInput = {
@@ -774,6 +874,9 @@ export type ProductCreateWithoutIdentifierInput = {
   fields?: Prisma.ProductFieldCreateNestedManyWithoutProductInput
   records?: Prisma.RecordCreateNestedManyWithoutProductInput
   importer: Prisma.ImporterCreateNestedOneWithoutProductsInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutIdentifierInput = {
@@ -789,6 +892,9 @@ export type ProductUncheckedCreateWithoutIdentifierInput = {
   createdAt?: Date | string
   fields?: Prisma.ProductFieldUncheckedCreateNestedManyWithoutProductInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutIdentifierInput = {
@@ -820,6 +926,9 @@ export type ProductUpdateWithoutIdentifierInput = {
   fields?: Prisma.ProductFieldUpdateManyWithoutProductNestedInput
   records?: Prisma.RecordUpdateManyWithoutProductNestedInput
   importer?: Prisma.ImporterUpdateOneRequiredWithoutProductsNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutIdentifierInput = {
@@ -835,6 +944,273 @@ export type ProductUncheckedUpdateWithoutIdentifierInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fields?: Prisma.ProductFieldUncheckedUpdateManyWithoutProductNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutProductNestedInput
+}
+
+export type ProductCreateWithoutActivityEventsInput = {
+  id?: string
+  name: string
+  code: string
+  ncm: string
+  completeness: string
+  status: string
+  identifierStatus?: boolean
+  updatedAt: Date | string
+  createdAt?: Date | string
+  fields?: Prisma.ProductFieldCreateNestedManyWithoutProductInput
+  identifier?: Prisma.IdentifierCreateNestedOneWithoutProductInput
+  records?: Prisma.RecordCreateNestedManyWithoutProductInput
+  importer: Prisma.ImporterCreateNestedOneWithoutProductsInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseCreateNestedManyWithoutProductInput
+}
+
+export type ProductUncheckedCreateWithoutActivityEventsInput = {
+  id?: string
+  importerId: string
+  name: string
+  code: string
+  ncm: string
+  completeness: string
+  status: string
+  identifierStatus?: boolean
+  updatedAt: Date | string
+  createdAt?: Date | string
+  fields?: Prisma.ProductFieldUncheckedCreateNestedManyWithoutProductInput
+  identifier?: Prisma.IdentifierUncheckedCreateNestedOneWithoutProductInput
+  records?: Prisma.RecordUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedCreateNestedManyWithoutProductInput
+}
+
+export type ProductCreateOrConnectWithoutActivityEventsInput = {
+  where: Prisma.ProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductCreateWithoutActivityEventsInput, Prisma.ProductUncheckedCreateWithoutActivityEventsInput>
+}
+
+export type ProductUpsertWithoutActivityEventsInput = {
+  update: Prisma.XOR<Prisma.ProductUpdateWithoutActivityEventsInput, Prisma.ProductUncheckedUpdateWithoutActivityEventsInput>
+  create: Prisma.XOR<Prisma.ProductCreateWithoutActivityEventsInput, Prisma.ProductUncheckedCreateWithoutActivityEventsInput>
+  where?: Prisma.ProductWhereInput
+}
+
+export type ProductUpdateToOneWithWhereWithoutActivityEventsInput = {
+  where?: Prisma.ProductWhereInput
+  data: Prisma.XOR<Prisma.ProductUpdateWithoutActivityEventsInput, Prisma.ProductUncheckedUpdateWithoutActivityEventsInput>
+}
+
+export type ProductUpdateWithoutActivityEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  ncm?: Prisma.StringFieldUpdateOperationsInput | string
+  completeness?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  identifierStatus?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.ProductFieldUpdateManyWithoutProductNestedInput
+  identifier?: Prisma.IdentifierUpdateOneWithoutProductNestedInput
+  records?: Prisma.RecordUpdateManyWithoutProductNestedInput
+  importer?: Prisma.ImporterUpdateOneRequiredWithoutProductsNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUpdateManyWithoutProductNestedInput
+}
+
+export type ProductUncheckedUpdateWithoutActivityEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  importerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  ncm?: Prisma.StringFieldUpdateOperationsInput | string
+  completeness?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  identifierStatus?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.ProductFieldUncheckedUpdateManyWithoutProductNestedInput
+  identifier?: Prisma.IdentifierUncheckedUpdateOneWithoutProductNestedInput
+  records?: Prisma.RecordUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedUpdateManyWithoutProductNestedInput
+}
+
+export type ProductCreateWithoutCatalogRequestProductsInput = {
+  id?: string
+  name: string
+  code: string
+  ncm: string
+  completeness: string
+  status: string
+  identifierStatus?: boolean
+  updatedAt: Date | string
+  createdAt?: Date | string
+  fields?: Prisma.ProductFieldCreateNestedManyWithoutProductInput
+  identifier?: Prisma.IdentifierCreateNestedOneWithoutProductInput
+  records?: Prisma.RecordCreateNestedManyWithoutProductInput
+  importer: Prisma.ImporterCreateNestedOneWithoutProductsInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutProductInput
+}
+
+export type ProductUncheckedCreateWithoutCatalogRequestProductsInput = {
+  id?: string
+  importerId: string
+  name: string
+  code: string
+  ncm: string
+  completeness: string
+  status: string
+  identifierStatus?: boolean
+  updatedAt: Date | string
+  createdAt?: Date | string
+  fields?: Prisma.ProductFieldUncheckedCreateNestedManyWithoutProductInput
+  identifier?: Prisma.IdentifierUncheckedCreateNestedOneWithoutProductInput
+  records?: Prisma.RecordUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutProductInput
+}
+
+export type ProductCreateOrConnectWithoutCatalogRequestProductsInput = {
+  where: Prisma.ProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductCreateWithoutCatalogRequestProductsInput, Prisma.ProductUncheckedCreateWithoutCatalogRequestProductsInput>
+}
+
+export type ProductUpsertWithoutCatalogRequestProductsInput = {
+  update: Prisma.XOR<Prisma.ProductUpdateWithoutCatalogRequestProductsInput, Prisma.ProductUncheckedUpdateWithoutCatalogRequestProductsInput>
+  create: Prisma.XOR<Prisma.ProductCreateWithoutCatalogRequestProductsInput, Prisma.ProductUncheckedCreateWithoutCatalogRequestProductsInput>
+  where?: Prisma.ProductWhereInput
+}
+
+export type ProductUpdateToOneWithWhereWithoutCatalogRequestProductsInput = {
+  where?: Prisma.ProductWhereInput
+  data: Prisma.XOR<Prisma.ProductUpdateWithoutCatalogRequestProductsInput, Prisma.ProductUncheckedUpdateWithoutCatalogRequestProductsInput>
+}
+
+export type ProductUpdateWithoutCatalogRequestProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  ncm?: Prisma.StringFieldUpdateOperationsInput | string
+  completeness?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  identifierStatus?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.ProductFieldUpdateManyWithoutProductNestedInput
+  identifier?: Prisma.IdentifierUpdateOneWithoutProductNestedInput
+  records?: Prisma.RecordUpdateManyWithoutProductNestedInput
+  importer?: Prisma.ImporterUpdateOneRequiredWithoutProductsNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutProductNestedInput
+}
+
+export type ProductUncheckedUpdateWithoutCatalogRequestProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  importerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  ncm?: Prisma.StringFieldUpdateOperationsInput | string
+  completeness?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  identifierStatus?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.ProductFieldUncheckedUpdateManyWithoutProductNestedInput
+  identifier?: Prisma.IdentifierUncheckedUpdateOneWithoutProductNestedInput
+  records?: Prisma.RecordUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutProductNestedInput
+}
+
+export type ProductCreateWithoutCatalogRequestResponsesInput = {
+  id?: string
+  name: string
+  code: string
+  ncm: string
+  completeness: string
+  status: string
+  identifierStatus?: boolean
+  updatedAt: Date | string
+  createdAt?: Date | string
+  fields?: Prisma.ProductFieldCreateNestedManyWithoutProductInput
+  identifier?: Prisma.IdentifierCreateNestedOneWithoutProductInput
+  records?: Prisma.RecordCreateNestedManyWithoutProductInput
+  importer: Prisma.ImporterCreateNestedOneWithoutProductsInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutProductInput
+}
+
+export type ProductUncheckedCreateWithoutCatalogRequestResponsesInput = {
+  id?: string
+  importerId: string
+  name: string
+  code: string
+  ncm: string
+  completeness: string
+  status: string
+  identifierStatus?: boolean
+  updatedAt: Date | string
+  createdAt?: Date | string
+  fields?: Prisma.ProductFieldUncheckedCreateNestedManyWithoutProductInput
+  identifier?: Prisma.IdentifierUncheckedCreateNestedOneWithoutProductInput
+  records?: Prisma.RecordUncheckedCreateNestedManyWithoutProductInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedCreateNestedManyWithoutProductInput
+  activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutProductInput
+}
+
+export type ProductCreateOrConnectWithoutCatalogRequestResponsesInput = {
+  where: Prisma.ProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductCreateWithoutCatalogRequestResponsesInput, Prisma.ProductUncheckedCreateWithoutCatalogRequestResponsesInput>
+}
+
+export type ProductUpsertWithoutCatalogRequestResponsesInput = {
+  update: Prisma.XOR<Prisma.ProductUpdateWithoutCatalogRequestResponsesInput, Prisma.ProductUncheckedUpdateWithoutCatalogRequestResponsesInput>
+  create: Prisma.XOR<Prisma.ProductCreateWithoutCatalogRequestResponsesInput, Prisma.ProductUncheckedCreateWithoutCatalogRequestResponsesInput>
+  where?: Prisma.ProductWhereInput
+}
+
+export type ProductUpdateToOneWithWhereWithoutCatalogRequestResponsesInput = {
+  where?: Prisma.ProductWhereInput
+  data: Prisma.XOR<Prisma.ProductUpdateWithoutCatalogRequestResponsesInput, Prisma.ProductUncheckedUpdateWithoutCatalogRequestResponsesInput>
+}
+
+export type ProductUpdateWithoutCatalogRequestResponsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  ncm?: Prisma.StringFieldUpdateOperationsInput | string
+  completeness?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  identifierStatus?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.ProductFieldUpdateManyWithoutProductNestedInput
+  identifier?: Prisma.IdentifierUpdateOneWithoutProductNestedInput
+  records?: Prisma.RecordUpdateManyWithoutProductNestedInput
+  importer?: Prisma.ImporterUpdateOneRequiredWithoutProductsNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutProductNestedInput
+}
+
+export type ProductUncheckedUpdateWithoutCatalogRequestResponsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  importerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  ncm?: Prisma.StringFieldUpdateOperationsInput | string
+  completeness?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  identifierStatus?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fields?: Prisma.ProductFieldUncheckedUpdateManyWithoutProductNestedInput
+  identifier?: Prisma.IdentifierUncheckedUpdateOneWithoutProductNestedInput
+  records?: Prisma.RecordUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductCreateManyImporterInput = {
@@ -862,6 +1238,9 @@ export type ProductUpdateWithoutImporterInput = {
   fields?: Prisma.ProductFieldUpdateManyWithoutProductNestedInput
   identifier?: Prisma.IdentifierUpdateOneWithoutProductNestedInput
   records?: Prisma.RecordUpdateManyWithoutProductNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutImporterInput = {
@@ -877,6 +1256,9 @@ export type ProductUncheckedUpdateWithoutImporterInput = {
   fields?: Prisma.ProductFieldUncheckedUpdateManyWithoutProductNestedInput
   identifier?: Prisma.IdentifierUncheckedUpdateOneWithoutProductNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestProducts?: Prisma.CatalogRequestProductUncheckedUpdateManyWithoutProductNestedInput
+  catalogRequestResponses?: Prisma.CatalogRequestResponseUncheckedUpdateManyWithoutProductNestedInput
+  activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateManyWithoutImporterInput = {
@@ -899,11 +1281,17 @@ export type ProductUncheckedUpdateManyWithoutImporterInput = {
 export type ProductCountOutputType = {
   fields: number
   records: number
+  catalogRequestProducts: number
+  catalogRequestResponses: number
+  activityEvents: number
 }
 
 export type ProductCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fields?: boolean | ProductCountOutputTypeCountFieldsArgs
   records?: boolean | ProductCountOutputTypeCountRecordsArgs
+  catalogRequestProducts?: boolean | ProductCountOutputTypeCountCatalogRequestProductsArgs
+  catalogRequestResponses?: boolean | ProductCountOutputTypeCountCatalogRequestResponsesArgs
+  activityEvents?: boolean | ProductCountOutputTypeCountActivityEventsArgs
 }
 
 /**
@@ -930,6 +1318,27 @@ export type ProductCountOutputTypeCountRecordsArgs<ExtArgs extends runtime.Types
   where?: Prisma.RecordWhereInput
 }
 
+/**
+ * ProductCountOutputType without action
+ */
+export type ProductCountOutputTypeCountCatalogRequestProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CatalogRequestProductWhereInput
+}
+
+/**
+ * ProductCountOutputType without action
+ */
+export type ProductCountOutputTypeCountCatalogRequestResponsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CatalogRequestResponseWhereInput
+}
+
+/**
+ * ProductCountOutputType without action
+ */
+export type ProductCountOutputTypeCountActivityEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ActivityEventWhereInput
+}
+
 
 export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -946,6 +1355,9 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   identifier?: boolean | Prisma.Product$identifierArgs<ExtArgs>
   records?: boolean | Prisma.Product$recordsArgs<ExtArgs>
   importer?: boolean | Prisma.ImporterDefaultArgs<ExtArgs>
+  catalogRequestProducts?: boolean | Prisma.Product$catalogRequestProductsArgs<ExtArgs>
+  catalogRequestResponses?: boolean | Prisma.Product$catalogRequestResponsesArgs<ExtArgs>
+  activityEvents?: boolean | Prisma.Product$activityEventsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["product"]>
 
@@ -996,6 +1408,9 @@ export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   identifier?: boolean | Prisma.Product$identifierArgs<ExtArgs>
   records?: boolean | Prisma.Product$recordsArgs<ExtArgs>
   importer?: boolean | Prisma.ImporterDefaultArgs<ExtArgs>
+  catalogRequestProducts?: boolean | Prisma.Product$catalogRequestProductsArgs<ExtArgs>
+  catalogRequestResponses?: boolean | Prisma.Product$catalogRequestResponsesArgs<ExtArgs>
+  activityEvents?: boolean | Prisma.Product$activityEventsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProductIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1012,6 +1427,9 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     identifier: Prisma.$IdentifierPayload<ExtArgs> | null
     records: Prisma.$RecordPayload<ExtArgs>[]
     importer: Prisma.$ImporterPayload<ExtArgs>
+    catalogRequestProducts: Prisma.$CatalogRequestProductPayload<ExtArgs>[]
+    catalogRequestResponses: Prisma.$CatalogRequestResponsePayload<ExtArgs>[]
+    activityEvents: Prisma.$ActivityEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1422,6 +1840,9 @@ export interface Prisma__ProductClient<T, Null = never, ExtArgs extends runtime.
   identifier<T extends Prisma.Product$identifierArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$identifierArgs<ExtArgs>>): Prisma.Prisma__IdentifierClient<runtime.Types.Result.GetResult<Prisma.$IdentifierPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   records<T extends Prisma.Product$recordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$recordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   importer<T extends Prisma.ImporterDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ImporterDefaultArgs<ExtArgs>>): Prisma.Prisma__ImporterClient<runtime.Types.Result.GetResult<Prisma.$ImporterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  catalogRequestProducts<T extends Prisma.Product$catalogRequestProductsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$catalogRequestProductsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CatalogRequestProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  catalogRequestResponses<T extends Prisma.Product$catalogRequestResponsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$catalogRequestResponsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CatalogRequestResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  activityEvents<T extends Prisma.Product$activityEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$activityEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1926,6 +2347,78 @@ export type Product$recordsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.RecordScalarFieldEnum | Prisma.RecordScalarFieldEnum[]
+}
+
+/**
+ * Product.catalogRequestProducts
+ */
+export type Product$catalogRequestProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CatalogRequestProduct
+   */
+  select?: Prisma.CatalogRequestProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CatalogRequestProduct
+   */
+  omit?: Prisma.CatalogRequestProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CatalogRequestProductInclude<ExtArgs> | null
+  where?: Prisma.CatalogRequestProductWhereInput
+  orderBy?: Prisma.CatalogRequestProductOrderByWithRelationInput | Prisma.CatalogRequestProductOrderByWithRelationInput[]
+  cursor?: Prisma.CatalogRequestProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CatalogRequestProductScalarFieldEnum | Prisma.CatalogRequestProductScalarFieldEnum[]
+}
+
+/**
+ * Product.catalogRequestResponses
+ */
+export type Product$catalogRequestResponsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CatalogRequestResponse
+   */
+  select?: Prisma.CatalogRequestResponseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CatalogRequestResponse
+   */
+  omit?: Prisma.CatalogRequestResponseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CatalogRequestResponseInclude<ExtArgs> | null
+  where?: Prisma.CatalogRequestResponseWhereInput
+  orderBy?: Prisma.CatalogRequestResponseOrderByWithRelationInput | Prisma.CatalogRequestResponseOrderByWithRelationInput[]
+  cursor?: Prisma.CatalogRequestResponseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CatalogRequestResponseScalarFieldEnum | Prisma.CatalogRequestResponseScalarFieldEnum[]
+}
+
+/**
+ * Product.activityEvents
+ */
+export type Product$activityEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ActivityEvent
+   */
+  select?: Prisma.ActivityEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ActivityEvent
+   */
+  omit?: Prisma.ActivityEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityEventInclude<ExtArgs> | null
+  where?: Prisma.ActivityEventWhereInput
+  orderBy?: Prisma.ActivityEventOrderByWithRelationInput | Prisma.ActivityEventOrderByWithRelationInput[]
+  cursor?: Prisma.ActivityEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ActivityEventScalarFieldEnum | Prisma.ActivityEventScalarFieldEnum[]
 }
 
 /**
