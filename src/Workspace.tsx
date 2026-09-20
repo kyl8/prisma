@@ -2552,13 +2552,8 @@ function Settings() {
         </Card>
         <div>
           <Card title="Integrações">
-            <Integration
-              name="Portal Único / Siscomex"
-              state="Não configurado"
-            />
-            <Integration name="Logcomex" state="Não configurado" />
-            <Integration name="ERP" state="Não configurado" />
-            <Integration name="API" state="Disponível" />
+            <Integration name="LOGCOMEX" state="Não configurado" />
+            <Integration name="SISCOMEX" state="Não configurado" />
           </Card>
           <Card title="Observação">
             <p className="ws-card-copy">
@@ -3171,7 +3166,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       case "users":
         return <LiveDataPlaceholder title="Usuários e acessos" description="Usuários e permissões reais aparecerão quando forem vinculados ao backend." />;
       case "settings":
-        return <LiveDataPlaceholder title="Configurações" description="As configurações da conta serão carregadas do backend." />;
+        return <Settings />;
       case "assistant":
         return <LiveDataPlaceholder title="Assistente PRISMA" description="O assistente será habilitado quando houver uma fonte de dados e conversas persistidas." />;
       case "add-client":
