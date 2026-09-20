@@ -170,7 +170,7 @@ function ClientDetailTabs({ company, go }: { company: WorkspaceCompany; go: (v: 
     <div className="ws-page-title client-header"><div><h1>{company.name}</h1><p>{company.cnpj} · Contato: {company.contactName ?? "—"}</p></div></div>
     <div className="ws-tabs"><button className={tab === "overview" ? "active" : ""} onClick={() => setTab("overview")}>Visão geral</button><button className={tab === "requests" ? "active" : ""} onClick={() => setTab("requests")}>Solicitações</button></div>
     {tab === "overview" && <div className="ws-layout client-layout"><Card title="Visão geral do cliente" className="ws-card--large"><div className="ws-stat-rows"><Metric value={company.totalProducts} label="Total de produtos" /><Metric value={`${company.completeness}%`} label="Completude geral" /><Metric value={company.pendingCount} label="Produtos em solicitações abertas" /><Metric value={company.inReview} label="Solicitações em revisão" /></div></Card><Card title="Quem precisa agir"><div className="ws-who"><span>IM</span><p><strong>Importador</strong><small>{company.awaitingImporter} solicitações abertas</small></p><button onClick={() => setTab("requests")}>Ver</button></div><div className="ws-who"><span>DE</span><p><strong>Despachante</strong><small>{company.inReview} aguardando revisão</small></p><button onClick={() => setTab("requests")}>Ver</button></div></Card><Card title="Atividade recente" className="ws-card--wide"><RealActivityList items={company.activity} go={go} /></Card></div>}
-    {tab === "requests" && <Card title={`Solicitações de ${company.name}`} className="ws-card--wide"><div className="ws-client-requests">{company.requests.map((request) => <div key={request.id} className="ws-client-request"><div><strong>#{request.id}</strong><span>{request.productCount} produto{request.productCount === 1 ? "" : "s"} · {request.recipientName}</span><small>{request.recipientEmail}</small></div><Status>{request.status === "submitted" ? "Enviado para revisão" : request.status === "completed" ? "Concluído" : request.status === "cancelled" ? "Cancelado" : "Em preenchimento"}</Status></div>)}{company.requests.length === 0 && <p className="ws-empty">Nenhuma solicitação registrada para este cliente.</p>}</div></Card>}
+    {tab === "requests" && <RequestsCard scopedCompanyId={company.id} />}
   </>;
 }
 
@@ -1017,7 +1017,8 @@ function requestInputDate(value?: string) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(date);
 }
 
-function RequestsCard() {
+function RequestsCard({ scopedCompanyId }: { scopedCompanyId?: string } = {}) {
+  const isScoped = Boolean(scopedCompanyId);
   const [open, setOpen] = useState(false);
   const [created, setCreated] = useState<(CatalogRequest & { url?: string }) | null>(null);
   const [recipientName, setRecipientName] = useState("Mariana Costa");
@@ -1047,7 +1048,7 @@ function RequestsCard() {
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [reviewRequest, setReviewRequest] = useState<any | null>(null);
   const [rejectNote, setRejectNote] = useState("");
-  const activeCompany = backendCompanies.find((company) => company.id === selectedRequestCompanyId) ?? backendCompanies[0];
+  const activeCompany = backendCompanies.find((company) => company.id === (scopedCompanyId ?? selectedRequestCompanyId)) ?? backendCompanies[0];
   useEffect(() => {
     listCatalogCompanies().then((companies) => {
       setBackendCompanies(companies);
@@ -1329,7 +1330,7 @@ function RequestsCard() {
             </div>}
             <label className="ws-field">
               <span>Empresa</span>
-              {backendCompanies.length > 1 && <select aria-label="Selecionar empresa" value={activeCompany?.id ?? ""} onChange={(event) => { const company = backendCompanies.find((item) => item.id === event.target.value); if (!company) return; setSelectedRequestCompanyId(company.id); setRecipientName(company.contactName ?? ""); setRecipientEmail(company.contactEmail ?? ""); setSelectedIds(company.products.slice(0, 2).map((product) => product.id)); setCorrectionProductId(company.products[0]?.id ?? ""); setCorrectionFieldKey(company.products[0]?.attributes[0]?.key ?? ""); }}>{backendCompanies.map((company) => <option key={company.id} value={company.id}>{company.name} · {company.cnpj}</option>)}</select>}
+              {backendCompanies.length > 1 && !isScoped && <select aria-label="Selecionar empresa" value={activeCompany?.id ?? ""} onChange={(event) => { const company = backendCompanies.find((item) => item.id === event.target.value); if (!company) return; setSelectedRequestCompanyId(company.id); setRecipientName(company.contactName ?? ""); setRecipientEmail(company.contactEmail ?? ""); setSelectedIds(company.products.slice(0, 2).map((product) => product.id)); setCorrectionProductId(company.products[0]?.id ?? ""); setCorrectionFieldKey(company.products[0]?.attributes[0]?.key ?? ""); }}>{backendCompanies.map((company) => <option key={company.id} value={company.id}>{company.name} · {company.cnpj}</option>)}</select>}
               <input value={activeCompany ? `${activeCompany.name} · ${activeCompany.cnpj}` : "Carregando empresa..."} readOnly />
             </label>
             <label className="ws-field">
