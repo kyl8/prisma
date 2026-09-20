@@ -893,6 +893,10 @@ function RequestsCard() {
   const { requests, products } = useStoreState();
   const atlasRequests = backendCompanies.length ? backendRequests : [];
   const atlasProducts = activeCompany?.products ?? [];
+  const completenessOf = (product: any) => {
+    const persisted = Number.parseInt(String(product.completeness ?? ""), 10);
+    return Number.isFinite(persisted) ? persisted : productCompleteness(product);
+  };
 
   const RequestStatus = ({ status }: { status: CatalogRequest["status"] }) => (
     <span
@@ -909,7 +913,7 @@ function RequestsCard() {
 
   const generate = async () => {
     const incompleteIds = atlasProducts
-      .filter((p) => productCompleteness(p) < 100)
+      .filter((p) => completenessOf(p) < 100)
       .map((p) => p.id);
     const productIds =
       kind === "correction"
@@ -1049,7 +1053,7 @@ function RequestsCard() {
                           }
                         />
                         <span>
-                          {p.name} <small>· {productCompleteness(p)}%</small>
+                          {p.name} <small>· {completenessOf(p)}%</small>
                         </span>
                       </label>
                     ))}
