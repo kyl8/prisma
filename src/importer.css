@@ -309,6 +309,11 @@
   background: #f3f3f0;
   box-shadow: 0 0 0 2px rgba(23, 23, 21, 0.08);
 }
+.imp-field.is-error input {
+  border-color: #8c8c86;
+  background: #f5f2ed;
+  box-shadow: 0 0 0 2px rgba(23, 23, 21, 0.1);
+}
 .imp-required {
   list-style: none;
   margin: 12px 0 0;
@@ -683,6 +688,11 @@
   background: #fbfbf9;
   box-shadow: 0 0 0 2px rgba(23, 23, 21, 0.1);
 }
+.req-field.is-error input {
+  border-color: #8c8c86;
+  background: #f5f2ed;
+  box-shadow: 0 0 0 2px rgba(23, 23, 21, 0.1);
+}
 .req-why {
   display: flex;
   gap: 10px;
@@ -884,6 +894,12 @@
   border-color: #55554f;
   background: #2a2a26;
   box-shadow: 0 0 0 2px rgba(244, 244, 240, 0.08);
+}
+[data-theme="dark"] .imp-field.is-error input,
+[data-theme="dark"] .req-field.is-error input {
+  border-color: #55554f;
+  background: #2c2a26;
+  box-shadow: 0 0 0 2px rgba(244, 244, 240, 0.1);
 }
 [data-theme="dark"] .imp-banner {
   background: #222220;

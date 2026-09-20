@@ -19,7 +19,9 @@ export type GlyphName =
   | "filter"
   | "file"
   | "chevron"
-  | "spark";
+  | "spark"
+  | "volume"
+  | "volume-off";
 
 const paths: Record<GlyphName, React.ReactNode> = {
   home: (
@@ -129,6 +131,18 @@ const paths: Record<GlyphName, React.ReactNode> = {
     <>
       <path d="M12 2c.3 4.8 2.8 7.2 7 7.5-4.2.3-6.7 2.8-7 7.5-.3-4.7-2.8-7.2-7-7.5C9.2 9.2 11.7 6.8 12 2Z" />
       <path d="M19 16c.1 2 1.1 3 3 3.2-1.9.1-2.9 1.2-3 3.1-.1-1.9-1.1-3-3-3.1 1.9-.2 2.9-1.2 3-3.2Z" />
+    </>
+  ),
+  volume: (
+    <>
+      <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+      <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" />
+    </>
+  ),
+  "volume-off": (
+    <>
+      <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+      <path d="m16 9 5 5M21 9l-5 5" />
     </>
   ),
 };

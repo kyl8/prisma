@@ -19,6 +19,7 @@ import {
   initialProducts,
   users,
 } from "./data";
+import { playUISound } from "./utils/uiSounds";
 
 export type Route =
   | { name: "marketing" }
@@ -297,6 +298,7 @@ export function requestCorrection(
     description: `${requester?.name ?? "O despachante"} solicitou uma correção em ${product.name}.`,
     productId,
   });
+  playUISound("notification");
   emit();
 }
 
@@ -339,6 +341,7 @@ export function submitProductForReview(productId: string) {
     description: `${product.name} foi atualizado e enviado para revisão.`,
     productId,
   });
+  playUISound("submit");
   emit();
 }
 
@@ -354,6 +357,7 @@ export function approveProduct(productId: string) {
     description: `${product.name} foi aprovado pelo despachante.`,
     productId,
   });
+  playUISound("notification");
   emit();
 }
 
@@ -473,6 +477,7 @@ export function createCatalogRequest(input: {
     title: "Nova solicitação de preenchimento",
     description: `${requester?.name ?? "O despachante"} solicitou informações sobre ${input.productIds.length} produto(s).`,
   });
+  playUISound("success");
   emit();
   return request;
 }
@@ -495,6 +500,7 @@ export function submitRequest(token: string) {
     title: "Solicitação concluída",
     description: `${request.recipientName} enviou ${request.productIds.length} produto(s) para revisão.`,
   });
+  playUISound("submit");
   emit();
 }
 
@@ -547,6 +553,7 @@ export function addCustomField(
     description: `O despachante solicitou a informação “${label}” em ${product.name}.`,
     productId,
   });
+  playUISound("notification");
   emit();
 }
 

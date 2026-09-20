@@ -18,7 +18,8 @@ import {
   useStoreState,
 } from "./store";
 import { ThemeToggle } from "./theme";
-import { Dropdown, Modal, NoticePopover } from "./ui";
+import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
+import { playUISound } from "./utils/uiSounds";
 import "./importer.css";
 
 type ImpView =
@@ -358,6 +359,7 @@ function ImpProduct({
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(product?.attributes.map((a) => [a.key, a.value]) ?? []),
   );
+  const [showErrors, setShowErrors] = useState(false);
   if (!product) {
     return <p className="ws-empty">Produto não encontrado.</p>;
   }
@@ -371,12 +373,22 @@ function ImpProduct({
     ["caracteristicas", "Características"],
     ["personalizados", "Solicitado pelo despachante"],
   ];
+  const missingRequired = product.attributes.filter(
+    (a) => a.required && !(values[a.key] ?? "").trim(),
+  );
   const saveDraft = () => {
     updateProductAttributes(productId, values);
     showToast("Rascunho salvo");
+    playUISound("save");
   };
   const submit = () => {
     updateProductAttributes(productId, values);
+    if (missingRequired.length > 0) {
+      setShowErrors(true);
+      showToast("Preencha os campos obrigatórios antes de enviar");
+      playUISound("warning");
+      return;
+    }
     submitProductForReview(productId);
     showToast("Enviado para revisão");
     go({ name: "home" });
@@ -427,29 +439,38 @@ function ImpProduct({
                   <h2>{label}</h2>
                 </header>
                 <div className="imp-form-grid">
-                  {attrs.map((a) => (
-                    <label
-                      key={a.key}
-                      className={
-                        focusField === a.key
-                          ? "imp-field is-target"
-                          : "imp-field"
-                      }
-                    >
-                      <span>
-                        {a.label}
-                        {a.required ? " *" : ""}
-                      </span>
-                      {a.note && <small>{a.note}</small>}
-                      <input
-                        value={values[a.key] ?? ""}
-                        onChange={(e) =>
-                          setValues((v) => ({ ...v, [a.key]: e.target.value }))
-                        }
-                        placeholder={`Adicionar ${a.label.toLowerCase()}`}
-                      />
-                    </label>
-                  ))}
+                  {attrs.map((a) => {
+                    const hasError =
+                      showErrors && a.required && !(values[a.key] ?? "").trim();
+                    return (
+                      <label
+                        key={a.key}
+                        className={[
+                          "imp-field",
+                          focusField === a.key ? "is-target" : "",
+                          hasError ? "is-error" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        <span>
+                          {a.label}
+                          {a.required ? " *" : ""}
+                        </span>
+                        {a.note && <small>{a.note}</small>}
+                        <input
+                          value={values[a.key] ?? ""}
+                          onChange={(e) =>
+                            setValues((v) => ({
+                              ...v,
+                              [a.key]: e.target.value,
+                            }))
+                          }
+                          placeholder={`Adicionar ${a.label.toLowerCase()}`}
+                        />
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -739,6 +760,7 @@ function ImpHelp({
               setOpen(false);
               // Simulação: em produção, dispararia e-mail para o despachante.
               showToast("Mensagem enviada — simulação");
+              playUISound("success");
             }}
           >
             Enviar mensagem
@@ -877,31 +899,39 @@ function ImpAssistant({
             />
           </div>
           <div className="ws-chat-log">
-            <div className="ws-user-message">{prompt}</div>
-            <div className="ws-ai-message">
-              <span>
-                <Glyph name="robot" />
-              </span>
-              <div>
-                <p>{messages.answer}</p>
-                {messages.items.length > 0 && (
-                  <div className="ws-inline-results">
-                    {messages.items.map((item) => (
-                      <button key={item.label} onClick={() => go(item.target)}>
-                        {item.label}
-                        <Glyph name="arrow" size={13} />
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <button
-                  className="ws-link"
-                  onClick={() => go(messages.actionTarget)}
-                >
-                  {messages.action}
-                </button>
+            <motion.div
+              key={`${prompt}-${context}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              style={{ display: "grid", gap: 16 }}
+            >
+              <div className="ws-user-message">{prompt}</div>
+              <div className="ws-ai-message">
+                <span>
+                  <Glyph name="robot" />
+                </span>
+                <div>
+                  <p>{messages.answer}</p>
+                  {messages.items.length > 0 && (
+                    <div className="ws-inline-results">
+                      {messages.items.map((item) => (
+                        <button key={item.label} onClick={() => go(item.target)}>
+                          {item.label}
+                          <Glyph name="arrow" size={13} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    className="ws-link"
+                    onClick={() => go(messages.actionTarget)}
+                  >
+                    {messages.action}
+                  </button>
+                </div>
               </div>
-            </div>
+            </motion.div>
           </div>
           <form
             className="ws-chat-input"
@@ -930,19 +960,26 @@ function ImpAssistant({
               <Glyph name="arrow" />
             </button>
           </form>
+          <div className="ws-suggest">
+            {assistantPrompts.map((q) => (
+              <button key={q} onClick={() => setPrompt(q)}>
+                {q}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="ws-card ws-chat-history">
           <header className="ws-card-head">
             <h2>Conversas</h2>
             <button
-              className="ws-quiet"
+              className="ws-quiet ws-chat-new"
               onClick={() => {
                 setConversations((c) => ["Nova conversa", ...c]);
                 setContext("Todo o catálogo");
                 setPrompt(assistantPrompts[0]);
               }}
             >
-              Nova conversa
+              <Glyph name="plus" size={13} /> Nova conversa
             </button>
           </header>
           {conversations.map((x) => (
@@ -1051,14 +1088,18 @@ export function ImporterPortal({ onLogout }: { onLogout: () => void }) {
         </button>
         <div className="ws-utilities">
           <ThemeToggle className="ws-utility-theme" />
+          <SoundToggle />
           <button aria-label="Buscar" onClick={() => setSearch(true)}>
             <Glyph name="search" />
           </button>
           <button
+            className={unread > 0 ? "ws-bell has-unread" : "ws-bell"}
             aria-label={`Notificações (${unread} não lidas)`}
             onClick={() => setNotice((v) => !v)}
           >
-            <Glyph name="bell" />
+            <span className="ws-bell-icon" key={unread}>
+              <Glyph name="bell" />
+            </span>
             {unread > 0 && <i />}
           </button>
           <button className="ws-profile" aria-label="Minha conta">

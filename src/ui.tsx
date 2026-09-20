@@ -3,6 +3,21 @@ import { useEffect, useRef, useState } from "react";
 import { AppNotification } from "./data";
 import { Glyph } from "./icons";
 import { useStoreState } from "./store";
+import { toggleSound, useSoundEnabled } from "./utils/uiSounds";
+
+/** Controle discreto de sons da interface, no padrão dos ícones do header. */
+export function SoundToggle() {
+  const soundOn = useSoundEnabled();
+  return (
+    <button
+      aria-label="Sons da interface"
+      title={`Sons da interface: ${soundOn ? "ativados" : "desativados"}`}
+      onClick={toggleSound}
+    >
+      <Glyph name={soundOn ? "volume" : "volume-off"} />
+    </button>
+  );
+}
 
 export function Modal({
   open,

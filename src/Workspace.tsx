@@ -22,7 +22,8 @@ import {
   useStoreState,
 } from "./store";
 import { ThemeToggle } from "./theme";
-import { Dropdown, Modal, NoticePopover } from "./ui";
+import { Dropdown, Modal, NoticePopover, SoundToggle } from "./ui";
+import { playUISound } from "./utils/uiSounds";
 import "./workspace.css";
 
 type View =
@@ -456,14 +457,18 @@ function AppTop({
       </button>
       <div className="ws-utilities">
         <ThemeToggle className="ws-utility-theme" />
+        <SoundToggle />
         <button aria-label="Buscar" onClick={onSearch}>
           <Glyph name="search" />
         </button>
         <button
+          className={unread > 0 ? "ws-bell has-unread" : "ws-bell"}
           aria-label={`Notificações (${unread} não lidas)`}
           onClick={onNotify}
         >
-          <Glyph name="bell" />
+          <span className="ws-bell-icon" key={unread}>
+            <Glyph name="bell" />
+          </span>
           {unread > 0 && <i />}
         </button>
         <button
@@ -1113,17 +1118,19 @@ function RequestsCard() {
                     `https://prisma.com/r/${created.token}/catalogo`,
                   );
                   showToast("Link copiado");
+                  playUISound("success");
                 }}
               >
                 Copiar link
               </button>
               <button
                 className="ws-quiet"
-                onClick={() =>
+                onClick={() => {
                   showToast(
                     `Convite enviado para ${created.recipientEmail} — simulação`,
-                  )
-                }
+                  );
+                  playUISound("success");
+                }}
               >
                 Enviar por e-mail
               </button>
@@ -2312,37 +2319,45 @@ function Assistant({ go }: { go: (v: View) => void }) {
             />
           </div>
           <div className="ws-chat-log">
-            <div className="ws-user-message">{prompt}</div>
-            <div className="ws-ai-message">
-              <span>
-                <Glyph name="robot" />
-              </span>
-              <div>
-                <p>{messages.answer}</p>
-                <div className="ws-inline-results">
-                  {messages.items.map((x) => (
-                    <button key={x}>
-                      {x}
-                      <Glyph name="arrow" />
-                    </button>
-                  ))}
+            <motion.div
+              key={`${prompt}-${context}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              style={{ display: "grid", gap: 16 }}
+            >
+              <div className="ws-user-message">{prompt}</div>
+              <div className="ws-ai-message">
+                <span>
+                  <Glyph name="robot" />
+                </span>
+                <div>
+                  <p>{messages.answer}</p>
+                  <div className="ws-inline-results">
+                    {messages.items.map((x) => (
+                      <button key={x}>
+                        {x}
+                        <Glyph name="arrow" />
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    className="ws-link"
+                    onClick={() =>
+                      go(
+                        messages.action === "Abrir produto"
+                          ? "product"
+                          : messages.action === "Ver catálogo"
+                            ? "catalog"
+                            : "pending",
+                      )
+                    }
+                  >
+                    {messages.action}
+                  </button>
                 </div>
-                <button
-                  className="ws-link"
-                  onClick={() =>
-                    go(
-                      messages.action === "Abrir produto"
-                        ? "product"
-                        : messages.action === "Ver catálogo"
-                          ? "catalog"
-                          : "pending",
-                    )
-                  }
-                >
-                  {messages.action}
-                </button>
               </div>
-            </div>
+            </motion.div>
           </div>
           <form
             className="ws-chat-input"
@@ -2370,13 +2385,28 @@ function Assistant({ go }: { go: (v: View) => void }) {
               <Glyph name="arrow" />
             </button>
           </form>
+          <div className="ws-suggest">
+            <button
+              onClick={() => setPrompt("Quais clientes precisam de atenção?")}
+            >
+              Quais clientes precisam de atenção?
+            </button>
+            <button onClick={() => setPrompt("O que falta no Motor XP-200?")}>
+              O que falta no Motor XP-200?
+            </button>
+            <button
+              onClick={() => setPrompt("O que deu errado na última planilha?")}
+            >
+              Analise a última importação
+            </button>
+          </div>
         </Card>
         <Card
           title="Conversas"
           className="ws-chat-history"
           action={
             <button
-              className="ws-quiet"
+              className="ws-quiet ws-chat-new"
               onClick={() => {
                 setConversations((c) => ["Nova conversa", ...c]);
                 setContext("Todos os clientes");
@@ -2385,7 +2415,7 @@ function Assistant({ go }: { go: (v: View) => void }) {
                 );
               }}
             >
-              Nova conversa
+              <Glyph name="plus" size={13} /> Nova conversa
             </button>
           }
         >
@@ -2457,6 +2487,7 @@ function FormPage({
                     setInviteSent(true);
                     // Simulação: em produção, dispararia e-mail transacional.
                     showToast(`Convite enviado para ${accessEmail} — simulação`);
+                    playUISound("success");
                   }}
                 >
                   {inviteSent ? "Convite enviado" : "Enviar convite"}
@@ -2468,6 +2499,7 @@ function FormPage({
                       "https://prisma.com/convidar/atlas",
                     );
                     showToast("Link de acesso copiado");
+                    playUISound("success");
                   }}
                 >
                   Copiar link de acesso
@@ -2533,6 +2565,7 @@ function FormPage({
                 });
                 setAccessEmail(form["E-mail"] || accessEmail);
                 setSuccess(true);
+                playUISound("success");
               }}
             >
               Criar cliente <Glyph name="arrow" />

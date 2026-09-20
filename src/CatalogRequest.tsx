@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CatalogRequest, Product, users } from "./data";
 import { Glyph } from "./icons";
 import {
@@ -15,6 +15,7 @@ import {
   useStoreState,
 } from "./store";
 import { ThemeToggle } from "./theme";
+import { playUISound } from "./utils/uiSounds";
 import "./importer.css";
 
 function fmtDate(iso: string): string {
@@ -48,16 +49,31 @@ function MissingFieldsForm({
   onNext,
   isLast,
   onSaveLater,
+  sending,
 }: {
   product: Product;
   onNext: (values: Record<string, string>) => void;
   isLast: boolean;
   onSaveLater: (values: Record<string, string>) => void;
+  sending: boolean;
 }) {
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(product.attributes.map((a) => [a.key, a.value])),
   );
+  const [showErrors, setShowErrors] = useState(false);
   const missing = product.attributes.filter((a) => !a.value.trim());
+  const missingRequired = product.attributes.filter(
+    (a) => a.required && !(values[a.key] ?? "").trim(),
+  );
+  const handleNext = () => {
+    if (missingRequired.length > 0) {
+      setShowErrors(true);
+      showToast("Preencha os campos obrigatórios para continuar");
+      playUISound("warning");
+      return;
+    }
+    onNext(values);
+  };
   return (
     <div>
       <div className="req-form-product">
@@ -69,21 +85,28 @@ function MissingFieldsForm({
         </div>
         <ImpMiniStatus percent={productCompleteness(product)} />
       </div>
-      {missing.map((a) => (
-        <label className="req-field" key={a.key}>
-          <span>
-            {a.label}
-            {a.required ? " *" : ""}
-          </span>
-          <input
-            value={values[a.key] ?? ""}
-            onChange={(e) =>
-              setValues((v) => ({ ...v, [a.key]: e.target.value }))
-            }
-            placeholder={`Adicionar ${a.label.toLowerCase()}`}
-          />
-        </label>
-      ))}
+      {missing.map((a) => {
+        const hasError =
+          showErrors && a.required && !(values[a.key] ?? "").trim();
+        return (
+          <label
+            className={hasError ? "req-field is-error" : "req-field"}
+            key={a.key}
+          >
+            <span>
+              {a.label}
+              {a.required ? " *" : ""}
+            </span>
+            <input
+              value={values[a.key] ?? ""}
+              onChange={(e) =>
+                setValues((v) => ({ ...v, [a.key]: e.target.value }))
+              }
+              placeholder={`Adicionar ${a.label.toLowerCase()}`}
+            />
+          </label>
+        );
+      })}
       <div className="req-why">
         <Glyph name="spark" size={16} />
         <div>
@@ -93,11 +116,23 @@ function MissingFieldsForm({
         </div>
       </div>
       <div className="req-actions">
-        <button className="button button--light" onClick={() => onSaveLater(values)}>
+        <button
+          className="button button--light"
+          disabled={sending}
+          onClick={() => onSaveLater(values)}
+        >
           Salvar e continuar depois
         </button>
-        <button className="button button--dark" onClick={() => onNext(values)}>
-          {isLast ? "Enviar para revisão" : "Próximo produto"}{" "}
+        <button
+          className="button button--dark"
+          disabled={sending}
+          onClick={handleNext}
+        >
+          {sending
+            ? "Enviando…"
+            : isLast
+              ? "Enviar para revisão"
+              : "Próximo produto"}{" "}
           <Glyph name="arrow" size={16} />
         </button>
       </div>
@@ -116,10 +151,12 @@ function ImpMiniStatus({ percent }: { percent: number }) {
 function CorrectionForm({
   product,
   request,
+  sending,
   onDone,
 }: {
   product: Product;
   request: CatalogRequest;
+  sending: boolean;
   onDone: () => void;
 }) {
   const [value, setValue] = useState("");
@@ -166,6 +203,7 @@ function CorrectionForm({
       <div className="req-actions" style={{ justifyContent: "flex-end" }}>
         <button
           className="button button--dark"
+          disabled={sending}
           onClick={() => {
             updateProductAttribute(product.id, fieldKey, value);
             if (correction) {
@@ -174,7 +212,8 @@ function CorrectionForm({
             onDone();
           }}
         >
-          Salvar correção <Glyph name="arrow" size={16} />
+          {sending ? "Enviando…" : "Salvar correção"}{" "}
+          <Glyph name="arrow" size={16} />
         </button>
       </div>
     </div>
@@ -194,6 +233,12 @@ export function CatalogRequestFlow({ token }: { token: string }) {
       : "landing",
   );
   const [index, setIndex] = useState(0);
+  const [sending, setSending] = useState(false);
+
+  // Token inválido/inexistente: feedback de erro (som + tela).
+  useEffect(() => {
+    if (!request) playUISound("error");
+  }, [request]);
 
   if (!request) {
     return (
@@ -241,9 +286,21 @@ export function CatalogRequestFlow({ token }: { token: string }) {
     if (index < scopedProducts.length - 1) {
       setIndex(index + 1);
     } else {
+      // Pequena espera simulada + loading antes do envio final.
+      setSending(true);
+      window.setTimeout(() => {
+        submitRequest(token);
+        setStage("done");
+      }, 650);
+    }
+  };
+
+  const finishCorrection = () => {
+    setSending(true);
+    window.setTimeout(() => {
       submitRequest(token);
       setStage("done");
-    }
+    }, 650);
   };
 
   const saveLater = (values: Record<string, string>) => {
@@ -253,6 +310,7 @@ export function CatalogRequestFlow({ token }: { token: string }) {
     });
     // Simulação: em produção, um e-mail de lembrete seria agendado aqui.
     showToast("Progresso salvo. Você pode continuar pelo mesmo link.");
+    playUISound("save");
   };
 
   if (stage === "landing") {
@@ -316,9 +374,14 @@ export function CatalogRequestFlow({ token }: { token: string }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="req-check">
+          <motion.span
+            className="req-check"
+            initial={{ scale: 0, rotate: -14 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 16, delay: 0.05 }}
+          >
             <Glyph name="check" size={24} />
-          </span>
+          </motion.span>
           <h1>Tudo certo.</h1>
           <p className="req-intro">Informações enviadas para revisão.</p>
           <ul>
@@ -397,15 +460,14 @@ export function CatalogRequestFlow({ token }: { token: string }) {
               <CorrectionForm
                 product={product}
                 request={request}
-                onDone={() => {
-                  submitRequest(token);
-                  setStage("done");
-                }}
+                sending={sending}
+                onDone={finishCorrection}
               />
             ) : (
               <MissingFieldsForm
                 product={product}
                 isLast={index === scopedProducts.length - 1}
+                sending={sending}
                 onNext={handleProductDone}
                 onSaveLater={saveLater}
               />
