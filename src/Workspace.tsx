@@ -851,7 +851,7 @@ function RequestsPage() {
 
 function RequestsCard() {
   const [open, setOpen] = useState(false);
-  const [created, setCreated] = useState<CatalogRequest | null>(null);
+  const [created, setCreated] = useState<(CatalogRequest & { url?: string }) | null>(null);
   const [recipientName, setRecipientName] = useState("Mariana Costa");
   const [recipientEmail, setRecipientEmail] = useState("mariana@atlas.com.br");
   const [deadline, setDeadline] = useState(() => {
@@ -972,12 +972,13 @@ function RequestsCard() {
               <p>{request.recipientEmail}</p>
             </div>
             <RequestStatus status={request.status} />
-            <button
-              className="ws-quiet"
-              onClick={() => navigate(`/r/${request.token}/catalogo`)}
-            >
-              Abrir link
-            </button>
+            {request.token ? (
+              <button className="ws-quiet" onClick={() => navigate(`/r/${request.token}/catalogo`)}>
+                Abrir link
+              </button>
+            ) : (
+              <span className="ws-status">Link já criado</span>
+            )}
           </div>
         ))}
       </Card>
@@ -1145,7 +1146,7 @@ function RequestsCard() {
               solicitação.
             </p>
             <div className="ws-request-link">
-              prisma.com/r/{created.token}/catalogo
+              {created.url ?? `${window.location.origin}/r/${created.token}/catalogo`}
             </div>
             <div className="ws-request-meta">
               <div>
@@ -1169,9 +1170,8 @@ function RequestsCard() {
               <button
                 className="ws-quiet"
                 onClick={() => {
-                  navigator.clipboard?.writeText(
-                    `https://prisma.com/r/${created.token}/catalogo`,
-                  );
+                  const link = created.url ?? `${window.location.origin}/r/${created.token}/catalogo`;
+                  navigator.clipboard?.writeText(link);
                   showToast("Link copiado");
                   playUISound("success");
                 }}
