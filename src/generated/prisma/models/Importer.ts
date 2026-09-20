@@ -26,28 +26,34 @@ export type AggregateImporter = {
 
 export type ImporterMinAggregateOutputType = {
   id: string | null
+  userId: string | null
 }
 
 export type ImporterMaxAggregateOutputType = {
   id: string | null
+  userId: string | null
 }
 
 export type ImporterCountAggregateOutputType = {
   id: number
+  userId: number
   _all: number
 }
 
 
 export type ImporterMinAggregateInputType = {
   id?: true
+  userId?: true
 }
 
 export type ImporterMaxAggregateInputType = {
   id?: true
+  userId?: true
 }
 
 export type ImporterCountAggregateInputType = {
   id?: true
+  userId?: true
   _all?: true
 }
 
@@ -125,6 +131,7 @@ export type ImporterGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 
 export type ImporterGroupByOutputType = {
   id: string
+  userId: string
   _count: ImporterCountAggregateOutputType | null
   _min: ImporterMinAggregateOutputType | null
   _max: ImporterMaxAggregateOutputType | null
@@ -150,24 +157,31 @@ export type ImporterWhereInput = {
   OR?: Prisma.ImporterWhereInput[]
   NOT?: Prisma.ImporterWhereInput | Prisma.ImporterWhereInput[]
   id?: Prisma.StringFilter<"Importer"> | string
+  userId?: Prisma.StringFilter<"Importer"> | string
   products?: Prisma.ProductListRelationFilter
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type ImporterOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   products?: Prisma.ProductOrderByRelationAggregateInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type ImporterWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  userId?: string
   AND?: Prisma.ImporterWhereInput | Prisma.ImporterWhereInput[]
   OR?: Prisma.ImporterWhereInput[]
   NOT?: Prisma.ImporterWhereInput | Prisma.ImporterWhereInput[]
   products?: Prisma.ProductListRelationFilter
-}, "id">
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+}, "id" | "userId">
 
 export type ImporterOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   _count?: Prisma.ImporterCountOrderByAggregateInput
   _max?: Prisma.ImporterMaxOrderByAggregateInput
   _min?: Prisma.ImporterMinOrderByAggregateInput
@@ -178,30 +192,36 @@ export type ImporterScalarWhereWithAggregatesInput = {
   OR?: Prisma.ImporterScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ImporterScalarWhereWithAggregatesInput | Prisma.ImporterScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Importer"> | string
+  userId?: Prisma.StringWithAggregatesFilter<"Importer"> | string
 }
 
 export type ImporterCreateInput = {
   id?: string
   products?: Prisma.ProductCreateNestedManyWithoutImporterInput
+  user: Prisma.UserCreateNestedOneWithoutImporterInput
 }
 
 export type ImporterUncheckedCreateInput = {
   id?: string
+  userId: string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutImporterInput
 }
 
 export type ImporterUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   products?: Prisma.ProductUpdateManyWithoutImporterNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutImporterNestedInput
 }
 
 export type ImporterUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutImporterNestedInput
 }
 
 export type ImporterCreateManyInput = {
   id?: string
+  userId: string
 }
 
 export type ImporterUpdateManyMutationInput = {
@@ -210,23 +230,64 @@ export type ImporterUpdateManyMutationInput = {
 
 export type ImporterUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type ImporterNullableScalarRelationFilter = {
+  is?: Prisma.ImporterWhereInput | null
+  isNot?: Prisma.ImporterWhereInput | null
 }
 
 export type ImporterCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
 }
 
 export type ImporterMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
 }
 
 export type ImporterMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
 }
 
 export type ImporterScalarRelationFilter = {
   is?: Prisma.ImporterWhereInput
   isNot?: Prisma.ImporterWhereInput
+}
+
+export type ImporterCreateNestedOneWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutUserInput, Prisma.ImporterUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutUserInput
+  connect?: Prisma.ImporterWhereUniqueInput
+}
+
+export type ImporterUncheckedCreateNestedOneWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutUserInput, Prisma.ImporterUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutUserInput
+  connect?: Prisma.ImporterWhereUniqueInput
+}
+
+export type ImporterUpdateOneWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutUserInput, Prisma.ImporterUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutUserInput
+  upsert?: Prisma.ImporterUpsertWithoutUserInput
+  disconnect?: Prisma.ImporterWhereInput | boolean
+  delete?: Prisma.ImporterWhereInput | boolean
+  connect?: Prisma.ImporterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ImporterUpdateToOneWithWhereWithoutUserInput, Prisma.ImporterUpdateWithoutUserInput>, Prisma.ImporterUncheckedUpdateWithoutUserInput>
+}
+
+export type ImporterUncheckedUpdateOneWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.ImporterCreateWithoutUserInput, Prisma.ImporterUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.ImporterCreateOrConnectWithoutUserInput
+  upsert?: Prisma.ImporterUpsertWithoutUserInput
+  disconnect?: Prisma.ImporterWhereInput | boolean
+  delete?: Prisma.ImporterWhereInput | boolean
+  connect?: Prisma.ImporterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ImporterUpdateToOneWithWhereWithoutUserInput, Prisma.ImporterUpdateWithoutUserInput>, Prisma.ImporterUncheckedUpdateWithoutUserInput>
 }
 
 export type ImporterCreateNestedOneWithoutProductsInput = {
@@ -243,12 +304,50 @@ export type ImporterUpdateOneRequiredWithoutProductsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ImporterUpdateToOneWithWhereWithoutProductsInput, Prisma.ImporterUpdateWithoutProductsInput>, Prisma.ImporterUncheckedUpdateWithoutProductsInput>
 }
 
+export type ImporterCreateWithoutUserInput = {
+  id?: string
+  products?: Prisma.ProductCreateNestedManyWithoutImporterInput
+}
+
+export type ImporterUncheckedCreateWithoutUserInput = {
+  id?: string
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutImporterInput
+}
+
+export type ImporterCreateOrConnectWithoutUserInput = {
+  where: Prisma.ImporterWhereUniqueInput
+  create: Prisma.XOR<Prisma.ImporterCreateWithoutUserInput, Prisma.ImporterUncheckedCreateWithoutUserInput>
+}
+
+export type ImporterUpsertWithoutUserInput = {
+  update: Prisma.XOR<Prisma.ImporterUpdateWithoutUserInput, Prisma.ImporterUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.ImporterCreateWithoutUserInput, Prisma.ImporterUncheckedCreateWithoutUserInput>
+  where?: Prisma.ImporterWhereInput
+}
+
+export type ImporterUpdateToOneWithWhereWithoutUserInput = {
+  where?: Prisma.ImporterWhereInput
+  data: Prisma.XOR<Prisma.ImporterUpdateWithoutUserInput, Prisma.ImporterUncheckedUpdateWithoutUserInput>
+}
+
+export type ImporterUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  products?: Prisma.ProductUpdateManyWithoutImporterNestedInput
+}
+
+export type ImporterUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  products?: Prisma.ProductUncheckedUpdateManyWithoutImporterNestedInput
+}
+
 export type ImporterCreateWithoutProductsInput = {
   id?: string
+  user: Prisma.UserCreateNestedOneWithoutImporterInput
 }
 
 export type ImporterUncheckedCreateWithoutProductsInput = {
   id?: string
+  userId: string
 }
 
 export type ImporterCreateOrConnectWithoutProductsInput = {
@@ -269,10 +368,12 @@ export type ImporterUpdateToOneWithWhereWithoutProductsInput = {
 
 export type ImporterUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  user?: Prisma.UserUpdateOneRequiredWithoutImporterNestedInput
 }
 
 export type ImporterUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -308,37 +409,51 @@ export type ImporterCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Typ
 
 export type ImporterSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   products?: boolean | Prisma.Importer$productsArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.ImporterCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["importer"]>
 
 export type ImporterSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["importer"]>
 
 export type ImporterSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["importer"]>
 
 export type ImporterSelectScalar = {
   id?: boolean
+  userId?: boolean
 }
 
-export type ImporterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id", ExtArgs["result"]["importer"]>
+export type ImporterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId", ExtArgs["result"]["importer"]>
 export type ImporterInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.Importer$productsArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.ImporterCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type ImporterIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type ImporterIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ImporterIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type ImporterIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
 
 export type $ImporterPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Importer"
   objects: {
     products: Prisma.$ProductPayload<ExtArgs>[]
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    userId: string
   }, ExtArgs["result"]["importer"]>
   composites: {}
 }
@@ -734,6 +849,7 @@ readonly fields: ImporterFieldRefs;
 export interface Prisma__ImporterClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   products<T extends Prisma.Importer$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Importer$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -764,6 +880,7 @@ export interface Prisma__ImporterClient<T, Null = never, ExtArgs extends runtime
  */
 export interface ImporterFieldRefs {
   readonly id: Prisma.FieldRef<"Importer", 'String'>
+  readonly userId: Prisma.FieldRef<"Importer", 'String'>
 }
     
 
@@ -987,7 +1104,7 @@ export type ImporterCreateArgs<ExtArgs extends runtime.Types.Extensions.Internal
   /**
    * The data needed to create a Importer.
    */
-  data?: Prisma.XOR<Prisma.ImporterCreateInput, Prisma.ImporterUncheckedCreateInput>
+  data: Prisma.XOR<Prisma.ImporterCreateInput, Prisma.ImporterUncheckedCreateInput>
 }
 
 /**
@@ -1018,6 +1135,10 @@ export type ImporterCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    */
   data: Prisma.ImporterCreateManyInput | Prisma.ImporterCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ImporterIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1088,6 +1209,10 @@ export type ImporterUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many Importers to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ImporterIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

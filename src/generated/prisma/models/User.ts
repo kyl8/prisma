@@ -227,6 +227,8 @@ export type UserWhereInput = {
   Authenticator?: Prisma.AuthenticatorListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   records?: Prisma.RecordListRelationFilter
+  importer?: Prisma.XOR<Prisma.ImporterNullableScalarRelationFilter, Prisma.ImporterWhereInput> | null
+  custbrok?: Prisma.XOR<Prisma.CustomsbrokerNullableScalarRelationFilter, Prisma.customsbrokerWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -245,6 +247,8 @@ export type UserOrderByWithRelationInput = {
   Authenticator?: Prisma.AuthenticatorOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   records?: Prisma.RecordOrderByRelationAggregateInput
+  importer?: Prisma.ImporterOrderByWithRelationInput
+  custbrok?: Prisma.customsbrokerOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -266,6 +270,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   Authenticator?: Prisma.AuthenticatorListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   records?: Prisma.RecordListRelationFilter
+  importer?: Prisma.XOR<Prisma.ImporterNullableScalarRelationFilter, Prisma.ImporterWhereInput> | null
+  custbrok?: Prisma.XOR<Prisma.CustomsbrokerNullableScalarRelationFilter, Prisma.customsbrokerWhereInput> | null
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -316,6 +322,8 @@ export type UserCreateInput = {
   Authenticator?: Prisma.AuthenticatorCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   records?: Prisma.RecordCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -334,6 +342,8 @@ export type UserUncheckedCreateInput = {
   Authenticator?: Prisma.AuthenticatorUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterUncheckedCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -352,6 +362,8 @@ export type UserUpdateInput = {
   Authenticator?: Prisma.AuthenticatorUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -370,6 +382,8 @@ export type UserUncheckedUpdateInput = {
   Authenticator?: Prisma.AuthenticatorUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUncheckedUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -513,6 +527,34 @@ export type UserUpdateOneRequiredWithoutAuthenticatorNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuthenticatorInput, Prisma.UserUpdateWithoutAuthenticatorInput>, Prisma.UserUncheckedUpdateWithoutAuthenticatorInput>
 }
 
+export type UserCreateNestedOneWithoutImporterInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutImporterInput, Prisma.UserUncheckedCreateWithoutImporterInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutImporterInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutImporterNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutImporterInput, Prisma.UserUncheckedCreateWithoutImporterInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutImporterInput
+  upsert?: Prisma.UserUpsertWithoutImporterInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutImporterInput, Prisma.UserUpdateWithoutImporterInput>, Prisma.UserUncheckedUpdateWithoutImporterInput>
+}
+
+export type UserCreateNestedOneWithoutCustbrokInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCustbrokInput, Prisma.UserUncheckedCreateWithoutCustbrokInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustbrokInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCustbrokNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCustbrokInput, Prisma.UserUncheckedCreateWithoutCustbrokInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustbrokInput
+  upsert?: Prisma.UserUpsertWithoutCustbrokInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCustbrokInput, Prisma.UserUpdateWithoutCustbrokInput>, Prisma.UserUncheckedUpdateWithoutCustbrokInput>
+}
+
 export type UserCreateNestedOneWithoutRecordsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutRecordsInput, Prisma.UserUncheckedCreateWithoutRecordsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutRecordsInput
@@ -556,6 +598,8 @@ export type UserCreateWithoutAccountsInput = {
   Authenticator?: Prisma.AuthenticatorCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   records?: Prisma.RecordCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -573,6 +617,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   Authenticator?: Prisma.AuthenticatorUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterUncheckedCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -606,6 +652,8 @@ export type UserUpdateWithoutAccountsInput = {
   Authenticator?: Prisma.AuthenticatorUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -623,6 +671,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   Authenticator?: Prisma.AuthenticatorUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUncheckedUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -640,6 +690,8 @@ export type UserCreateWithoutSessionsInput = {
   Authenticator?: Prisma.AuthenticatorCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   records?: Prisma.RecordCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -657,6 +709,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   Authenticator?: Prisma.AuthenticatorUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterUncheckedCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -690,6 +744,8 @@ export type UserUpdateWithoutSessionsInput = {
   Authenticator?: Prisma.AuthenticatorUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -707,6 +763,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   Authenticator?: Prisma.AuthenticatorUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUncheckedUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuthenticatorInput = {
@@ -724,6 +782,8 @@ export type UserCreateWithoutAuthenticatorInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   records?: Prisma.RecordCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuthenticatorInput = {
@@ -741,6 +801,8 @@ export type UserUncheckedCreateWithoutAuthenticatorInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterUncheckedCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuthenticatorInput = {
@@ -774,6 +836,8 @@ export type UserUpdateWithoutAuthenticatorInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuthenticatorInput = {
@@ -791,6 +855,192 @@ export type UserUncheckedUpdateWithoutAuthenticatorInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUncheckedUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutImporterInput = {
+  id?: string
+  name?: string | null
+  email: string
+  password?: string | null
+  emailVerified?: Date | string | null
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enterprise: string
+  cnpj: string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  Authenticator?: Prisma.AuthenticatorCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  records?: Prisma.RecordCreateNestedManyWithoutUserInput
+  custbrok?: Prisma.customsbrokerCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutImporterInput = {
+  id?: string
+  name?: string | null
+  email: string
+  password?: string | null
+  emailVerified?: Date | string | null
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enterprise: string
+  cnpj: string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  Authenticator?: Prisma.AuthenticatorUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  records?: Prisma.RecordUncheckedCreateNestedManyWithoutUserInput
+  custbrok?: Prisma.customsbrokerUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutImporterInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutImporterInput, Prisma.UserUncheckedCreateWithoutImporterInput>
+}
+
+export type UserUpsertWithoutImporterInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutImporterInput, Prisma.UserUncheckedUpdateWithoutImporterInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutImporterInput, Prisma.UserUncheckedCreateWithoutImporterInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutImporterInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutImporterInput, Prisma.UserUncheckedUpdateWithoutImporterInput>
+}
+
+export type UserUpdateWithoutImporterInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enterprise?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  Authenticator?: Prisma.AuthenticatorUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  records?: Prisma.RecordUpdateManyWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutImporterInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enterprise?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  Authenticator?: Prisma.AuthenticatorUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  records?: Prisma.RecordUncheckedUpdateManyWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCustbrokInput = {
+  id?: string
+  name?: string | null
+  email: string
+  password?: string | null
+  emailVerified?: Date | string | null
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enterprise: string
+  cnpj: string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  Authenticator?: Prisma.AuthenticatorCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  records?: Prisma.RecordCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCustbrokInput = {
+  id?: string
+  name?: string | null
+  email: string
+  password?: string | null
+  emailVerified?: Date | string | null
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enterprise: string
+  cnpj: string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  Authenticator?: Prisma.AuthenticatorUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  records?: Prisma.RecordUncheckedCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCustbrokInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCustbrokInput, Prisma.UserUncheckedCreateWithoutCustbrokInput>
+}
+
+export type UserUpsertWithoutCustbrokInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCustbrokInput, Prisma.UserUncheckedUpdateWithoutCustbrokInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCustbrokInput, Prisma.UserUncheckedCreateWithoutCustbrokInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCustbrokInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCustbrokInput, Prisma.UserUncheckedUpdateWithoutCustbrokInput>
+}
+
+export type UserUpdateWithoutCustbrokInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enterprise?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  Authenticator?: Prisma.AuthenticatorUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  records?: Prisma.RecordUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCustbrokInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enterprise?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  Authenticator?: Prisma.AuthenticatorUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  records?: Prisma.RecordUncheckedUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecordsInput = {
@@ -808,6 +1058,8 @@ export type UserCreateWithoutRecordsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   Authenticator?: Prisma.AuthenticatorCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecordsInput = {
@@ -825,6 +1077,8 @@ export type UserUncheckedCreateWithoutRecordsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   Authenticator?: Prisma.AuthenticatorUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterUncheckedCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecordsInput = {
@@ -858,6 +1112,8 @@ export type UserUpdateWithoutRecordsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   Authenticator?: Prisma.AuthenticatorUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecordsInput = {
@@ -875,6 +1131,8 @@ export type UserUncheckedUpdateWithoutRecordsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   Authenticator?: Prisma.AuthenticatorUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUncheckedUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -892,6 +1150,8 @@ export type UserCreateWithoutNotificationsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   Authenticator?: Prisma.AuthenticatorCreateNestedManyWithoutUserInput
   records?: Prisma.RecordCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -909,6 +1169,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   Authenticator?: Prisma.AuthenticatorUncheckedCreateNestedManyWithoutUserInput
   records?: Prisma.RecordUncheckedCreateNestedManyWithoutUserInput
+  importer?: Prisma.ImporterUncheckedCreateNestedOneWithoutUserInput
+  custbrok?: Prisma.customsbrokerUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -942,6 +1204,8 @@ export type UserUpdateWithoutNotificationsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   Authenticator?: Prisma.AuthenticatorUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -959,6 +1223,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   Authenticator?: Prisma.AuthenticatorUncheckedUpdateManyWithoutUserNestedInput
   records?: Prisma.RecordUncheckedUpdateManyWithoutUserNestedInput
+  importer?: Prisma.ImporterUncheckedUpdateOneWithoutUserNestedInput
+  custbrok?: Prisma.customsbrokerUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -1044,6 +1310,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   Authenticator?: boolean | Prisma.User$AuthenticatorArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   records?: boolean | Prisma.User$recordsArgs<ExtArgs>
+  importer?: boolean | Prisma.User$importerArgs<ExtArgs>
+  custbrok?: boolean | Prisma.User$custbrokArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1093,6 +1361,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   Authenticator?: boolean | Prisma.User$AuthenticatorArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   records?: boolean | Prisma.User$recordsArgs<ExtArgs>
+  importer?: boolean | Prisma.User$importerArgs<ExtArgs>
+  custbrok?: boolean | Prisma.User$custbrokArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1106,6 +1376,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     Authenticator: Prisma.$AuthenticatorPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     records: Prisma.$RecordPayload<ExtArgs>[]
+    importer: Prisma.$ImporterPayload<ExtArgs> | null
+    custbrok: Prisma.$customsbrokerPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1517,6 +1789,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   Authenticator<T extends Prisma.User$AuthenticatorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$AuthenticatorArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthenticatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   records<T extends Prisma.User$recordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  importer<T extends Prisma.User$importerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$importerArgs<ExtArgs>>): Prisma.Prisma__ImporterClient<runtime.Types.Result.GetResult<Prisma.$ImporterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  custbrok<T extends Prisma.User$custbrokArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$custbrokArgs<ExtArgs>>): Prisma.Prisma__customsbrokerClient<runtime.Types.Result.GetResult<Prisma.$customsbrokerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2066,6 +2340,44 @@ export type User$recordsArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.RecordScalarFieldEnum | Prisma.RecordScalarFieldEnum[]
+}
+
+/**
+ * User.importer
+ */
+export type User$importerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Importer
+   */
+  select?: Prisma.ImporterSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Importer
+   */
+  omit?: Prisma.ImporterOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ImporterInclude<ExtArgs> | null
+  where?: Prisma.ImporterWhereInput
+}
+
+/**
+ * User.custbrok
+ */
+export type User$custbrokArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the customsbroker
+   */
+  select?: Prisma.customsbrokerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the customsbroker
+   */
+  omit?: Prisma.customsbrokerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.customsbrokerInclude<ExtArgs> | null
+  where?: Prisma.customsbrokerWhereInput
 }
 
 /**

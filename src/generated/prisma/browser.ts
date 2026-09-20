@@ -48,6 +48,11 @@ export type Authenticator = Prisma.AuthenticatorModel
  */
 export type Importer = Prisma.ImporterModel
 /**
+ * Model customsbroker
+ * 
+ */
+export type customsbroker = Prisma.customsbrokerModel
+/**
  * Model Product
  * 
  */

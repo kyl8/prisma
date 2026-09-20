@@ -403,6 +403,7 @@ export const ModelName = {
   VerificationToken: 'VerificationToken',
   Authenticator: 'Authenticator',
   Importer: 'Importer',
+  customsbroker: 'customsbroker',
   Product: 'Product',
   ProductField: 'ProductField',
   Record: 'Record',
@@ -424,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "authenticator" | "importer" | "product" | "productField" | "record" | "prodFieldResp" | "identifier" | "notification"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "authenticator" | "importer" | "customsbroker" | "product" | "productField" | "record" | "prodFieldResp" | "identifier" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -869,6 +870,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ImporterCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ImporterCountAggregateOutputType> | number
+        }
+      }
+    }
+    customsbroker: {
+      payload: Prisma.$customsbrokerPayload<ExtArgs>
+      fields: Prisma.customsbrokerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.customsbrokerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.customsbrokerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>
+        }
+        findFirst: {
+          args: Prisma.customsbrokerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.customsbrokerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>
+        }
+        findMany: {
+          args: Prisma.customsbrokerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>[]
+        }
+        create: {
+          args: Prisma.customsbrokerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>
+        }
+        createMany: {
+          args: Prisma.customsbrokerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.customsbrokerCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>[]
+        }
+        delete: {
+          args: Prisma.customsbrokerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>
+        }
+        update: {
+          args: Prisma.customsbrokerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>
+        }
+        deleteMany: {
+          args: Prisma.customsbrokerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.customsbrokerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.customsbrokerUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>[]
+        }
+        upsert: {
+          args: Prisma.customsbrokerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$customsbrokerPayload>
+        }
+        aggregate: {
+          args: Prisma.CustomsbrokerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCustomsbroker>
+        }
+        groupBy: {
+          args: Prisma.customsbrokerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CustomsbrokerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.customsbrokerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CustomsbrokerCountAggregateOutputType> | number
         }
       }
     }
@@ -1425,10 +1500,20 @@ export type AuthenticatorScalarFieldEnum = (typeof AuthenticatorScalarFieldEnum)
 
 
 export const ImporterScalarFieldEnum = {
-  id: 'id'
+  id: 'id',
+  userId: 'userId'
 } as const
 
 export type ImporterScalarFieldEnum = (typeof ImporterScalarFieldEnum)[keyof typeof ImporterScalarFieldEnum]
+
+
+export const CustomsbrokerScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  specialty: 'specialty'
+} as const
+
+export type CustomsbrokerScalarFieldEnum = (typeof CustomsbrokerScalarFieldEnum)[keyof typeof CustomsbrokerScalarFieldEnum]
 
 
 export const ProductScalarFieldEnum = {
@@ -1746,6 +1831,7 @@ export type GlobalOmitConfig = {
   verificationToken?: Prisma.VerificationTokenOmit
   authenticator?: Prisma.AuthenticatorOmit
   importer?: Prisma.ImporterOmit
+  customsbroker?: Prisma.customsbrokerOmit
   product?: Prisma.ProductOmit
   productField?: Prisma.ProductFieldOmit
   record?: Prisma.RecordOmit

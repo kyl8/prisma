@@ -57,6 +57,7 @@ export const ModelName = {
   VerificationToken: 'VerificationToken',
   Authenticator: 'Authenticator',
   Importer: 'Importer',
+  customsbroker: 'customsbroker',
   Product: 'Product',
   ProductField: 'ProductField',
   Record: 'Record',
@@ -151,10 +152,20 @@ export type AuthenticatorScalarFieldEnum = (typeof AuthenticatorScalarFieldEnum)
 
 
 export const ImporterScalarFieldEnum = {
-  id: 'id'
+  id: 'id',
+  userId: 'userId'
 } as const
 
 export type ImporterScalarFieldEnum = (typeof ImporterScalarFieldEnum)[keyof typeof ImporterScalarFieldEnum]
+
+
+export const CustomsbrokerScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  specialty: 'specialty'
+} as const
+
+export type CustomsbrokerScalarFieldEnum = (typeof CustomsbrokerScalarFieldEnum)[keyof typeof CustomsbrokerScalarFieldEnum]
 
 
 export const ProductScalarFieldEnum = {
