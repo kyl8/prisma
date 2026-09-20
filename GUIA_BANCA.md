@@ -9,7 +9,7 @@ pnpm db:deploy
 pnpm db:seed:demo
 pnpm dev
 
-Contas fictícias: admin@prisma.local / Prisma@123, banca@prisma.local / Banca@123 e banca.despachante@prisma.local / Banca@123. Use somente em avaliação. Link público: /r/prisma-demo-importer-link-2026-portal/catalogo.
+Contas fictícias: banca@prisma.local / Banca@123 e banca.despachante@prisma.local / Banca@123. Use somente em avaliação. Link público: /r/prisma-demo-importer-link-2026-portal/catalogo.
 
 ## Roteiro
 
