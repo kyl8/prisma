@@ -178,6 +178,10 @@ function RealClientDetail({ company, go }: { company?: WorkspaceCompany; go: (v:
   </>;
 }
 
+function ClientRequestsInline({ company }: { company: WorkspaceCompany }) {
+  return <><Breadcrumb>Clientes / {company.name} / Solicitações</Breadcrumb><div className="ws-page-title"><div><h1>Solicitações</h1><p>Solicitações vinculadas a {company.name}.</p></div></div><Card title={`Solicitações de ${company.name}`} className="ws-card--wide"><div className="ws-client-requests">{company.requests.map((request) => <div className="ws-client-request" key={request.id}><div><strong>#{request.id}</strong><span>{request.productCount} produto{request.productCount === 1 ? "" : "s"} · {request.recipientName}</span><small>{request.recipientEmail}</small></div><Status>{request.status === "submitted" ? "Enviado para revisão" : request.status === "completed" ? "Concluído" : request.status === "cancelled" ? "Cancelado" : "Em preenchimento"}</Status></div>)}{company.requests.length === 0 && <p className="ws-empty">Nenhuma solicitação registrada para este cliente.</p>}</div></Card></>;
+}
+
 function RealCatalog({ company, companies, go, onSelectCompany, onSelectProduct }: { company?: WorkspaceCompany; companies: WorkspaceCompany[]; go: (v: View) => void; onSelectCompany: (companyId: string) => void; onSelectProduct: (productId: string) => void }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("Todos");
@@ -3192,7 +3196,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       case "catalog":
         return <RealCatalog company={selectedCompany} companies={workspaceCompanies} go={go} onSelectCompany={setSelectedCompanyId} onSelectProduct={setSelectedProductId} />;
       case "requests":
-        return <RequestsPage />;
+        return selectedCompany ? <ClientRequestsInline company={selectedCompany} /> : <RequestsPage />;
       case "product":
         return <RealProduct product={selectedProduct} company={selectedCompany} go={go} />;
       case "review":

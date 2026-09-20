@@ -2815,6 +2815,9 @@
 .client-header + .ws-tabs button:nth-child(2) {
   display: none;
 }
+.client-header + .ws-tabs button:last-child {
+  display: none;
+}
 .client-layout .ws-card:has(.ws-request-list) {
   display: none;
 }
