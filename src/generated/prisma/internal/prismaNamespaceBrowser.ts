@@ -55,7 +55,14 @@ export const ModelName = {
   Account: 'Account',
   Session: 'Session',
   VerificationToken: 'VerificationToken',
-  Authenticator: 'Authenticator'
+  Authenticator: 'Authenticator',
+  Importer: 'Importer',
+  Product: 'Product',
+  ProductField: 'ProductField',
+  Record: 'Record',
+  ProdFieldResp: 'ProdFieldResp',
+  Identifier: 'Identifier',
+  Notification: 'Notification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -82,7 +89,9 @@ export const UserScalarFieldEnum = {
   emailVerified: 'emailVerified',
   image: 'image',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  enterprise: 'enterprise',
+  cnpj: 'cnpj'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -139,6 +148,79 @@ export const AuthenticatorScalarFieldEnum = {
 } as const
 
 export type AuthenticatorScalarFieldEnum = (typeof AuthenticatorScalarFieldEnum)[keyof typeof AuthenticatorScalarFieldEnum]
+
+
+export const ImporterScalarFieldEnum = {
+  id: 'id'
+} as const
+
+export type ImporterScalarFieldEnum = (typeof ImporterScalarFieldEnum)[keyof typeof ImporterScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  importerId: 'importerId',
+  name: 'name',
+  code: 'code',
+  ncm: 'ncm',
+  completeness: 'completeness',
+  status: 'status',
+  identifierStatus: 'identifierStatus',
+  updatedAt: 'updatedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const ProductFieldScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  title: 'title',
+  label: 'label',
+  type: 'type'
+} as const
+
+export type ProductFieldScalarFieldEnum = (typeof ProductFieldScalarFieldEnum)[keyof typeof ProductFieldScalarFieldEnum]
+
+
+export const RecordScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type RecordScalarFieldEnum = (typeof RecordScalarFieldEnum)[keyof typeof RecordScalarFieldEnum]
+
+
+export const ProdFieldRespScalarFieldEnum = {
+  id: 'id',
+  fieldId: 'fieldId',
+  recordId: 'recordId',
+  response: 'response'
+} as const
+
+export type ProdFieldRespScalarFieldEnum = (typeof ProdFieldRespScalarFieldEnum)[keyof typeof ProdFieldRespScalarFieldEnum]
+
+
+export const IdentifierScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  duimpId: 'duimpId'
+} as const
+
+export type IdentifierScalarFieldEnum = (typeof IdentifierScalarFieldEnum)[keyof typeof IdentifierScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  action: 'action',
+  description: 'description'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
 export const SortOrder = {

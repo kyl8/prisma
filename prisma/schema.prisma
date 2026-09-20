@@ -26,6 +26,14 @@ model User {
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  //busines fields
+  enterprise String
+  cnpj String
+
+  //relations
+  notifications    Notification[]     @relation("RUserNotification")
+  records    Record[]     @relation("RProdRecordUser")
 }
  
 model Account {
@@ -81,4 +89,79 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@id([userId, credentialID])
+}
+
+model Importer {
+  id   String          @id @default(cuid())
+  // status String dado obtido através de pesquisas
+
+  products       Product[]     @relation("RProductImporter")
+}
+
+model Product {
+  id   String          @id @default(cuid())
+  importerId String
+  name String @unique
+  code String @unique
+  ncm  String @unique
+  completeness String
+  status String
+  identifierStatus Boolean @default(false)
+
+  updatedAt DateTime
+  createdAt DateTime @default(now())
+
+  fields    ProductField[]     @relation("RProductField")
+  identifier    Identifier?     @relation("RProductIdentifier")
+  records       Record[]     @relation("RProdRecord")
+  importer   Importer @relation("RProductImporter", fields: [importerId], references: [id])
+}
+
+model ProductField {
+  id        String  @id @default(cuid())
+  productId String
+  title     String
+  label     String
+  type      String
+
+  product   Product @relation("RProductField", fields: [productId], references: [id])
+  responses    ProdFieldResp[]     @relation("RProdFieldResp")
+}
+
+model Record {
+  id  String  @id @default(cuid())
+  productId String
+  userId String
+
+  createdAt DateTime @default(now())
+  user User @relation("RProdRecordUser", fields: [userId], references: [id])
+  Product Product @relation("RProdRecord", fields: [productId], references: [id])
+  fieldResp ProdFieldResp[] @relation("RProdRespRecord")
+}
+
+model ProdFieldResp {
+  id        String  @id @default(cuid())
+  fieldId   String
+  recordId  String
+  response  String
+
+  productField   ProductField @relation("RProdFieldResp", fields: [fieldId], references: [id])
+  record          Record @relation("RProdRespRecord", fields: [recordId], references: [id])
+}
+
+model Identifier {
+  id        String  @id @default(cuid())
+  productId String  @unique
+  duimpId   String
+
+  product   Product @relation("RProductIdentifier", fields: [productId], references: [id]) 
+}
+
+model Notification {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  action    String
+  description String
+
+  user   User @relation("RUserNotification", fields: [userId], references: [id]) 
 }

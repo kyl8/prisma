@@ -29,7 +29,9 @@ async function main() {
     await prisma.user.create({ data: {
       email: user.email,
       name: user.name,
-      password: hashedPassword
+      password: hashedPassword,
+      cnpj: user.cnpj,
+      enterprise: user.enterprise
     } });
   }
   console.log(`✅ ${users.length} users criados.`);

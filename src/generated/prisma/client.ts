@@ -66,3 +66,38 @@ export type VerificationToken = Prisma.VerificationTokenModel
  * 
  */
 export type Authenticator = Prisma.AuthenticatorModel
+/**
+ * Model Importer
+ * 
+ */
+export type Importer = Prisma.ImporterModel
+/**
+ * Model Product
+ * 
+ */
+export type Product = Prisma.ProductModel
+/**
+ * Model ProductField
+ * 
+ */
+export type ProductField = Prisma.ProductFieldModel
+/**
+ * Model Record
+ * 
+ */
+export type Record = Prisma.RecordModel
+/**
+ * Model ProdFieldResp
+ * 
+ */
+export type ProdFieldResp = Prisma.ProdFieldRespModel
+/**
+ * Model Identifier
+ * 
+ */
+export type Identifier = Prisma.IdentifierModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
