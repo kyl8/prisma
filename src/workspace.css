@@ -2811,6 +2811,9 @@
 .client-layout > .ws-card:nth-child(3) {
   display: none;
 }
+.client-layout .ws-card:has(.ws-request-list) {
+  display: none;
+}
 .ws-field select + input[readonly] {
   display: none;
 }
