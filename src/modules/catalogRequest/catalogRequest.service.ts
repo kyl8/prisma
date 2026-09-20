@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import prisma from "@/lib/prisma";
-import type { CreateCatalogRequestInput, SaveProductInput } from "./catalogRequest.schemas";
+import type { CreateCatalogRequestInput, SaveProductInput, UpdateCatalogRequestInput } from "./catalogRequest.schemas";
 
-export const REQUEST_STATUSES = ["waiting", "in_progress", "submitted", "completed", "expired"] as const;
+export const REQUEST_STATUSES = ["waiting", "in_progress", "submitted", "completed", "expired", "cancelled"] as const;
 export type RequestStatus = (typeof REQUEST_STATUSES)[number];
 
 export class CatalogRequestError extends Error {
@@ -87,6 +87,7 @@ async function findByToken(token: string) {
     },
   });
   if (!request) throw new CatalogRequestError("INVALID_TOKEN", "Link indisponível.", 404);
+  if (request.status === "cancelled") throw new CatalogRequestError("REQUEST_CANCELLED", "Esta solicitação foi cancelada.", 410);
   assertNotExpired(request);
   return request;
 }
@@ -150,8 +151,8 @@ export async function listCatalogRequests(companyId: string, userId: string) {
   if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem consultar solicitações.", 403);
   const company = await prisma.importer.findUnique({ where: { id: companyId } });
   if (!company) throw new CatalogRequestError("COMPANY_NOT_FOUND", "Empresa não encontrada.", 404);
-  const requests = await prisma.catalogRequest.findMany({ where: { companyId }, include: { _count: { select: { products: true } } }, orderBy: { createdAt: "desc" } });
-  return requests.map((request) => ({ id: request.id, status: request.status, kind: request.kind, recipientName: request.recipientName, recipientEmail: request.recipientEmail, expiresAt: request.expiresAt.toISOString(), createdAt: request.createdAt.toISOString(), productCount: request._count.products }));
+  const requests = await prisma.catalogRequest.findMany({ where: { companyId }, include: { products: { select: { productId: true } }, _count: { select: { products: true } } }, orderBy: { createdAt: "desc" } });
+  return requests.map((request) => ({ id: request.id, status: request.status, kind: request.kind, recipientName: request.recipientName, recipientEmail: request.recipientEmail, message: request.message, expiresAt: request.expiresAt.toISOString(), createdAt: request.createdAt.toISOString(), productCount: request._count.products, productIds: request.products.map((product) => product.productId) }));
 }
 
 export async function listCompanies(userId: string) {
@@ -173,6 +174,7 @@ export async function reissueCatalogRequest(requestId: string, userId: string) {
   if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem gerar links.", 403);
   const request = await prisma.catalogRequest.findUnique({ where: { id: requestId }, include: { company: { include: { user: true } }, _count: { select: { products: true } } } });
   if (!request) throw new CatalogRequestError("REQUEST_NOT_FOUND", "Solicitação não encontrada.", 404);
+  if (request.status === "cancelled") throw new CatalogRequestError("REQUEST_CANCELLED", "Não é possível gerar link para uma solicitação cancelada.", 409);
   const token = crypto.randomBytes(32).toString("hex");
   await prisma.catalogRequest.update({ where: { id: request.id }, data: { tokenHash: hashToken(token) } });
   return { id: request.id, status: request.status, token, url: publicUrl(token), recipientName: request.recipientName, recipientEmail: request.recipientEmail, expiresAt: request.expiresAt.toISOString(), productCount: request._count.products, createdAt: request.createdAt.toISOString() };
@@ -182,9 +184,55 @@ export async function getPublicCatalogRequest(token: string) {
   return dto(await findByToken(token));
 }
 
+async function ownedRequest(requestId: string, userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, include: { custbrok: true } });
+  if (!user?.custbrok) throw new CatalogRequestError("FORBIDDEN", "Apenas despachantes podem alterar solicitações.", 403);
+  const request = await prisma.catalogRequest.findUnique({ where: { id: requestId }, include: { products: true } });
+  if (!request) throw new CatalogRequestError("REQUEST_NOT_FOUND", "Solicitação não encontrada.", 404);
+  return request;
+}
+
+export async function updateCatalogRequest(requestId: string, input: UpdateCatalogRequestInput, userId: string) {
+  const request = await ownedRequest(requestId, userId);
+  if (["submitted", "completed", "expired", "cancelled"].includes(request.status)) {
+    throw new CatalogRequestError("REQUEST_READ_ONLY", "Esta solicitação não pode mais ser editada.", 409);
+  }
+  if (input.expiresAt && input.expiresAt <= new Date()) throw new CatalogRequestError("INVALID_EXPIRY", "O prazo precisa estar no futuro.");
+  const changes: Record<string, unknown> = {
+    ...(input.recipientName !== undefined ? { recipientName: input.recipientName } : {}),
+    ...(input.recipientEmail !== undefined ? { recipientEmail: input.recipientEmail } : {}),
+    ...(input.expiresAt !== undefined ? { expiresAt: input.expiresAt } : {}),
+    ...(input.message !== undefined ? { message: input.message || null } : {}),
+  };
+  if (input.productIds) {
+    if (request.status !== "waiting") throw new CatalogRequestError("REQUEST_IN_PROGRESS", "Produtos só podem ser alterados antes do início do preenchimento.", 409);
+    const productIds = [...new Set(input.productIds)];
+    const products = await prisma.product.findMany({ where: { id: { in: productIds }, importerId: request.companyId }, select: { id: true } });
+    if (products.length !== productIds.length) throw new CatalogRequestError("PRODUCT_SCOPE_ERROR", "Um ou mais produtos não pertencem à empresa.", 403);
+    await prisma.$transaction([
+      prisma.catalogRequestProduct.deleteMany({ where: { requestId } }),
+      prisma.catalogRequestProduct.createMany({ data: productIds.map((productId) => ({ requestId, productId })) }),
+      prisma.catalogRequest.update({ where: { id: requestId }, data: changes }),
+    ]);
+  } else {
+    await prisma.catalogRequest.update({ where: { id: requestId }, data: changes });
+  }
+  const updated = await prisma.catalogRequest.findUniqueOrThrow({ where: { id: requestId }, include: { _count: { select: { products: true } } } });
+  return { id: updated.id, status: updated.status, kind: updated.kind, recipientName: updated.recipientName, recipientEmail: updated.recipientEmail, message: updated.message, expiresAt: updated.expiresAt.toISOString(), createdAt: updated.createdAt.toISOString(), productCount: updated._count.products };
+}
+
+export async function cancelCatalogRequest(requestId: string, userId: string) {
+  const request = await ownedRequest(requestId, userId);
+  if (["submitted", "completed", "expired", "cancelled"].includes(request.status)) {
+    throw new CatalogRequestError("REQUEST_READ_ONLY", "Esta solicitação não pode ser cancelada.", 409);
+  }
+  const updated = await prisma.catalogRequest.update({ where: { id: request.id }, data: { status: "cancelled", completedAt: new Date() } });
+  return { id: updated.id, status: updated.status };
+}
+
 export async function startCatalogRequest(token: string) {
   const request = await findByToken(token);
-  if (request.status === "submitted" || request.status === "completed") throw new CatalogRequestError("REQUEST_READ_ONLY", "Esta solicitação já foi enviada para revisão.", 409);
+  if (["submitted", "completed", "cancelled"].includes(request.status)) throw new CatalogRequestError("REQUEST_READ_ONLY", "Esta solicitação já foi encerrada.", 409);
   if (request.status === "waiting") await prisma.catalogRequest.updateMany({ where: { id: request.id, status: "waiting" }, data: { status: "in_progress", startedAt: new Date() } });
   return getPublicCatalogRequest(token);
 }
@@ -212,7 +260,8 @@ export async function saveCatalogProduct(token: string, productId: string, input
 
 export async function submitCatalogRequest(token: string) {
   const request = await findByToken(token);
-  if (request.status === "submitted" || request.status === "completed") return dto(request);
+  if (["submitted", "completed"].includes(request.status)) return dto(request);
+  if (request.status === "cancelled") throw new CatalogRequestError("REQUEST_READ_ONLY", "Esta solicitação foi cancelada.", 409);
   if (request.status === "waiting") throw new CatalogRequestError("NOT_STARTED", "Comece o preenchimento antes de enviar.");
   const current = await findByToken(token);
   const missing: unknown[] = [];

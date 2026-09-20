@@ -17,5 +17,14 @@ export const saveProductSchema = z.object({
   attributes: z.record(z.string(), z.string().max(5000)),
 });
 
+export const updateCatalogRequestSchema = z.object({
+  recipientName: z.string().trim().min(2).max(120).optional(),
+  recipientEmail: z.email().optional(),
+  expiresAt: z.coerce.date().optional(),
+  message: z.string().trim().max(2000).nullable().optional(),
+  productIds: z.array(z.string().min(1)).min(1).max(500).optional(),
+});
+
 export type CreateCatalogRequestInput = z.infer<typeof createCatalogRequestSchema>;
 export type SaveProductInput = z.infer<typeof saveProductSchema>;
+export type UpdateCatalogRequestInput = z.infer<typeof updateCatalogRequestSchema>;
