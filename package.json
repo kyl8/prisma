@@ -1,0 +1,13 @@
+{
+  "name": "prisma-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/policy.test.js test/server.test.js"
+  }
+}
