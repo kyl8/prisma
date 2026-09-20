@@ -163,8 +163,19 @@ function RealClients({ companies, loading, error, go, onSelect }: { companies: W
   </>;
 }
 
-function RealClientDetail({ company, go }: { company?: WorkspaceCompany; go: (v: View) => void }) {
-  if (!company) return <div className="ws-empty">Selecione um cliente para ver os detalhes.</div>;
+function ClientDetailTabs({ company, go }: { company: WorkspaceCompany; go: (v: View) => void }) {
+  const [tab, setTab] = useState<"overview" | "requests">("overview");
+  return <>
+    <Breadcrumb>Clientes / {company.name}</Breadcrumb>
+    <div className="ws-page-title client-header"><div><h1>{company.name}</h1><p>{company.cnpj} · Contato: {company.contactName ?? "—"}</p></div></div>
+    <div className="ws-tabs"><button className={tab === "overview" ? "active" : ""} onClick={() => setTab("overview")}>Visão geral</button><button className={tab === "requests" ? "active" : ""} onClick={() => setTab("requests")}>Solicitações</button></div>
+    {tab === "overview" ? <div className="ws-layout client-layout"><Card title="Visão geral do cliente" className="ws-card--large"><div className="ws-stat-rows"><Metric value={company.totalProducts} label="Total de produtos" /><Metric value={`${company.completeness}%`} label="Completude geral" /><Metric value={company.pendingCount} label="Produtos em solicitações abertas" /><Metric value={company.inReview} label="Solicitações em revisão" /></div></Card><Card title="Quem precisa agir"><div className="ws-who"><span>IM</span><p><strong>Importador</strong><small>{company.awaitingImporter} solicitações abertas</small></p><button onClick={() => setTab("requests")}>Ver</button></div><div className="ws-who"><span>DE</span><p><strong>Despachante</strong><small>{company.inReview} aguardando revisão</small></p><button onClick={() => setTab("requests")}>Ver</button></div></Card><Card title="Atividade recente" className="ws-card--wide"><RealActivityList items={company.activity} go={go} /></Card></div> : <Card title={`Solicitações de ${company.name}`} className="ws-card--wide"><div className="ws-client-requests">{company.requests.map((request) => <button key={request.id} className="ws-client-request" onClick={() => go("requests")}><div><strong>#{request.id}</strong><span>{request.productCount} produto{request.productCount === 1 ? "" : "s"} · {request.recipientName}</span><small>{request.recipientEmail}</small></div><Status>{request.status === "submitted" ? "Enviado para revisão" : request.status === "completed" ? "Concluído" : request.status === "cancelled" ? "Cancelado" : "Em preenchimento"}</Status><Glyph name="arrow" /></button>)}{company.requests.length === 0 && <p className="ws-empty">Nenhuma solicitação registrada para este cliente.</p>}</div></Card>}
+  </>;
+}
+
+function RealClientDetail({ company, go }: { company: WorkspaceCompany; go: (v: View) => void }) {
+  return <ClientDetailTabs company={company} go={go} />;
+  /* legacy layout retained below for compatibility */
   return <>
     <Breadcrumb>Clientes / {company.name}</Breadcrumb>
     <div className="ws-page-title client-header"><div><h1>{company.name}</h1><p>{company.cnpj} · Contato: {company.contactName ?? "—"}</p></div><div><button className="ws-primary" onClick={() => go("requests")}>Solicitações</button></div></div>
@@ -3196,7 +3207,7 @@ export function Workspace({ onLogout = () => {} }: { onLogout?: () => void }) {
       case "clients":
         return <RealClients companies={workspaceCompanies} loading={workspaceLoading} error={workspaceError} go={go} onSelect={setSelectedCompanyId} />;
       case "client":
-        return <RealClientDetail company={selectedCompany} go={go} />;
+        return selectedCompany ? <RealClientDetail company={selectedCompany} go={go} /> : <div className="ws-empty">Selecione um cliente para ver os detalhes.</div>;
       case "catalog":
         return <RealCatalog company={selectedCompany} companies={workspaceCompanies} go={go} onSelectCompany={setSelectedCompanyId} onSelectProduct={setSelectedProductId} />;
       case "requests":
